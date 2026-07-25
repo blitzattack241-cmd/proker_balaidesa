@@ -550,10 +550,10 @@ if (!is_dir($base_upload_dir)) {
                         Kudus, <?= tgl_indo($data['tanggal_surat']); ?><br>
                         Kepala Desa Berugenjang
                         <div class="spasi-ttd"></div>
+                        <?= tampilkanQR('sktm_kis', $id_sktm, $qr_token); ?>
                         <!-- Diubah manual / dinamis sesuai Pejabat penandatangan -->
                         <strong
-                            style="text-decoration: underline;"><?= htmlspecialchars($data['nama_pejabat'] ?? 'K I S W O, S.E'); ?></strong>
-                        <?= tampilkanQR('sktm_kis', $id_sktm, $qr_token); ?>
+                            style="text-decoration: underline;"> <?= htmlspecialchars($data['nama_pejabat'] ?? 'K I S W O, S.E'); ?></strong>
                     </div>
                 </div>
 

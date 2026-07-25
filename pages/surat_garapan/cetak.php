@@ -91,12 +91,11 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
 
     .btn-cetak {
         background-color: #0d6efd;
-        color: #white;
+        color: white;
         border: none;
         padding: 8px 20px;
         font-size: 10pt;
         font-weight: bold;
-        color: white;
         border-radius: 4px;
         cursor: pointer;
         transition: background 0.2s;
@@ -460,8 +459,8 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
                 <p style="margin-bottom: 0;">Berugenjang, <?= tgl_indo($data['tanggal_surat']); ?></p>
                 <p style="margin-top: 0; margin-bottom: 0;">Kepala Desa Berugenjang</p>
                 <div class="ttd-space"></div>
-                <p class="ttd-nama">KISWO, S.E.</p>
                 <?= tampilkanQR('surat_garapan', $id_garapan, $qr_token); ?>
+                <p class="ttd-nama">KISWO, S.E.</p>
             </div>
         </div>
     </div>

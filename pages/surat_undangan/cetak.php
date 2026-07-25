@@ -42,7 +42,8 @@ if (!$query || mysqli_num_rows($query) == 0) {
     if (mysqli_error($koneksi)) {
         echo "<li style='color:red; margin-top:10px;'><b>Pesan Error MySQL:</b> " . mysqli_error($koneksi) . "<br><small><i>(Periksa apakah nama tabel Anda 'tb_surat_undangan' dan primary key-nya 'id_surat')</i></small></li>";
     } else {
-        echo "<li style='margin-top:10px;'><b>Status Koneksi:</b> Terhubung. Namun data dengan ID <b>$id_surat</b> memang tidak ada di tabel <b>tb_surat_undangan</b>.</li>";
+        $idDebug = isset($_GET['id']) ? htmlspecialchars($_GET['id']) : 'Kosong';
+        echo "<li style='margin-top:10px;'><b>Status Koneksi:</b> Terhubung. Namun data dengan ID <b>$idDebug</b> memang tidak ada di tabel <b>tb_surat_undangan</b>.</li>";
     }
     echo "</ul>";
     echo "<button onclick='window.close()' style='padding:8px 15px; background:#6c757d; color:#fff; border:none; border-radius:4px; cursor:pointer;'>Tutup Halaman</button>";
@@ -449,11 +450,13 @@ function tgl_indo($tanggal)
                 <td style="width: 45%;">
                     <p style="margin: 0;"><?= htmlspecialchars($jabatan_penandatangan); ?> Berugenjang</p>
                     <div class="space-ttd"></div>
-                    <p class="nama-kades"><?= htmlspecialchars($nama_penandatangan); ?></p>
+                    <div class="qr-sign-block">
+                        <?= tampilkanQR('surat_undangan', $id_undangan, $qr_token); ?>
+                        <p class="nama-kades"><?= htmlspecialchars($nama_penandatangan); ?></p>
+                    </div>
                     <?php if (!empty($nip_penandatangan) && $nip_penandatangan !== '-'): ?>
                         <p style="margin: 0; font-size: 10pt;">NIP. <?= htmlspecialchars($nip_penandatangan); ?></p>
                     <?php endif; ?>
-                    <?= tampilkanQR('surat_undangan', $id_undangan, $qr_token); ?>
                 </td>
             </tr>
         </table>

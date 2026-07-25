@@ -535,11 +535,12 @@ function renderDateBoxes($dateString) {
                     </p>
                     <p style="margin:0;">Petinggi / Kepala Desa Berugenjang</p>
                     <div class="space-sign-blank"></div>
-                    <p style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;"
-                        contenteditable="true" style="outline:none;">
-                        VIWIT MARIYANTO
-                    </p>
-                    <?= tampilkanQR('surat_kematian', $id, $qr_token); ?>
+                    <div class="qr-sign-block">
+                        <?= tampilkanQR('surat_kematian', $id, $qr_token); ?>
+                        <p class="ttd-nama" style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;" contenteditable="true">
+                            VIWIT MARIYANTO
+                        </p>
+                    </div>
                 </td>
             </tr>
         </table>

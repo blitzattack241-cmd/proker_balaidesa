@@ -13,6 +13,131 @@
  *   <?= tampilkanQR('surat_domisili', $id_domisili, $token); ?>   // taruh di dalam kolom ttd pejabat
  */
 
+// Load autoloader Composer (dibutuhkan untuk library QR lokal).
+if (!function_exists('muatAutoloadComposerQr')) {
+    function muatAutoloadComposerQr()
+    {
+        static $autoloadStatus = null;
+        if ($autoloadStatus !== null) {
+            return $autoloadStatus;
+        }
+
+        $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
+        if (!is_file($autoloadPath)) {
+            $autoloadStatus = false;
+            return false;
+        }
+
+        try {
+            require_once $autoloadPath;
+            $autoloadStatus = true;
+            return true;
+        } catch (Throwable $e) {
+            // Hindari hard-fail halaman cetak bila autoload dependency bermasalah.
+            if (!headers_sent()) {
+                http_response_code(200);
+            }
+            $autoloadStatus = false;
+            return false;
+        }
+    }
+}
+
+/**
+ * Membuat source gambar QR berbentuk data URI secara lokal (tanpa API eksternal).
+ * Mengutamakan Endroid QR Code, lalu fallback ke Bacon QR Code bila tersedia.
+ */
+function buatQrDataUriLokal($data, $size = 110)
+{
+    if (!muatAutoloadComposerQr()) {
+        return '';
+    }
+
+    // Prioritas 1: Endroid SVG writer (tidak memerlukan extension GD)
+    if (class_exists('\\Endroid\\QrCode\\Builder\\Builder') && class_exists('\\Endroid\\QrCode\\Writer\\SvgWriter')) {
+        try {
+            $builderClass = '\\Endroid\\QrCode\\Builder\\Builder';
+            $writerClass = '\\Endroid\\QrCode\\Writer\\SvgWriter';
+
+            $builder = $builderClass::create();
+            $builder = $builder->writer(new $writerClass());
+            $builder = $builder->data((string) $data);
+
+            if (method_exists($builder, 'size')) {
+                $builder = $builder->size((int) $size);
+            }
+            if (method_exists($builder, 'margin')) {
+                $builder = $builder->margin(0);
+            }
+
+            $result = $builder->build();
+
+            if (is_object($result) && method_exists($result, 'getString')) {
+                return 'data:image/svg+xml;base64,' . base64_encode($result->getString());
+            }
+        } catch (Throwable $e) {
+            // Lanjut ke fallback berikutnya.
+        }
+    }
+
+    // Prioritas 2: Endroid PNG writer (butuh extension GD)
+    if (class_exists('\\Endroid\\QrCode\\Builder\\Builder') && class_exists('\\Endroid\\QrCode\\Writer\\PngWriter')) {
+        try {
+            $builderClass = '\\Endroid\\QrCode\\Builder\\Builder';
+            $writerClass = '\\Endroid\\QrCode\\Writer\\PngWriter';
+
+            $builder = $builderClass::create();
+            $builder = $builder->writer(new $writerClass());
+            $builder = $builder->data((string) $data);
+
+            if (method_exists($builder, 'size')) {
+                $builder = $builder->size((int) $size);
+            }
+            if (method_exists($builder, 'margin')) {
+                $builder = $builder->margin(0);
+            }
+
+            $result = $builder->build();
+
+            if (is_object($result) && method_exists($result, 'getDataUri')) {
+                return $result->getDataUri();
+            }
+
+            if (is_object($result) && method_exists($result, 'getString')) {
+                $mime = method_exists($result, 'getMimeType') ? $result->getMimeType() : 'image/png';
+                return 'data:' . $mime . ';base64,' . base64_encode($result->getString());
+            }
+        } catch (Throwable $e) {
+            // Lanjut ke fallback berikutnya.
+        }
+    }
+
+    // Prioritas 3: Bacon QR Code (fallback tambahan)
+    if (
+        class_exists('\\BaconQrCode\\Writer')
+        && class_exists('\\BaconQrCode\\Renderer\\ImageRenderer')
+        && class_exists('\\BaconQrCode\\Renderer\\Image\\SvgImageBackEnd')
+        && class_exists('\\BaconQrCode\\Renderer\\RendererStyle\\RendererStyle')
+    ) {
+        try {
+            $rendererClass = '\\BaconQrCode\\Renderer\\ImageRenderer';
+            $backendClass = '\\BaconQrCode\\Renderer\\Image\\SvgImageBackEnd';
+            $styleClass = '\\BaconQrCode\\Renderer\\RendererStyle\\RendererStyle';
+            $writerClass = '\\BaconQrCode\\Writer';
+
+            $renderer = new $rendererClass(new $styleClass((int) $size), new $backendClass());
+            $writer = new $writerClass($renderer);
+            $svg = $writer->writeString((string) $data);
+
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        } catch (Throwable $e) {
+            // Fallback final dipakai di bawah.
+        }
+    }
+
+    return '';
+}
+
 // Mendeteksi otomatis alamat dasar website (bekerja di localhost maupun domain asli)
 function getBaseUrlSimdes()
 {
@@ -139,10 +264,21 @@ function tampilkanQR($jenis_surat, $id_surat, $token)
         . '&id=' . (int) $id_surat
         . '&token=' . urlencode($token);
 
-    // Menggunakan layanan QR gratis (tidak butuh instalasi library tambahan).
-    // Bila server tidak memiliki akses internet saat mencetak, ganti dengan
-    // library lokal seperti endroid/qr-code (sudah tersedia di /vendor).
-    $qrImgSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=' . urlencode($url);
+    // QR dibangkitkan lokal (offline-ready) dan ditanam sebagai data URI.
+    $qrImgSrc = buatQrDataUriLokal($url, 110);
+
+    // Fallback internal bila library QR belum tersedia.
+    if ($qrImgSrc === '') {
+        $fallback = htmlspecialchars($url);
+        return '<div class="qr-verifikasi" style="margin:6px auto 0 auto;text-align:center;width:75px;">
+            <div style="width:75px;height:75px;border:1px solid #999;display:flex;align-items:center;justify-content:center;font-size:6pt;line-height:1.2;color:#555;margin:0 auto;">
+                QR lokal<br>tidak tersedia
+            </div>
+            <p style="font-size:6.2pt;margin:3px 0 0 0;color:#333;line-height:1.15;word-break:break-all;">
+                Verifikasi manual:<br>' . $fallback . '
+            </p>
+        </div>';
+    }
 
     return '<div class="qr-verifikasi" style="margin:6px auto 0 auto;text-align:center;width:75px;">
         <img src="' . htmlspecialchars($qrImgSrc) . '" alt="QR Verifikasi Dokumen"

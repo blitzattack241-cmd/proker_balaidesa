@@ -495,8 +495,8 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                         Disaksikan dan dibenarkan oleh kami,<br>
                         <strong><?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang</strong>
                         <div style="height: 48px;"></div>
-                        <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                         <?= tampilkanQR('surat_ahli_waris', $id_waris, $qr_token); ?>
+                        <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                     </td>
                 </tr>
             </table>

@@ -420,8 +420,8 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             <div class="ttd-kolom">
                 <p style="margin-bottom: 0;"><br><?= htmlspecialchars($data['jabatan']); ?></p>
                 <div class="ttd-space"></div>
-                <p class="ttd-nama"><?= htmlspecialchars($data['nama_pejabat']); ?></p>
                 <?= tampilkanQR('surat_domisili', $id_domisili, $qr_token); ?>
+                <p class="ttd-nama"><?= htmlspecialchars($data['nama_pejabat']); ?></p>
             </div>
 
             <div class="ttd-kolom">

@@ -401,8 +401,10 @@ function tgl_indo($tanggal)
                 <td style="width: 50%;">
                     <p style="margin: 0;">Kepala Desa Berugenjang</p>
                     <div class="space-ttd"></div>
-                    <p class="nama-kades">KISWO, S.E</p>
-                    <?= tampilkanQR('surat_pengantar_dukcapil', $id_surat, $qr_token); ?>
+                    <div class="qr-sign-block">
+                        <?= tampilkanQR('surat_pengantar_dukcapil', $id_surat, $qr_token); ?>
+                        <p class="nama-kades">KISWO, S.E</p>
+                    </div>
                 </td>
             </tr>
         </table>

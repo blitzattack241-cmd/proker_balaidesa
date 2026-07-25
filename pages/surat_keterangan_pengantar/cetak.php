@@ -429,10 +429,10 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
                         Mengetahui,<br>
                         Kepala Desa Berugenjang
                         <div class="space-ttd"></div>
+                        <?= tampilkanQR('surat_keterangan_pengantar', $id_surat, $qr_token); ?>
                         <span style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">
                             <?= htmlspecialchars($data['nama_penandatanganan'] ?? 'KISWO, S.E'); ?>
                         </span>
-                        <?= tampilkanQR('surat_keterangan_pengantar', $id_surat, $qr_token); ?>
                     </div>
                     <div class="col-ttd" style="width: 27.5%;"></div>
                 </div>

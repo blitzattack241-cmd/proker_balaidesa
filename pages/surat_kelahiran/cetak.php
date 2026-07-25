@@ -527,7 +527,7 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td>
                     Pek: <?= renderBoxes($data['pekerjaan_ayah'], 25); ?><br>
-                    <span style="font-size:9px; color:#44px;">Alamat: </span><span contenteditable="true"
+                    <span style="font-size:9px; color:#444444;">Alamat: </span><span contenteditable="true"
                         style="font-size:9px; outline:none; border-bottom:1px dashed #aaa;"><?= htmlspecialchars($data['alamat_ayah']); ?></span>
                 </td>
             </tr>
@@ -597,11 +597,12 @@ function renderDateBoxes($dateString) {
                             style="outline:none;"><?= date('d-m-Y', strtotime($data['tanggal_surat'])); ?></span></p>
                     <p style="margin:0;">Petinggi / Kepala Desa Berugenjang</p>
                     <div class="space-sign-blank"></div>
-                    <p style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;"
-                        contenteditable="true" style="outline:none;">
-                        VIWIT MARIYANTO
-                    </p>
-                    <?= tampilkanQR('surat_kelahiran', $id, $qr_token); ?>
+                    <div class="qr-sign-block">
+                        <?= tampilkanQR('surat_kelahiran', $id, $qr_token); ?>
+                        <p class="ttd-nama" style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;" contenteditable="true">
+                            VIWIT MARIYANTO
+                        </p>
+                    </div>
                 </td>
             </tr>
         </table>

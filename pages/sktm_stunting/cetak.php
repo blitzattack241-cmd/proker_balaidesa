@@ -471,8 +471,8 @@ function tgl_indo($tanggal)
                         Kudus, <?= tgl_indo($data['tanggal_surat']); ?><br>
                         <?= htmlspecialchars($data['jabatan'] ?? 'Kepala Desa'); ?> Desa Berugenjang
                         <div class="spasi-ttd"></div>
-                        <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                         <?= tampilkanQR('sktm_stunting', $id_sktm, $qr_token); ?>
+                        <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                     </div>
                 </div>
 
