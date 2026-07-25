@@ -1,0 +1,453 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+if (mysqli_connect_errno()) {
+    die("Koneksi database gagal: " . mysqli_connect_error());
+}
+
+if ($koneksi) {
+    mysqli_set_charset($koneksi, 'utf8mb4');
+}
+
+function tableExists(mysqli $koneksi, string $namaTable): bool {
+    $check = mysqli_query($koneksi, "SHOW TABLES LIKE '" . mysqli_real_escape_string($koneksi, $namaTable) . "'");
+    return $check && mysqli_num_rows($check) > 0;
+}
+
+function columnExists(mysqli $koneksi, string $namaTable, string $namaKolom): bool {
+    $check = mysqli_query($koneksi, "SHOW COLUMNS FROM `" . mysqli_real_escape_string($koneksi, $namaTable) . "` LIKE '" . mysqli_real_escape_string($koneksi, $namaKolom) . "'");
+    return $check && mysqli_num_rows($check) > 0;
+}
+
+function findExistingTable(mysqli $koneksi, array $candidates): ?string {
+    foreach ($candidates as $table) {
+        if (tableExists($koneksi, $table)) return $table;
+    }
+    return null;
+}
+
+function chooseColumnExpr(mysqli $koneksi, string $table, array $candidates, string $default = ''): string {
+    foreach ($candidates as $column) {
+        if (columnExists($koneksi, $table, $column)) return "`$column`";
+    }
+    return "'" . mysqli_real_escape_string($koneksi, $default) . "'";
+}
+
+function chooseColumnName(mysqli $koneksi, string $table, array $candidates): string {
+    foreach ($candidates as $column) {
+        if (columnExists($koneksi, $table, $column)) return $column;
+    }
+    return '';
+}
+
+function cleanUtf8(?string $string): string {
+    if (empty($string)) return '';
+    if (mb_detect_encoding($string, 'UTF-8', true) && strpos($string, 'â') !== false) {
+        return utf8_encode(utf8_decode($string));
+    }
+    return $string;
+}
+
+// Filter Bulan dan Tahun dari URL
+$filterBulan = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
+$filterTahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
+
+$sourceTables = [
+    [
+        'label' => 'Surat Garapan Sawah',
+        'candidates' => ['tb_surat_garapan', 'surat_garapan'],
+        'name' => ['nama_penggarap', 'nama_pemohon', 'nama_warga'],
+        'tujuan' => ['pekerjaan', 'keperluan', 'perihal'],
+        'keterangan' => ['keperluan', 'keterangan', 'keterangan_lain'],
+    ],
+    [
+        'label' => 'Surat Ahli Waris',
+        'candidates' => ['tb_surat_waris', 'surat_waris'],
+        'name' => ['nama_almarhum', 'nama_pasangan', 'nama_pemohon'],
+        'tujuan' => ['keperluan', 'keterangan', 'perihal'],
+        'keterangan' => ['keperluan', 'keterangan', 'keterangan_lain'],
+    ],
+    [
+        'label' => 'Surat Undangan',
+        'candidates' => ['tb_surat_undangan', 'surat_undangan'],
+        'name' => ['nama_pemohon', 'sifat', 'id_pejabat'],
+        'tujuan' => ['acara', 'perihal', 'tempat_acara'],
+        'keterangan' => ['keterangan', 'keperluan'],
+    ],
+    [
+        'label' => 'Surat Kelahiran',
+        'candidates' => ['tb_surat_kelahiran', 'surat_kelahiran'],
+        'name' => ['nama_kepala_keluarga', 'nama_bayi', 'nama_pelapor'],
+        'tujuan' => ['nama_bayi', 'nomor_kk', 'nama_kepala_keluarga'],
+        'keterangan' => ['keterangan', 'keterangan_lain'],
+    ],
+    [
+        'label' => 'Surat Kematian',
+        'candidates' => ['tb_surat_kematian', 'surat_kematian'],
+        'name' => ['nama_jenazah', 'nama_pelapor'],
+        'tujuan' => ['nama_pelapor', 'keterangan'],
+        'keterangan' => ['keterangan', 'keterangan_lain'],
+    ],
+    [
+        'label' => 'Surat Keterangan / Pengantar',
+        'candidates' => ['tb_surat_pengantar', 'surat_pengantar'],
+        'name' => ['nama_pemohon', 'nama_warga'],
+        'tujuan' => ['keperluan', 'keterangan_lain', 'keterangan'],
+        'keterangan' => ['keterangan_lain', 'keterangan', 'keperluan'],
+    ],
+    [
+        'label' => 'Surat Domisili',
+        'candidates' => ['tb_surat_domisili', 'surat_domisili'],
+        'name' => ['nama_warga', 'nama_pemohon'],
+        'tujuan' => ['keperluan', 'keterangan_lain'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+    [
+        'label' => 'Surat Pengantar Dukcapil',
+        'candidates' => ['tb_surat_pengantar_dukcapil', 'tb_surat_dukcapil', 'surat_pengantar_dukcapil', 'surat_dukcapil'],
+        'name' => ['created_by', 'jenis_dikirim'],
+        'tujuan' => ['jenis_dikirim', 'banyaknya'],
+        'keterangan' => ['keterangan'],
+    ],
+    [
+        'label' => 'SKTM Ibu Hamil',
+        'candidates' => ['tb_sktm_bumil', 'sktm_bumil'],
+        'name' => ['nama_pemohon', 'nama_warga'],
+        'tujuan' => ['keperluan', 'keterangan_lain'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+    [
+        'label' => 'SKTM Pembebasan Rawat',
+        'candidates' => ['tb_sktm_rawat', 'sktm_rawat', 'tb_sktm_pasien', 'sktm_pasien'],
+        'name' => ['nama_pemohon', 'nama_warga'],
+        'tujuan' => ['rumah_sakit_tujuan', 'keperluan'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+    [
+        'label' => 'SKTM KIS',
+        'candidates' => ['tb_sktm_kis', 'sktm_kis'],
+        'name' => ['nama_warga', 'nama_pemohon'],
+        'tujuan' => ['keperluan', 'keterangan'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+    [
+        'label' => 'SKTM KIP',
+        'candidates' => ['tb_sktm_kip', 'sktm_kip'],
+        'name' => ['nama_warga', 'nama_pemohon'],
+        'tujuan' => ['keperluan', 'keterangan'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+    [
+        'label' => 'SKTM Stunting',
+        'candidates' => ['tb_sktm_stunting', 'sktm_stunting'],
+        'name' => ['nama_warga', 'nama_pemohon'],
+        'tujuan' => ['keperluan', 'keterangan'],
+        'keterangan' => ['keterangan_lain', 'keterangan'],
+    ],
+];
+
+$unionQueries = [];
+foreach ($sourceTables as $config) {
+    $table = findExistingTable($koneksi, $config['candidates']);
+    if (!$table) continue;
+
+    $jenis = mysqli_real_escape_string($koneksi, $config['label']);
+    $nomor = chooseColumnExpr($koneksi, $table, ['nomor_surat'], '');
+    $tanggal = chooseColumnExpr($koneksi, $table, ['tanggal_surat'], '');
+    $nama = chooseColumnExpr($koneksi, $table, $config['name'], '');
+    $tujuan = chooseColumnExpr($koneksi, $table, $config['tujuan'], '');
+    $keterangan = chooseColumnExpr($koneksi, $table, $config['keterangan'], '');
+    $idColumnName = chooseColumnName($koneksi, $table, ['id', 'id_surat', 'id_kelahiran', 'id_kematian', 'id_penggarap', 'id_sktm', 'id_undangan', 'id_pasien', 'id_waris']);
+    $idExpr = $idColumnName ? "`" . $idColumnName . "`" : "0";
+
+    $coll = ' COLLATE utf8mb4_general_ci';
+    $jenisExpr = "'" . $jenis . "'" . $coll . " AS jenis_surat";
+    $sumberExpr = "'" . mysqli_real_escape_string($koneksi, $table) . "'" . $coll . " AS sumber_tabel";
+
+    $applyTextCollation = function ($expr) use ($coll) {
+        $trim = ltrim($expr);
+        if ($trim === "''" || (isset($trim[0]) && $trim[0] === "'")) return $expr . $coll;
+        if (strpos($expr, "`") !== false || stripos($expr, 'concat') !== false || stripos($expr, 'trim') !== false) {
+            return 'CONVERT(' . $expr . " USING utf8mb4)";
+        }
+        return $expr . $coll;
+    };
+
+    $nomorExpr = $applyTextCollation($nomor) . " AS nomor_surat";
+    $tanggalExpr = $tanggal . " AS tanggal_surat";
+    $namaExpr = $applyTextCollation($nama) . " AS nama_pemohon";
+    $tujuanExpr = $applyTextCollation($tujuan) . " AS tujuan";
+    $keteranganExpr = $applyTextCollation($keterangan) . " AS keterangan";
+    $idColumnExpr = "'" . mysqli_real_escape_string($koneksi, $idColumnName) . "'" . $coll . " AS id_column";
+
+    $unionQueries[] = "SELECT " . $jenisExpr . ", " . $sumberExpr . ", " . $nomorExpr . ", " . $tanggalExpr . ", " . $namaExpr . ", " . $tujuanExpr . ", " . $keteranganExpr . ", " . $idExpr . " AS id_value, " . $idColumnExpr . " FROM `" . mysqli_real_escape_string($koneksi, $table) . "`";
+}
+
+$suratRows = [];
+if (!empty($unionQueries)) {
+    $query = implode(' UNION ALL ', $unionQueries) . ' ORDER BY tanggal_surat ASC, nomor_surat ASC';
+    $result = mysqli_query($koneksi, $query);
+    if ($result) {
+        while ($data = mysqli_fetch_assoc($result)) {
+            $suratRows[] = $data;
+        }
+    }
+}
+
+// Filter Data
+$filteredRows = [];
+foreach ($suratRows as $row) {
+    $tgl = $row['tanggal_surat'];
+    $ts = strtotime($tgl);
+    if ($ts !== false && $tgl != '') {
+        $m = date('m', $ts);
+        $y = date('Y', $ts);
+        if ($m === sprintf('%02d', $filterBulan) && $y === $filterTahun) {
+            $filteredRows[] = $row;
+        }
+    }
+}
+
+$namaBulanList = [
+    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
+    '04' => 'April', '05' => 'Mei', '06' => 'Juni',
+    '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
+    '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+];
+$namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
+?>
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cetak Agenda Surat Keluar - <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></title>
+    <style>
+    /* CSS MURNI DOKUMEN CETAK LANDSCAPE */
+    @page {
+        size: A4 landscape;
+        margin: 10mm 12mm 10mm 12mm;
+    }
+
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+        background: #fff;
+        margin: 0;
+        padding: 0;
+        font-size: 10pt;
+    }
+
+    /* TOMBOL CETAK & NAVIGASI */
+    .btn-bar {
+        background: #222;
+        padding: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-bar button {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-bar button:hover {
+        background: #218838;
+    }
+
+    /* KOP HEADER DOKUMEN */
+    .header {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .header h2 {
+        margin: 0;
+        font-size: 14pt;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .header h3 {
+        margin: 4px 0;
+        font-size: 12pt;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .header p {
+        margin: 2px 0 0 0;
+        font-style: italic;
+        font-size: 10pt;
+    }
+
+    .line {
+        border-bottom: 2px solid #000;
+        margin-top: 8px;
+        margin-bottom: 15px;
+    }
+
+    /* TABEL AGENDA */
+    table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    table.data-table th,
+    table.data-table td {
+        border: 1px solid #000;
+        padding: 5px 6px;
+        vertical-align: top;
+        word-wrap: break-word;
+    }
+
+    table.data-table th {
+        background-color: #f2f2f2;
+        text-align: center;
+        font-weight: bold;
+        font-size: 9.5pt;
+        text-transform: uppercase;
+    }
+
+    table.data-table td {
+        font-size: 9pt;
+        line-height: 1.2;
+    }
+
+    /* MATIKAN HEAD REPEAT DI HALAMAN BARU */
+    table.data-table thead {
+        display: table-row-group;
+    }
+
+    /* TANDA TANGAN */
+    .footer-ttd {
+        width: 100%;
+        margin-top: 25px;
+        page-break-inside: avoid;
+    }
+
+    .footer-ttd table {
+        width: 100%;
+        border: none;
+    }
+
+    .footer-ttd td {
+        border: none !important;
+        text-align: center;
+        vertical-align: top;
+        font-size: 10pt;
+    }
+
+    /* SEMBUNYIKAN NAVIGASI SAAT DIPRINT */
+    @media print {
+        .btn-bar {
+            display: none !important;
+        }
+    }
+    </style>
+</head>
+
+<body>
+
+    <!-- Tombol Cetak Manual -->
+    <div class="btn-bar">
+        <button onclick="window.print()">🖨️ Cetak Dokumen Ini</button>
+    </div>
+
+    <!-- KOP AGENDA -->
+    <div class="header">
+        <h2>BUKU AGENDA SURAT KELUAR</h2>
+        <h3>PEMERINTAH DESA BERUGENJANG</h3>
+        <p>Periode: Bulan <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></p>
+    </div>
+    <div class="line"></div>
+
+    <!-- TABEL DATA AGENDA -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 4%;">NO</th>
+                <th style="width: 17%;">ISI SINGKAT</th>
+                <th style="width: 16%;">NAMA PEMOHON</th>
+                <th style="width: 11%;">TANGGAL SURAT</th>
+                <th style="width: 18%;">NOMOR SURAT</th>
+                <th style="width: 17%;">TUJUAN</th>
+                <th style="width: 17%;">KETERANGAN</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (!empty($filteredRows)): ?>
+            <?php $no = 1; ?>
+            <?php foreach ($filteredRows as $row): ?>
+            <?php
+                    $tanggal = '-';
+                    if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
+                        $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
+                    }
+                    ?>
+            <tr>
+                <td style="text-align: center; font-weight: bold;"><?php echo $no++; ?></td>
+                <td><strong><?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?></strong></td>
+                <td><?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '-')); ?></td>
+                <td style="text-align: center;"><?php echo htmlspecialchars($tanggal); ?></td>
+                <td><?php echo htmlspecialchars(cleanUtf8($row['nomor_surat'] ?: '-')); ?></td>
+                <td><?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '-')); ?></td>
+                <td><?php echo htmlspecialchars(cleanUtf8($row['keterangan'] ?: '-')); ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 15px;">
+                    Tidak ada data surat keluar pada bulan <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?>.
+                </td>
+            </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
+    <!-- TANDA TANGAN -->
+    <div class="footer-ttd">
+        <table>
+            <tr>
+                <td style="width: 50%;">
+                    <p style="margin-bottom: 50px;">
+                        Mengetahui,<br>
+                        <strong>Kepala Desa Berugenjang</strong>
+                    </p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;">
+                        KISWO, S.E
+                    </p>
+                </td>
+                <td style="width: 50%;">
+                    <p style="margin-bottom: 50px;">
+                        Berugenjang, ....................................<br>
+                        <strong>Sekretaris Desa Berugenjang</strong>
+                    </p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;">
+                        PUJIONO
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Pemicu Cetak Otomatis -->
+    <script>
+    window.onload = function() {
+        window.print();
+    }
+    </script>
+</body>
+
+</html>
