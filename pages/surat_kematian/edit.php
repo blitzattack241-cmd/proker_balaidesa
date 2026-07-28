@@ -25,6 +25,15 @@ if ($checkTable && mysqli_num_rows($checkTable) > 0) {
     $tableTarget = 'surat_kematian';
 }
 
+function getFormValue(array $data, array $keys): string {
+    foreach ($keys as $key) {
+        if (array_key_exists($key, $data) && $data[$key] !== null && $data[$key] !== '') {
+            return (string) $data[$key];
+        }
+    }
+    return '';
+}
+
 // Ambil daftar kolom aktual di tabel target (Untuk keperluan UPDATE nanti)
 $existingColumns = [];
 $columnResult = mysqli_query($koneksi, "SHOW COLUMNS FROM `$tableTarget`");
@@ -95,8 +104,10 @@ if (isset($_POST['update'])) {
         'nama_jenazah' => $nama_jenazah,
         'jenis_kelamin' => $jenis_kelamin,
         'tanggal_lahir' => $tanggal_lahir,
+        'tanggal_lahir_jenazah' => $tanggal_lahir,
         'umur' => $umur,
         'tempat_lahir' => $tempat_lahir,
+        'tempat_lahir_jenazah' => $tempat_lahir,
         'agama' => $agama,
         'pekerjaan' => $pekerjaan,
         'alamat_jenazah' => $alamat_jenazah,
@@ -179,6 +190,11 @@ if (isset($_POST['update'])) {
         </div>
     </div>
 
+    <?php
+    $jenisKelaminValue = strtolower(getFormValue($data, ['jenis_kelamin']));
+    $agamaValue = getFormValue($data, ['agama']);
+    ?>
+
     <form action="" method="POST" class="needs-validation" novalidate>
         <div class="card card-modern p-4 mb-4">
 
@@ -189,12 +205,13 @@ if (isset($_POST['update'])) {
                 <div class="col-md-6">
                     <label class="form-label form-label-modern">Nomor Surat Kematian</label>
                     <input type="text" class="form-control form-control-modern" name="nomor_surat"
-                        value="<?= htmlspecialchars($data['nomor_surat'] ?? ''); ?>" placeholder="474.3/..." required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nomor_surat'])); ?>" placeholder="474.3/..."
+                        required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label form-label-modern">Tanggal Surat Keluar</label>
                     <input type="date" class="form-control form-control-modern" name="tanggal_surat"
-                        value="<?= htmlspecialchars($data['tanggal_surat'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['tanggal_surat'])); ?>" required>
                 </div>
             </div>
 
@@ -205,38 +222,38 @@ if (isset($_POST['update'])) {
                 <div class="col-md-4">
                     <label class="form-label form-label-modern">NIK Jenazah</label>
                     <input type="text" class="form-control form-control-modern font-monospace" name="nik_jenazah"
-                        value="<?= htmlspecialchars($data['nik_jenazah'] ?? ''); ?>" maxlength="16" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nik_jenazah'])); ?>" maxlength="16" required>
                 </div>
                 <div class="col-md-5">
                     <label class="form-label form-label-modern">Nama Lengkap Jenazah</label>
                     <input type="text" class="form-control form-control-modern text-uppercase" name="nama_jenazah"
-                        value="<?= htmlspecialchars($data['nama_jenazah'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nama_jenazah'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Jenis Kelamin</label>
                     <select class="form-select form-control-modern" name="jenis_kelamin" required>
-                        <option value="Laki-laki"
-                            <?= (strtolower($data['jenis_kelamin'] ?? '') == 'laki-laki') ? 'selected' : ''; ?>>
+                        <option value="Laki-laki" <?= ($jenisKelaminValue === 'laki-laki') ? 'selected' : ''; ?>>
                             Laki-laki</option>
-                        <option value="Perempuan"
-                            <?= (strtolower($data['jenis_kelamin'] ?? '') == 'perempuan') ? 'selected' : ''; ?>>
+                        <option value="Perempuan" <?= ($jenisKelaminValue === 'perempuan') ? 'selected' : ''; ?>>
                             Perempuan</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Tempat Lahir</label>
                     <input type="text" class="form-control form-control-modern" name="tempat_lahir"
-                        value="<?= htmlspecialchars($data['tempat_lahir'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['tempat_lahir', 'tempat_lahir_jenazah'])); ?>"
+                        required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Tanggal Lahir</label>
                     <input type="date" class="form-control form-control-modern" name="tanggal_lahir"
-                        value="<?= htmlspecialchars($data['tanggal_lahir'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['tanggal_lahir', 'tanggal_lahir_jenazah'])); ?>"
+                        required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Umur (Tahun)</label>
                     <input type="number" class="form-control form-control-modern" name="umur"
-                        value="<?= htmlspecialchars($data['umur'] ?? ''); ?>" min="0" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['umur'])); ?>" min="0" required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Agama</label>
@@ -244,7 +261,7 @@ if (isset($_POST['update'])) {
                         <?php
                         $agama_list = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Khonghucu'];
                         foreach ($agama_list as $ag) {
-                            $selected = (strcasecmp($data['agama'] ?? '', $ag) == 0) ? 'selected' : '';
+                            $selected = (strcasecmp($agamaValue, $ag) == 0) ? 'selected' : '';
                             echo "<option value='$ag' $selected>$ag</option>";
                         }
                         ?>
@@ -253,27 +270,27 @@ if (isset($_POST['update'])) {
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Pekerjaan</label>
                     <input type="text" class="form-control form-control-modern" name="pekerjaan"
-                        value="<?= htmlspecialchars($data['pekerjaan'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['pekerjaan'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Alamat Jalan/Dukuh</label>
                     <input type="text" class="form-control form-control-modern" name="alamat_jenazah"
-                        value="<?= htmlspecialchars($data['alamat_jenazah'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['alamat_jenazah'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Desa</label>
                     <input type="text" class="form-control form-control-modern" name="desa_jenazah"
-                        value="<?= htmlspecialchars($data['desa_jenazah'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['desa_jenazah'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Kecamatan</label>
                     <input type="text" class="form-control form-control-modern" name="kecamatan_jenazah"
-                        value="<?= htmlspecialchars($data['kecamatan_jenazah'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['kecamatan_jenazah'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Kabupaten</label>
                     <input type="text" class="form-control form-control-modern" name="kabupaten_jenazah"
-                        value="<?= htmlspecialchars($data['kabupaten_jenazah'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['kabupaten_jenazah'])); ?>" required>
                 </div>
             </div>
 
@@ -284,29 +301,29 @@ if (isset($_POST['update'])) {
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Hari Kematian</label>
                     <input type="text" class="form-control form-control-modern" name="hari_kematian"
-                        value="<?= htmlspecialchars($data['hari_kematian'] ?? ''); ?>" placeholder="Senin/Selasa..."
-                        required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['hari_kematian'])); ?>"
+                        placeholder="Senin/Selasa..." required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Tanggal Meninggal</label>
                     <input type="date" class="form-control form-control-modern" name="tanggal_kematian"
-                        value="<?= htmlspecialchars($data['tanggal_kematian'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['tanggal_kematian'])); ?>" required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Pukul / Jam</label>
                     <input type="time" class="form-control form-control-modern" name="jam_kematian"
-                        value="<?= htmlspecialchars($data['jam_kematian'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['jam_kematian'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Tempat Kematian</label>
                     <input type="text" class="form-control form-control-modern" name="tempat_kematian"
-                        value="<?= htmlspecialchars($data['tempat_kematian'] ?? ''); ?>" placeholder="Rumah / RS / dll"
-                        required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['tempat_kematian'])); ?>"
+                        placeholder="Rumah / RS / dll" required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-modern">Penyebab Kematian</label>
                     <input type="text" class="form-control form-control-modern" name="penyebab_kematian"
-                        value="<?= htmlspecialchars($data['penyebab_kematian'] ?? ''); ?>"
+                        value="<?= htmlspecialchars(getFormValue($data, ['penyebab_kematian'])); ?>"
                         placeholder="Sakit / Tua / dll" required>
                 </div>
             </div>
@@ -318,32 +335,32 @@ if (isset($_POST['update'])) {
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">NIK Pelapor</label>
                     <input type="text" class="form-control form-control-modern" name="nik_pelapor"
-                        value="<?= htmlspecialchars($data['nik_pelapor'] ?? ''); ?>" maxlength="16" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nik_pelapor'])); ?>" maxlength="16" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Nama Pelapor</label>
                     <input type="text" class="form-control form-control-modern" name="nama_pelapor"
-                        value="<?= htmlspecialchars($data['nama_pelapor'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nama_pelapor'])); ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">NIK Saksi I</label>
                     <input type="text" class="form-control form-control-modern" name="nik_saksi1"
-                        value="<?= htmlspecialchars($data['nik_saksi1'] ?? ''); ?>" maxlength="16" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nik_saksi1'])); ?>" maxlength="16" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Nama Saksi I</label>
                     <input type="text" class="form-control form-control-modern" name="nama_saksi1"
-                        value="<?= htmlspecialchars($data['nama_saksi1'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nama_saksi1'])); ?>" required>
                 </div>
                 <div class="col-md-3 offset-md-6">
                     <label class="form-label form-label-modern">NIK Saksi II</label>
                     <input type="text" class="form-control form-control-modern" name="nik_saksi2"
-                        value="<?= htmlspecialchars($data['nik_saksi2'] ?? ''); ?>" maxlength="16" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nik_saksi2'])); ?>" maxlength="16" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Nama Saksi II</label>
                     <input type="text" class="form-control form-control-modern" name="nama_saksi2"
-                        value="<?= htmlspecialchars($data['nama_saksi2'] ?? ''); ?>" required>
+                        value="<?= htmlspecialchars(getFormValue($data, ['nama_saksi2'])); ?>" required>
                 </div>
             </div>
 
