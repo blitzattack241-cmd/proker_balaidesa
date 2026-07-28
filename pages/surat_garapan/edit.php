@@ -110,9 +110,10 @@ if (isset($_POST['update'])) {
 </style>
 
 <div class="container-fluid px-4 py-3">
-    <h1 class="mt-4 fw-bold text-dark">Edit Surat Keterangan Garapan Sawah</h1>
+    <h3 class="mt-4 fw-bold text-dark">Edit Surat Keterangan Garapan Sawah</h3>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="index.php?page=dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="index.php?page=dashboard" class="text-decoration-none">Dashboard</a>
+        </li>
         <li class="breadcrumb-item"><a href="index.php?page=surat-garapan-sawah" class="text-decoration-none">Surat
                 Garapan</a></li>
         <li class="breadcrumb-item active">Edit</li>
@@ -204,7 +205,8 @@ if (isset($_POST['update'])) {
                                     <option value="Buddha" <?= $data_utama['agama'] == 'Buddha' ? 'selected' : ''; ?>>
                                         Buddha</option>
                                     <option value="Khonghucu"
-                                        <?= $data_utama['agama'] == 'Khonghucu' ? 'selected' : ''; ?>>Khonghucu</option>
+                                        <?= $data_utama['agama'] == 'Khonghucu' ? 'selected' : ''; ?>>Khonghucu
+                                    </option>
                                 </select>
                             </div>
                             <div class="col-md-6">

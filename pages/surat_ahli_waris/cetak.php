@@ -44,7 +44,7 @@ if (mysqli_num_rows($query) === 0) {
 
 $data = mysqli_fetch_assoc($query);
 
-// Modul QR Verifikasi (ACC) - agar setiap surat yang dicetak punya QR sah
+// Modul QR Verifikasi (ACC)
 require_once __DIR__ . '/../../includes/qr_helper.php';
 $qr_token = dapatkanTokenVerifikasi($koneksi, 'surat_ahli_waris', $id_waris, $data['nomor_surat'] ?? '');
 
@@ -106,7 +106,6 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
         font-family: "Times New Roman", Times, serif;
         color: #000;
         font-size: 10.5pt;
-        /* Dioptimalkan agar tidak terlalu besar */
     }
 
     /* TOP NAV BAR PREVIEW */
@@ -166,14 +165,11 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
         background-color: #ffffff;
         width: 210mm;
         height: 297mm;
-        /* Kunci tinggi A4 */
         padding: 15mm 20mm 10mm 20mm;
-        /* Sempitkan padding agar space luas */
         box-sizing: border-box;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         position: relative;
         overflow: hidden;
-        /* Mencegah konten tembus ke bawah */
     }
 
     .judul-dokumen {
@@ -226,31 +222,68 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
     }
 
     .tabel-ttd-waris td {
-        padding: 2px 0;
+        padding: 3px 0;
         vertical-align: middle;
     }
 
-    .kotak-meterai {
-        border: 1px dashed #999;
-        width: 60px;
-        height: 38px;
-        line-height: 38px;
+    /* KOTAK METERAI DI BELAKANG TEKS (BEHIND TEXT) */
+    .td-ttd-relative {
+        position: relative;
+    }
+
+    .kotak-meterai-overlay {
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        transform: translate(-50%, -50%);
+        border: 1px dashed #7f8c8d;
+        width: 55px;
+        height: 35px;
+        line-height: 35px;
         text-align: center;
-        font-size: 7.5pt;
-        color: #666;
-        display: inline-block;
+        font-size: 8pt;
+        color: #95a5a6;
+        background-color: transparent !important;
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .tekst-ttd-front {
+        position: relative;
+        z-index: 1;
     }
 
     .tabel-pejabat-bawah {
         width: 100%;
-        margin-top: 15px;
+        margin-top: 12px;
         border-collapse: collapse;
         font-size: 10pt;
     }
 
     .tabel-pejabat-bawah td {
         padding: 1px 0;
-        vertical-align: top;
+    }
+
+    /* CONTAINER BARCODE QR & NAMA PEJABAT */
+    .box-ttd-kanan {
+        text-align: center;
+        width: 100%;
+    }
+
+    .qr-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 8px 0;
+    }
+
+    .qr-wrapper img {
+        width: 80px;
+        height: 80px;
+        display: block;
+        margin: 0 auto;
     }
 
     @media print {
@@ -283,6 +316,11 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
             height: 297mm;
             padding: 15mm 20mm 10mm 20mm;
             box-shadow: none !important;
+        }
+
+        .kotak-meterai-overlay {
+            border: 1px dashed #666 !important;
+            background-color: transparent !important;
         }
     }
     </style>
@@ -393,7 +431,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                 ?>
             </table>
 
-            <!-- TEMPLATE GUGATAN / KETERANGAN KOSONG TENGAH -->
+            <!-- TEMPLATE KETERANGAN / DOKUMEN -->
             <p class="paragraf-salam" style="text-indent: 0px; margin-bottom: 2px;">
                 Bahwa anak tersebut diatas masih hidup <span contenteditable="true"><?= $jumlah_anak; ?>
                     (<?= $jumlah_anak_huruf; ?>)</span> orang.
@@ -428,22 +466,26 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                 mysqli_data_seek($query_anak, 0);
                 $j = 1;
                 while($anak_ttd = mysqli_fetch_assoc($query_anak)) {
+                    // Meterai ditaruh pada baris ke-2 (atau ke-1 jika hanya ada 1 anak)
+                    $is_meterai_row = ($jumlah_anak >= 2) ? ($j === 2) : ($j === 1);
                     ?>
                 <tr>
                     <td width="5%"></td>
                     <td width="5%"><?= $j; ?>.</td>
-                    <td width="25%">Anak Ke <?= $j; ?></td>
+                    <td width="20%">Anak ke <?= $j; ?></td>
                     <td width="3%">:</td>
                     <td width="27%"><strong
                             contenteditable="true"><?= htmlspecialchars($anak_ttd['nama_anak']); ?></strong></td>
-                    <td width="5%">:</td>
-                    <td width="30%" contenteditable="true">
-                        <?php if($j === $jumlah_anak): ?>
-                        <div class="kotak-meterai" contenteditable="false">Meterai</div>
-                        .............................................
-                        <?php else: ?>
-                        .........................................................................
+                    <td width="3%">:</td>
+                    <td width="37%" class="td-ttd-relative">
+                        <?php if($is_meterai_row): ?>
+                        <!-- KOTAK METERAI DIBUAT DI BELAKANG (BEHIND TEXT) -->
+                        <div class="kotak-meterai-overlay" contenteditable="false">10.000</div>
                         <?php endif; ?>
+
+                        <!-- ISIAN TITIK-TITIK DILAPISKAN DI DEPAN METERAI -->
+                        <span class="tekst-ttd-front"
+                            contenteditable="true">.........................................................................</span>
                     </td>
                 </tr>
                 <?php 
@@ -462,8 +504,9 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     <td width="4%">1.</td>
                     <td width="25%"><strong
                             contenteditable="true"><?= htmlspecialchars($saksi_list[0]['nama_saksi']); ?></strong></td>
-                    <td contenteditable="true">(
-                        .................................................................................... )</td>
+                    <td><span contenteditable="true">(
+                            ....................................................................................
+                            )</span></td>
                 </tr>
                 <?php endif; ?>
                 <?php if (isset($saksi_list[1])): ?>
@@ -471,8 +514,9 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     <td>2.</td>
                     <td><strong contenteditable="true"><?= htmlspecialchars($saksi_list[1]['nama_saksi']); ?></strong>
                     </td>
-                    <td contenteditable="true">(
-                        .................................................................................... )</td>
+                    <td><span contenteditable="true">(
+                            ....................................................................................
+                            )</span></td>
                 </tr>
                 <?php endif; ?>
             </table>
@@ -480,23 +524,36 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
             <!-- FOOTER LEGALITAS: KELURAHAN & KECAMATAN -->
             <table class="tabel-pejabat-bawah">
                 <tr>
-                    <td width="45%" contenteditable="true">
+                    <td width="45%" contenteditable="true" style="vertical-align: top;">
                         Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ........................................<br>
                         Tanggal &nbsp;&nbsp;&nbsp;: ........................................<br>
                         Dikuatkan oleh kami,<br>
                         <strong>Camat Undaan</strong>
-                        <div style="height: 48px;"></div> <!-- Spasi tanda tangan dipersempit sedikit -->
+                        <div style="height: 85px;"></div>
                         .......................................................
                     </td>
                     <td width="10%"></td>
-                    <td width="45%" contenteditable="true">
-                        Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 470 / <?= htmlspecialchars($data['nomor_surat']); ?><br>
-                        Tanggal &nbsp;&nbsp;&nbsp;: <?= tgl_indo($data['tanggal_surat']); ?><br>
-                        Disaksikan dan dibenarkan oleh kami,<br>
-                        <strong><?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang</strong>
-                        <div style="height: 48px;"></div>
-                        <?= tampilkanQR('surat_ahli_waris', $id_waris, $qr_token); ?>
-                        <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
+                    <td width="45%" style="vertical-align: top;">
+                        <div class="box-ttd-kanan">
+                            <!-- TEKS KETERANGAN JABATAN RATA KIRI AGAR SEJAJAR -->
+                            <div contenteditable="true" style="text-align: left; display: inline-block;">
+                                Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 470 /
+                                <?= htmlspecialchars($data['nomor_surat']); ?><br>
+                                Tanggal &nbsp;&nbsp;&nbsp;: <?= tgl_indo($data['tanggal_surat']); ?><br>
+                                Disaksikan dan dibenarkan oleh kami,<br>
+                                <strong><?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang</strong>
+                            </div>
+
+                            <!-- QR CODE RATA TENGAH (CENTER) -->
+                            <div class="qr-wrapper" contenteditable="false">
+                                <?= tampilkanQR('surat_ahli_waris', $id_waris, $qr_token); ?>
+                            </div>
+
+                            <!-- NAMA PEJABAT RATA TENGAH (CENTER) -->
+                            <div contenteditable="true" style="text-align: center; margin-top: 4px;">
+                                <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             </table>
