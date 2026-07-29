@@ -26,6 +26,13 @@ if (mysqli_connect_errno()) {
 // Ambil list pejabat untuk dropdown TTD secara dinamis
 $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY nama_pejabat ASC");
 
+// Pengecekan nama tabel dinamis
+$tableName = 'tb_surat_pengantar';
+$check = mysqli_query($koneksi, "SHOW TABLES LIKE 'surat_pengantar'");
+if ($check && mysqli_num_rows($check) > 0) {
+    $tableName = 'surat_pengantar';
+}
+
 // ==========================================
 // 2. PROSES SIMPAN DATA (POST SUBMISSION)
 // ==========================================
@@ -65,14 +72,7 @@ if (isset($_POST['simpan'])) {
         }
     }
 
-    // Pengecekan nama tabel dinamis
-    $tableName = 'tb_surat_pengantar';
-    $check = mysqli_query($koneksi, "SHOW TABLES LIKE 'surat_pengantar'");
-    if ($check && mysqli_num_rows($check) > 0) {
-        $tableName = 'surat_pengantar';
-    }
-
-    // QUERY UTAMA INSERT DATA (Menyimpan nama dan jabatan penandatangan)
+    // QUERY UTAMA INSERT DATA
     $insert = mysqli_query($koneksi, "
         INSERT INTO `$tableName` (
             `nomor_surat`, `kode_surat`, `tanggal_surat`, `nik`, `nomor_kk`, `nama_penduduk`, 
@@ -99,15 +99,26 @@ if (isset($_POST['simpan'])) {
     }
 }
 
-// Otomatisasi nomor surat acak sementara
+// ==========================================
+// 3. GENERATE NOMOR SURAT OTOMATIS
+// ==========================================
 $tahun_sekarang = date('Y');
-$bulan_romawi = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][(int) date('m')];
-$no_surat_auto = rand(100, 999);
+
+// Hitung surat di tahun ini
+$query_max = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM `$tableName` WHERE YEAR(tanggal_surat) = '$tahun_sekarang'");
+$data_max = mysqli_fetch_assoc($query_max);
+
+// Urutan selanjutnya (+1)
+$next_no = ($data_max['total'] ?? 0) + 1;
+
+// Format 2 digit: 01, 02, dst (Ganti %02d menjadi %03d jika ingin 3 digit: 001, 002)
+$no_urut_formatted = sprintf("%02d", $next_no);
+
+// Hasil gabungan nomor surat otomatis
+$no_surat_auto = '400.10.2.2/' . $no_urut_formatted . '/31.07.16/' . $tahun_sekarang;
 ?>
 
-<!-- ==========================================
-     3. STYLING CSS MODERN & PREMIUM UI
-     ========================================== -->
+<!-- STYLING CSS MODERN -->
 <style>
 .page-title-modern {
     font-weight: 700;
@@ -213,16 +224,15 @@ $no_surat_auto = rand(100, 999);
                 </h5>
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">No Klasifikasi (Kiri Atas)</label>
-                        <input type="text" name="kode_surat" value="471/    /31.07.16/2026" class="form-control"
-                            required>
+                        <label class="form-label">Kode Desa (Kiri Atas)</label>
+                        <input type="text" name="kode_surat" value="31.07.16" class="form-control" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Nomor Surat Resmi (Tengah)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted fw-bold">471 /</span>
-                            <input type="text" name="nomor_surat" class="form-control" value="<?= $no_surat_auto; ?>"
-                                placeholder="Contoh: 471 / 2026" required>
+                            <input type="text" name="nomor_surat" class="form-control"
+                                value="<?= htmlspecialchars($no_surat_auto); ?>"
+                                placeholder="Contoh: 400.10.2.2/01/31.07.16/2026" required>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -291,7 +301,7 @@ $no_surat_auto = rand(100, 999);
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Tempat Tinggal / Alamat Lengkap (Poin 8)</label>
                         <textarea name="alamat_tinggal" class="form-control" rows="2"
-                            placeholder="Desa Megawon RT ... RW ... Kecamatan Jati..." required></textarea>
+                            placeholder="Desa berugenjang RT ... RW ... Kecamatan Undaan..." required></textarea>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Surat Bukti Diri: NIK KTP (Poin 9)</label>
@@ -300,7 +310,7 @@ $no_surat_auto = rand(100, 999);
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Surat Bukti Diri: No Kartu Keluarga (Poin 9)</label>
-                        <input type="text" name="nomor_kk" class="form-control" maxlength="16"
+                        <input type="text" name="nomor_kk" class="form-control" maxlength="16" value="331904"
                             placeholder="Masukkan 16 digit Nomor KK..." required>
                     </div>
                 </div>

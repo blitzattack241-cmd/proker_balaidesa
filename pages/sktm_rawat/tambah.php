@@ -229,7 +229,8 @@ if (isset($_POST['simpan'])) {
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">No. Kartu Keluarga (KK)</label>
-                                <input type="text" class="form-control" name="no_kk" maxlength="16" required>
+                                <input type="text" class="form-control" name="no_kk" maxlength="16" value="331904"
+                                    required>
                             </div>
 
                             <div class="col-md-6">

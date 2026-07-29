@@ -10,33 +10,28 @@ $query_pejabat = mysqli_query($koneksi, "SELECT * FROM tb_pejabat");
 // =========================================================================
 $tahun_sekarang = date('Y');
 
-// Ambil nomor surat terakhir berdasarkan id_domisili terbanyak untuk tahun ini
+// Ambil nomor urut terakhir dari data yang ada untuk tahun ini
 $query_no = "SELECT nomor_surat FROM `tb_surat_domisili` 
              WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_domisili DESC LIMIT 1"; 
+             ORDER BY id_domisili DESC LIMIT 1";
 
 $result_no = mysqli_query($koneksi, $query_no);
 
-$nomor_urut_baru = 1; // Default jika belum ada data tahun ini
+$nomor_urut_baru = 1;
 
 if ($result_no && mysqli_num_rows($result_no) > 0) {
     $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; 
-    
-    // Pecah berdasarkan slash (/) -> [474, 196, 31.07.16, 2026]
+    $nomor_terakhir = $row_no['nomor_surat'];
+
     $bagian = explode('/', $nomor_terakhir);
-    
-    // Mengambil indeks ke-1 (nomor urut)
     if (isset($bagian[1]) && is_numeric(trim($bagian[1]))) {
         $nomor_urut_baru = (int) trim($bagian[1]) + 1;
     } else {
-        // Fallback: ekstrak angka menggunakan regex jika format bervariasi
         preg_match_all('/\d+/', $nomor_terakhir, $matches);
         if (!empty($matches[0])) {
             foreach ($matches[0] as $val) {
-                $num = (int)$val;
-                // Abaikan angka bawaan dari kode klasifikasi/wilayah/tahun (474, 31, 07, 16, 2026)
-                if (!in_array($num, [474, 31, 7, 16, 310716, (int)$tahun_sekarang]) && $num > 0) {
+                $num = (int) $val;
+                if (!in_array($num, [474, 31, 7, 16, 310716, (int) $tahun_sekarang]) && $num > 0) {
                     $nomor_urut_baru = $num + 1;
                     break;
                 }
@@ -46,7 +41,7 @@ if ($result_no && mysqli_num_rows($result_no) > 0) {
 }
 
 // Hasil gabungan format nomor surat domisili otomatis
-$nomor_surat_otomatis = "474/" . $nomor_urut_baru . "/31.07.16/" . $tahun_sekarang;
+$nomor_surat_otomatis = '474/' . $nomor_urut_baru . '/31.07.16/' . $tahun_sekarang;
 
 
 // PROSES SIMPAN DATA FORM
@@ -214,8 +209,8 @@ if (isset($_POST['simpan'])) {
 
                     <div class="col-md-6">
                         <label class="form-label">NIK (16 Digit)</label>
-                        <input type="text" name="nik" maxlength="16" class="form-control" placeholder="Contoh: 33190..."
-                            required>
+                        <input type="text" name="nik" maxlength="16" class="form-control" value="331904"
+                            placeholder="Contoh: 33190..." required>
                     </div>
 
                     <div class="col-md-4">

@@ -45,6 +45,10 @@ if (empty($id)) {
 $query_surat = mysqli_query($koneksi, "SELECT * FROM `$tableName` WHERE `id_surat` = '$id'");
 $data = mysqli_fetch_assoc($query_surat);
 
+$tahun_sekarang = date('Y');
+$nomor_surat_default = '400.10.2.2/ /31.07.16/' . $tahun_sekarang;
+$nomor_surat_value = !empty($data['nomor_surat']) ? $data['nomor_surat'] : $nomor_surat_default;
+
 if (!$data) {
     echo "<script>
             alert('Data tidak ditemukan di database!');
@@ -255,16 +259,16 @@ if (isset($_POST['update'])) {
                 </h5>
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">No Klasifikasi (Kiri Atas)</label>
+                        <label class="form-label">Kode Desa (Kiri Atas)</label>
                         <input type="text" name="kode_surat" value="<?= htmlspecialchars($data['kode_surat']); ?>"
                             class="form-control" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Nomor Surat Resmi (Tengah)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted fw-bold">471 /</span>
+                            <span class="input-group-text bg-light text-muted fw-bold">01 /</span>
                             <input type="text" name="nomor_surat" class="form-control"
-                                value="<?= htmlspecialchars($data['nomor_surat']); ?>" required>
+                                value="<?= htmlspecialchars($nomor_surat_value); ?>" required>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">

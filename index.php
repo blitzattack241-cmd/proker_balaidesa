@@ -711,12 +711,7 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             <?= $isKeteranganOpen ? '<div class="active-dot"></div>' : ''; ?>
                         </a>
-                        <a class="nav-link <?= ($page == 'daftar-surat') ? 'active-green' : ''; ?>"
-                            href="index.php?page=daftar-surat">
-                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
-                            Daftar Semua Surat
-                            <?= ($page == 'daftar-surat') ? '<div class="active-dot"></div>' : ''; ?>
-                        </a>
+
                         <div class="collapse <?= $isKeteranganOpen ? 'show' : ''; ?>" id="collapseKeterangan"
                             aria-labelledby="headingKeterangan" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
@@ -743,7 +738,7 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                                 <a class="nav-link <?= in_array($page, ['bumil', 'sktm-bumil', 'sktm-bumil-tampil', 'sktm-bumil-tambah', 'sktm-bumil-edit', 'sktm-bumil-hapus', 'sktm-bumil-proses-tambah'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=sktm-bumil-tampil">Bumil</a>
                                 <a class="nav-link <?= in_array($page, ['pembebasan-rawat-inab-dan-jalan', 'sktm_rawat', 'sktm-rawat', 'sktm-rawat-tampil', 'sktm-rawat-tambah', 'sktm-rawat-edit', 'sktm-rawat-hapus'], true) ? 'active-green' : ''; ?>"
-                                    href="index.php?page=pembebasan-rawat-inab-dan-jalan">Pembebasan Rawat Inab dan
+                                    href="index.php?page=pembebasan-rawat-inab-dan-jalan">Pembebasan Rawat Inap dan
                                     Jalan</a>
                                 <a class="nav-link <?= in_array($page, ['sktm-kis', 'sktm-kis-tampil', 'sktm-kis-tambah', 'sktm-kis-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=sktm-kis">SKTM KIS</a>
@@ -758,6 +753,12 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Penduduk
                             <?= ($page == 'penduduk') ? '<div class="active-dot"></div>' : ''; ?>
+                        </a>
+                        <a class="nav-link <?= ($page == 'daftar-surat') ? 'active-green' : ''; ?>"
+                            href="index.php?page=daftar-surat">
+                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                            Daftar Semua Surat
+                            <?= ($page == 'daftar-surat') ? '<div class="active-dot"></div>' : ''; ?>
                         </a>
                         <a class="nav-link <?= ($page == 'profil-desa') ? 'active-green' : ''; ?>"
                             href="index.php?page=profil-desa">

@@ -299,13 +299,13 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
 
             <!-- Nomor Klasifikasi Kiri -->
             <div class="no-klasifikasi">
-                No : <?= htmlspecialchars($data['kode_surat'] ?? '31.07.16'); ?>
+                Kode Desa : <?= htmlspecialchars($data['kode_surat'] ?? '31.07.16'); ?>
             </div>
 
             <!-- Judul Tengah -->
             <div class="judul-surat">
                 <h4>SURAT KETERANGAN / PENGANTAR</h4>
-                <p>NOMOR: 471 / <?= htmlspecialchars($data['nomor_surat']); ?></p>
+                <p>NOMOR: <?= htmlspecialchars($data['nomor_surat']); ?></p>
             </div>
 
             <div class="pembuka">

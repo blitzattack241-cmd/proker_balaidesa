@@ -205,7 +205,7 @@ if (isset($_POST['simpan'])) {
                 <div class="col-md-3">
                     <label class="form-label form-label-modern">Nomor KK</label>
                     <input type="text" class="form-control form-control-modern font-monospace" name="nomor_kk"
-                        maxlength="16" placeholder="16 Digit No. KK" required>
+                        maxlength="16" value="331904" placeholder="16 Digit No. KK" required>
                 </div>
             </div>
 
