@@ -16,9 +16,11 @@ if (!$isAdmin) {
 
 if (isset($_POST['simpan'])) {
     $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
     // Ambil data dari form input
-    $nomor_surat      = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan)
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
     $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
     $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
     $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);

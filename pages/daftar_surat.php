@@ -63,91 +63,78 @@ $sourceTables = [
         'candidates' => ['tb_surat_garapan', 'surat_garapan'],
         'name' => ['nama_penggarap', 'nama_pemohon', 'nama_warga'],
         'tujuan' => ['pekerjaan', 'keperluan', 'perihal'],
-        'keterangan' => ['keperluan', 'keterangan', 'keterangan_lain'],
     ],
     [
         'label' => 'Surat Ahli Waris',
         'candidates' => ['tb_surat_waris', 'surat_waris'],
         'name' => ['nama_almarhum', 'nama_pasangan', 'nama_pemohon'],
         'tujuan' => ['keperluan', 'keterangan', 'perihal'],
-        'keterangan' => ['keperluan', 'keterangan', 'keterangan_lain'],
     ],
     [
         'label' => 'Surat Undangan',
         'candidates' => ['tb_surat_undangan', 'surat_undangan'],
         'name' => ['nama_pemohon', 'sifat', 'id_pejabat'],
         'tujuan' => ['acara', 'perihal', 'tempat_acara'],
-        'keterangan' => ['keterangan', 'keperluan'],
     ],
     [
         'label' => 'Surat Kelahiran',
         'candidates' => ['tb_surat_kelahiran', 'surat_kelahiran'],
         'name' => ['nama_kepala_keluarga', 'nama_bayi', 'nama_pelapor'],
         'tujuan' => ['nama_bayi', 'nomor_kk', 'nama_kepala_keluarga'],
-        'keterangan' => ['keterangan', 'keterangan_lain'],
     ],
     [
         'label' => 'Surat Kematian',
         'candidates' => ['tb_surat_kematian', 'surat_kematian'],
         'name' => ['nama_jenazah', 'nama_pelapor'],
         'tujuan' => ['nama_pelapor', 'keterangan'],
-        'keterangan' => ['keterangan', 'keterangan_lain'],
     ],
     [
         'label' => 'Surat Keterangan / Pengantar',
         'candidates' => ['tb_surat_pengantar', 'surat_pengantar'],
         'name' => ['nama_pemohon', 'nama_warga'],
         'tujuan' => ['keperluan', 'keterangan_lain', 'keterangan'],
-        'keterangan' => ['keterangan_lain', 'keterangan', 'keperluan'],
     ],
     [
         'label' => 'Surat Domisili',
         'candidates' => ['tb_surat_domisili', 'surat_domisili'],
         'name' => ['nama_warga', 'nama_pemohon'],
         'tujuan' => ['keperluan', 'keterangan_lain'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'Surat Pengantar Dukcapil',
         'candidates' => ['tb_surat_pengantar_dukcapil', 'tb_surat_dukcapil', 'surat_pengantar_dukcapil', 'surat_dukcapil'],
         'name' => ['created_by', 'jenis_dikirim'],
         'tujuan' => ['jenis_dikirim', 'banyaknya'],
-        'keterangan' => ['keterangan'],
     ],
     [
         'label' => 'SKTM Ibu Hamil',
         'candidates' => ['tb_sktm_bumil', 'sktm_bumil'],
         'name' => ['nama_pemohon', 'nama_warga'],
         'tujuan' => ['keperluan', 'keterangan_lain'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'SKTM Pembebasan Rawat',
         'candidates' => ['tb_sktm_rawat', 'sktm_rawat', 'tb_sktm_pasien', 'sktm_pasien'],
         'name' => ['nama_pemohon', 'nama_warga'],
         'tujuan' => ['rumah_sakit_tujuan', 'keperluan'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'SKTM KIS',
         'candidates' => ['tb_sktm_kis', 'sktm_kis'],
         'name' => ['nama_warga', 'nama_pemohon'],
         'tujuan' => ['keperluan', 'keterangan'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'SKTM KIP',
         'candidates' => ['tb_sktm_kip', 'sktm_kip'],
         'name' => ['nama_warga', 'nama_pemohon'],
         'tujuan' => ['keperluan', 'keterangan'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'SKTM Stunting',
         'candidates' => ['tb_sktm_stunting', 'sktm_stunting'],
         'name' => ['nama_warga', 'nama_pemohon'],
         'tujuan' => ['keperluan', 'keterangan'],
-        'keterangan' => ['keterangan_lain', 'keterangan'],
     ],
 ];
 
@@ -162,7 +149,6 @@ foreach ($sourceTables as $config) {
     $tanggal = chooseColumnExpr($koneksi, $table, ['tanggal_surat'], '');
     $nama = chooseColumnExpr($koneksi, $table, $config['name'], '');
     $tujuan = chooseColumnExpr($koneksi, $table, $config['tujuan'], '');
-    $keterangan = chooseColumnExpr($koneksi, $table, $config['keterangan'], '');
 
     $coll = ' COLLATE utf8mb4_general_ci';
     $jenisExpr = "'" . $jenis . "'" . $coll . " AS jenis_surat";
@@ -181,9 +167,8 @@ foreach ($sourceTables as $config) {
     $tanggalExpr = $tanggal . " AS tanggal_surat";
     $namaExpr = $applyTextCollation($nama) . " AS nama_pemohon";
     $tujuanExpr = $applyTextCollation($tujuan) . " AS tujuan";
-    $keteranganExpr = $applyTextCollation($keterangan) . " AS keterangan";
 
-    $unionQueries[] = "SELECT " . $jenisExpr . ", " . $nomorExpr . ", " . $tanggalExpr . ", " . $namaExpr . ", " . $tujuanExpr . ", " . $keteranganExpr . " FROM `" . mysqli_real_escape_string($koneksi, $table) . "`";
+    $unionQueries[] = "SELECT " . $jenisExpr . ", " . $nomorExpr . ", " . $tanggalExpr . ", " . $namaExpr . ", " . $tujuanExpr . " FROM `" . mysqli_real_escape_string($koneksi, $table) . "`";
 }
 
 $suratRows = [];
@@ -230,7 +215,6 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
 ?>
 
 <style>
-/* Display Normal Dashboard */
 .green-banner {
     background: linear-gradient(135deg, #0b8a4f 0%, #086b3d 100%);
     border-radius: 16px;
@@ -281,6 +265,20 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
     color: #334155;
     vertical-align: top;
     word-wrap: break-word;
+}
+
+/* Style tambahan untuk kolom Keterangan yang bisa diedit langsung */
+.editable-ket {
+    background-color: #fffde7;
+    outline: none;
+    cursor: text;
+    transition: background-color 0.2s;
+}
+
+.editable-ket:focus {
+    background-color: #ffffff;
+    box-shadow: inset 0 0 0 2px #0b8a4f;
+    border-radius: 4px;
 }
 </style>
 
@@ -366,21 +364,24 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
                     <?php $no = 1; ?>
                     <?php foreach ($filteredRows as $row): ?>
                     <?php
-                            $tanggal = '-';
-                            if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
-                                $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
-                            }
-                            ?>
+                        $tanggal = '-';
+                        if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
+                            $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
+                        }
+                    ?>
                     <tr>
                         <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                        <td><strong
+                        <td>
+                            <strong
                                 class="text-dark"><?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?></strong>
                         </td>
                         <td><?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '-')); ?></td>
                         <td class="text-center"><?php echo htmlspecialchars($tanggal); ?></td>
                         <td><?php echo htmlspecialchars(cleanUtf8($row['nomor_surat'] ?: '-')); ?></td>
                         <td><?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '-')); ?></td>
-                        <td><?php echo htmlspecialchars(cleanUtf8($row['keterangan'] ?: '-')); ?></td>
+                        <!-- Kolom Keterangan dikosongkan secara default & bisa diketik/edited secara langsung -->
+                        <td contenteditable="true" class="editable-ket"
+                            title="Klik di sini untuk mengisi keterangan manual jika diperlukan"></td>
                     </tr>
                     <?php endforeach; ?>
                     <?php else: ?>

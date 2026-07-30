@@ -21,96 +21,62 @@ if (mysqli_connect_errno()) {
 // Target nama tabel master
 $tableTarget = 'tb_surat_kelahiran';
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT KELAHIRAN OTOMATIS
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Mengurutkan berdasarkan primary key 'id_surat' secara DESCENDING
-$query_no = "SELECT nomor_surat FROM `$tableTarget` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_surat DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 1; // Default urutan pertama jika belum ada data tahun ini
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; // Contoh di DB: "474.1/05/2026"
-    
-    // Pecah string nomor berdasarkan slash (/)
-    $bagian = explode('/', $nomor_terakhir);
-    
-    if (isset($bagian[0])) {
-        $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[0]);
-        
-        // Jika bagian pertama adalah kode klasifikasi (474.1 atau 474), ambil angka di bagian ke-2
-        if (($angka_saja == 4741 || $angka_saja == 474) && isset($bagian[1])) {
-            $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[1]);
-        }
-        
-        if ($angka_saja > 0) {
-            $nomor_urut_baru = $angka_saja + 1;
-        }
-    } 
-}
-
-// Format nomor urut jadi 2 digit / 3 digit (misal 5 + 1 -> 06)
-$nomor_formatted = sprintf("%02d", $nomor_urut_baru);
-
-// Format baku nomor surat kelahiran desa
-$nomor_surat_otomatis = "474.3/" . $nomor_formatted . "/31.07.16/   /VII/" . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // PROSES SIMPAN DATA FORM
 if (isset($_POST['simpan'])) {
     // 1. Data Umum & KK
-    $nomor_surat          = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $tanggal_surat        = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
     $nama_kepala_keluarga = mysqli_real_escape_string($koneksi, $_POST['nama_kepala_keluarga']);
-    $nomor_kk             = mysqli_real_escape_string($koneksi, $_POST['nomor_kk']);
+    $nomor_kk = mysqli_real_escape_string($koneksi, $_POST['nomor_kk']);
 
     // 2. Data Bayi
-    $nama_bayi            = mysqli_real_escape_string($koneksi, $_POST['nama_bayi']);
-    $jenis_kelamin_bayi   = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin_bayi']);
-    $tempat_dilahirkan    = mysqli_real_escape_string($koneksi, $_POST['tempat_dilahirkan']);
+    $nama_bayi = mysqli_real_escape_string($koneksi, $_POST['nama_bayi']);
+    $jenis_kelamin_bayi = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin_bayi']);
+    $tempat_dilahirkan = mysqli_real_escape_string($koneksi, $_POST['tempat_dilahirkan']);
     $tempat_kelahiran_kab = mysqli_real_escape_string($koneksi, $_POST['tempat_kelahiran_kab']);
-    $hari_lahir_bayi      = mysqli_real_escape_string($koneksi, $_POST['hari_lahir_bayi']);
-    $tanggal_lahir_bayi   = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_bayi']);
-    $pukul_lahir_bayi     = mysqli_real_escape_string($koneksi, $_POST['pukul_lahir_bayi']);
-    $jenis_kelahiran      = mysqli_real_escape_string($koneksi, $_POST['jenis_kelahiran']);
-    $kelahiran_ke         = mysqli_real_escape_string($koneksi, $_POST['kelahiran_ke']);
-    $penolong_kelahiran   = mysqli_real_escape_string($koneksi, $_POST['penolong_kelahiran']);
-    $berat_bayi_gram      = mysqli_real_escape_string($koneksi, $_POST['berat_bayi_gram']);
-    $panjang_bayi_cm      = mysqli_real_escape_string($koneksi, $_POST['panjang_bayi_cm']);
+    $hari_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['hari_lahir_bayi']);
+    $tanggal_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_bayi']);
+    $pukul_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['pukul_lahir_bayi']);
+    $jenis_kelahiran = mysqli_real_escape_string($koneksi, $_POST['jenis_kelahiran']);
+    $kelahiran_ke = mysqli_real_escape_string($koneksi, $_POST['kelahiran_ke']);
+    $penolong_kelahiran = mysqli_real_escape_string($koneksi, $_POST['penolong_kelahiran']);
+    $berat_bayi_gram = mysqli_real_escape_string($koneksi, $_POST['berat_bayi_gram']);
+    $panjang_bayi_cm = mysqli_real_escape_string($koneksi, $_POST['panjang_bayi_cm']);
 
     // 3. Data Ibu
-    $nik_ibu              = mysqli_real_escape_string($koneksi, $_POST['nik_ibu']);
-    $nama_ibu             = mysqli_real_escape_string($koneksi, $_POST['nama_ibu']);
-    $tanggal_lahir_ibu    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ibu']);
-    $umur_ibu             = mysqli_real_escape_string($koneksi, $_POST['umur_ibu']);
-    $pekerjaan_ibu        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ibu']);
-    $alamat_ibu           = mysqli_real_escape_string($koneksi, $_POST['alamat_ibu']);
-    $desa_ibu             = mysqli_real_escape_string($koneksi, $_POST['desa_ibu']);
-    $kecamatan_ibu        = mysqli_real_escape_string($koneksi, $_POST['kecamatan_ibu']);
-    $kabupaten_ibu        = mysqli_real_escape_string($koneksi, $_POST['kabupaten_ibu']);
+    $nik_ibu = mysqli_real_escape_string($koneksi, $_POST['nik_ibu']);
+    $nama_ibu = mysqli_real_escape_string($koneksi, $_POST['nama_ibu']);
+    $tanggal_lahir_ibu = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ibu']);
+    $umur_ibu = mysqli_real_escape_string($koneksi, $_POST['umur_ibu']);
+    $pekerjaan_ibu = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ibu']);
+    $alamat_ibu = mysqli_real_escape_string($koneksi, $_POST['alamat_ibu']);
+    $desa_ibu = mysqli_real_escape_string($koneksi, $_POST['desa_ibu']);
+    $kecamatan_ibu = mysqli_real_escape_string($koneksi, $_POST['kecamatan_ibu']);
+    $kabupaten_ibu = mysqli_real_escape_string($koneksi, $_POST['kabupaten_ibu']);
 
     // 4. Data Ayah
-    $nik_ayah             = mysqli_real_escape_string($koneksi, $_POST['nik_ayah']);
-    $nama_ayah            = mysqli_real_escape_string($koneksi, $_POST['nama_ayah']);
-    $tanggal_lahir_ayah   = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ayah']);
-    $umur_ayah            = mysqli_real_escape_string($koneksi, $_POST['umur_ayah']);
-    $pekerjaan_ayah       = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ayah']);
-    $alamat_ayah          = mysqli_real_escape_string($koneksi, $_POST['alamat_ayah']);
+    $nik_ayah = mysqli_real_escape_string($koneksi, $_POST['nik_ayah']);
+    $nama_ayah = mysqli_real_escape_string($koneksi, $_POST['nama_ayah']);
+    $tanggal_lahir_ayah = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ayah']);
+    $umur_ayah = mysqli_real_escape_string($koneksi, $_POST['umur_ayah']);
+    $pekerjaan_ayah = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ayah']);
+    $alamat_ayah = mysqli_real_escape_string($koneksi, $_POST['alamat_ayah']);
 
     // 5. Data Pelapor & Saksi
-    $nik_pelapor          = mysqli_real_escape_string($koneksi, $_POST['nik_pelapor']);
-    $nama_pelapor         = mysqli_real_escape_string($koneksi, $_POST['nama_pelapor']);
-    $nik_saksi1           = mysqli_real_escape_string($koneksi, $_POST['nik_saksi1']);
-    $nama_saksi1          = mysqli_real_escape_string($koneksi, $_POST['nama_saksi1']);
-    $nik_saksi2           = mysqli_real_escape_string($koneksi, $_POST['nik_saksi2']);
-    $nama_saksi2          = mysqli_real_escape_string($koneksi, $_POST['nama_saksi2']);
+    $nik_pelapor = mysqli_real_escape_string($koneksi, $_POST['nik_pelapor']);
+    $nama_pelapor = mysqli_real_escape_string($koneksi, $_POST['nama_pelapor']);
+    $nik_saksi1 = mysqli_real_escape_string($koneksi, $_POST['nik_saksi1']);
+    $nama_saksi1 = mysqli_real_escape_string($koneksi, $_POST['nama_saksi1']);
+    $nik_saksi2 = mysqli_real_escape_string($koneksi, $_POST['nik_saksi2']);
+    $nama_saksi2 = mysqli_real_escape_string($koneksi, $_POST['nama_saksi2']);
 
     // Query INSERT masal ke kolom master
     $sqlInsert = "INSERT INTO `$tableTarget` (
@@ -126,7 +92,7 @@ if (isset($_POST['simpan'])) {
         '$nik_ayah', '$nama_ayah', '$tanggal_lahir_ayah', '$umur_ayah', '$pekerjaan_ayah', '$alamat_ayah',
         '$nik_pelapor', '$nama_pelapor', '$nik_saksi1', '$nama_saksi1', '$nik_saksi2', '$nama_saksi2'
     )";
-    
+
     if (mysqli_query($koneksi, $sqlInsert)) {
         echo "<script>alert('Data Formulir F-2.01 Berhasil Disimpan!'); window.location.href = 'index.php?page=surat-kelahiran';</script>";
     } else {
@@ -136,38 +102,38 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #0d6efd;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #0d6efd;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -407,18 +373,18 @@ if (isset($_POST['simpan'])) {
 </div>
 
 <script>
-// Validasi Interaktif Bootstrap Browser
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    // Validasi Interaktif Bootstrap Browser
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>

@@ -66,10 +66,10 @@ if (!empty($_SESSION['profile_picture']) && file_exists($_SESSION['profile_pictu
 // Ambil parameter halaman dari URL (?page=...)
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
-$suratPages = ['buat-surat', 'surat-garapan-sawah', 'surat-keterangan-ahli-waris', 'surat_waris', 'surat-waris', 'tambah_surat_waris', 'surat-waris-tambah', 'edit_surat_waris', 'surat-waris-edit', 'surat-undangan', 'surat-undangan-tambah', 'surat-undangan-edit', 'surat-kelahiran', 'surat_kelahiran', 'surat-kelahiran-tambah', 'surat_kelahiran-tambah', 'surat-kematian', 'surat-kematian-tambah', 'surat-kematian-edit'];
+$suratPages = ['buat-surat', 'surat-garapan', 'surat-garapan-sawah', 'surat-garapan-tambah', 'surat-garapan-edit', 'surat-keterangan-ahli-waris', 'surat_waris', 'surat-waris', 'tambah_surat_waris', 'surat-waris-tambah', 'edit_surat_waris', 'surat-waris-edit', 'surat-undangan', 'surat-undangan-tambah', 'surat-undangan-edit', 'surat-kelahiran', 'surat_kelahiran', 'surat-kelahiran-tambah', 'surat_kelahiran-tambah', 'surat-kematian', 'surat-kematian-tambah', 'surat-kematian-edit'];
 $isSuratOpen = in_array($page, $suratPages, true);
 
-$keteranganPages = ['surat-keterangan-pengantar', 'surat-pengantar', 'surat-pengantar-tambah', 'surat-pengantar-edit', 'surat-domisili', 'surat-keterangan-tidak-mampu', 'surat-pengantar-dukcapil'];
+$keteranganPages = ['surat-keterangan-pengantar', 'surat-pengantar', 'surat-pengantar-tambah', 'surat-pengantar-edit', 'surat-domisili', 'surat-domisili-tambah', 'surat-domisili-edit', 'surat-keterangan-tidak-mampu', 'surat-pengantar-dukcapil', 'surat-pengantar-dukcapil-tambah', 'surat-pengantar-dukcapil-edit'];
 $suratTidakMampuPages = ['surat-keterangan-tidak-mampu', 'bumil', 'sktm-bumil', 'sktm-bumil-tampil', 'sktm-bumil-tambah', 'sktm-bumil-edit', 'sktm-bumil-hapus', 'sktm-bumil-proses-tambah', 'pembebasan-rawat-inab-dan-jalan', 'sktm_rawat', 'sktm-rawat', 'sktm-rawat-tampil', 'sktm-rawat-tambah', 'sktm-rawat-edit', 'sktm-rawat-hapus', 'pengajuan-kis', 'sktm-kip', 'sktm-kip-tampil', 'sktm-kip-tambah', 'sktm-kip-edit', 'sktm-kip-hapus', 'sktm-kis', 'sktm-kis-tampil', 'sktm-kis-tambah', 'sktm-kis-edit', 'stunting', 'stunting-tampil', 'stunting-tambah', 'stunting-edit', 'stunting-hapus', 'sktm-stunting', 'sktm-stunting-tampil', 'sktm-stunting-tambah', 'sktm-stunting-edit', 'sktm-stunting-hapus'];
 $isKeteranganOpen = in_array($page, $keteranganPages, true);
 $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
@@ -689,15 +689,15 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             aria-labelledby="headingSurat" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
 
-                                <a class="nav-link <?= ($page == 'surat-garapan-sawah') ? 'active-green' : ''; ?>"
+                                <a class="nav-link <?= in_array($page, ['surat-garapan', 'surat-garapan-sawah', 'surat-garapan-tambah', 'surat-garapan-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-garapan-sawah">Surat Garapan Sawah</a>
                                 <a class="nav-link <?= in_array($page, ['surat-keterangan-ahli-waris', 'surat_waris', 'surat-waris', 'tambah_surat_waris', 'surat-waris-tambah', 'edit_surat_waris', 'surat-waris-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-keterangan-ahli-waris">Surat Ahli Waris</a>
                                 <a class="nav-link <?= in_array($page, ['surat-undangan', 'surat-undangan-tambah', 'surat-undangan-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-undangan">Surat Undangan</a>
-                                <a class="nav-link <?= in_array($page, ['surat-kelahiran', 'surat_kelahiran'], true) ? 'active-green' : ''; ?>"
+                                <a class="nav-link <?= in_array($page, ['surat-kelahiran', 'surat_kelahiran', 'surat-kelahiran-tambah', 'surat_kelahiran-tambah', 'surat-kelahiran-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-kelahiran">Surat Kelahiran</a>
-                                <a class="nav-link <?= ($page == 'surat-kematian') ? 'active-green' : ''; ?>"
+                                <a class="nav-link <?= in_array($page, ['surat-kematian', 'surat-kematian-tambah', 'surat-kematian-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-kematian">Surat Kematian</a>
                             </nav>
                         </div>
@@ -717,9 +717,9 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             <nav class="sb-sidenav-menu-nested nav">
                                 <a class="nav-link <?= in_array($page, ['surat-keterangan-pengantar', 'surat-pengantar', 'surat-pengantar-tambah', 'surat-pengantar-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-keterangan-pengantar">Surat Keterangan / Pengantar</a>
-                                <a class="nav-link <?= ($page == 'surat-domisili') ? 'active-green' : ''; ?>"
+                                <a class="nav-link <?= in_array($page, ['surat-domisili', 'surat-domisili-tambah', 'surat-domisili-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-domisili">Surat Domisili</a>
-                                <a class="nav-link <?= ($page == 'surat-pengantar-dukcapil') ? 'active-green' : ''; ?>"
+                                <a class="nav-link <?= in_array($page, ['surat-pengantar-dukcapil', 'surat-pengantar-dukcapil-tambah', 'surat-pengantar-dukcapil-edit'], true) ? 'active-green' : ''; ?>"
                                     href="index.php?page=surat-pengantar-dukcapil">Surat Pengantar Dukcapil</a>
                             </nav>
                         </div>

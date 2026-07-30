@@ -1,49 +1,34 @@
 <?php
 $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
 
-// --- LOGIC GENERATE NOMOR SURAT OTOMATIS ---
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Ambil nomor urut tertinggi pada tabel tb_sktm_kis di tahun berjalan
-$query_max_no = mysqli_query($koneksi, "
-    SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_surat, '/', 2), '/', -1) AS UNSIGNED)) as max_no 
-    FROM tb_sktm_kis 
-    WHERE nomor_surat LIKE '%/$tahun_sekarang'
-");
-
-$data_max = mysqli_fetch_assoc($query_max_no);
-$no_urut_terakhir = $data_max['max_no'] ?? 0;
-
-// Increment nomor urut
-$no_urut_baru = $no_urut_terakhir + 1;
-
-// Format 2 digit angka (contoh: 01, 02, dst.)
-$no_urut_formatted = str_pad($no_urut_baru, 2, "0", STR_PAD_LEFT);
-
-// Format Nomor Surat Sesuai Template (474 / xx / 31.07.16 / 2026)
-$nomor_surat_otomatis = "474 / " . $no_urut_formatted . " / 31.07.16 / " . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 // Ambil data pejabat untuk dropdown tanda tangan
 $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY nama_pejabat ASC");
 
 // Proses Penyimpanan Data ketika Form Disubmit
 if (isset($_POST['submit'])) {
-    $nomor_surat      = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $tempat_lahir     = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $pekerjaan        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $agama            = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $kewarganegaraan  = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
-    $alamat_tinggal   = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $no_kk            = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
-    $no_ktp           = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
-    $keperluan        = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
+    $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $kewarganegaraan = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $no_kk = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
+    $no_ktp = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
     $anggota_keluarga = mysqli_real_escape_string($koneksi, $_POST['anggota_keluarga']);
-    $berlaku_mulai    = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $id_pejabat       = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
+    $berlaku_mulai = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
 
     // Array nama input file foto untuk looping proses upload
     $foto_fields = ['foto_depan', 'foto_ruang_tamu', 'foto_kamar_tidur', 'foto_dapur', 'foto_kamar_mandi'];
@@ -61,7 +46,7 @@ if (isset($_POST['submit'])) {
     foreach ($foto_fields as $field) {
         if (!empty($_FILES[$field]['name'])) {
             $file_extension = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
-            
+
             // Validasi Ekstensi File
             if (in_array($file_extension, $allowed_extensions)) {
                 // Penamaan file unik menggunakan format: jenis_foto_nik_timestamp.ekstensi
@@ -115,36 +100,36 @@ if (isset($_POST['submit'])) {
 ?>
 
 <style>
-.form-section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #0d6efd;
-    padding-bottom: 5px;
-    margin-bottom: 20px;
-}
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.btn-save-modern {
-    background: linear-gradient(135deg, #198754, #157347) !important;
-    border: none !important;
-    font-weight: 600;
-    padding: 10px 24px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
-    color: white !important;
-}
+    .btn-save-modern {
+        background: linear-gradient(135deg, #198754, #157347) !important;
+        border: none !important;
+        font-weight: 600;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+        color: white !important;
+    }
 
-.btn-save-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
-    color: white !important;
-}
+    .btn-save-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
+        color: white !important;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -278,10 +263,10 @@ if (isset($_POST['submit'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)) { ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php } ?>
                         </select>
                     </div>

@@ -23,99 +23,80 @@ if (mysqli_connect_errno()) {
 // Ambil data pejabat untuk pilihan penandatangan surat
 $pejabat_query = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY nama_pejabat ASC");
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT SKTM STUNTING OTOMATIS
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Query untuk mengambil angka urut tertinggi dari nomor_surat di tahun berjalan
-$query_max_no = mysqli_query($koneksi, "
-    SELECT MAX(CAST(TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_surat, '/', 2), '/', -1)) AS UNSIGNED)) as max_no 
-    FROM tb_sktm_stunting 
-    WHERE nomor_surat LIKE '%/$tahun_sekarang'
-");
-
-$data_max = mysqli_fetch_assoc($query_max_no);
-$no_urut_terakhir = $data_max['max_no'] ?? 0;
-
-// Auto Increment
-$nomor_urut_baru = $no_urut_terakhir + 1;
-
-// Format menjadi 3 digit angka (001, 002, dst)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Susun string Nomor Surat Otomatis
-$nomor_otomatis = "474 / " . $nomor_formatted . " / 31.07.16 / " . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 ?>
 
 <!-- Style Kustom untuk Formulir Modern -->
 <style>
-.card-form {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-form {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.card-form-header {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.5rem !important;
-}
+    .card-form-header {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.5rem !important;
+    }
 
-.form-label-custom {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-}
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
 
-.form-control-custom {
-    border-radius: 8px !important;
-    padding: 0.6rem 1rem !important;
-    border: 1px solid #ced4da !important;
-    transition: all 0.2s ease;
-}
+    .form-control-custom {
+        border-radius: 8px !important;
+        padding: 0.6rem 1rem !important;
+        border: 1px solid #ced4da !important;
+        transition: all 0.2s ease;
+    }
 
-.form-control-custom:focus {
-    border-color: #0d6efd !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
-}
+    .form-control-custom:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
 
-.section-divider {
-    border-top: 2px dashed #e9ecef;
-    margin: 2rem 0;
-}
+    .section-divider {
+        border-top: 2px dashed #e9ecef;
+        margin: 2rem 0;
+    }
 
-.section-title-custom {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #0d6efd;
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .section-title-custom {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.btn-submit-custom {
-    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-    transition: all 0.25s ease;
-}
+    .btn-submit-custom {
+        background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+        transition: all 0.25s ease;
+    }
 
-.btn-submit-custom:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-}
+    .btn-submit-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    }
 
-.btn-batal-custom {
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-weight: 600;
-}
+    .btn-batal-custom {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 600;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -258,11 +239,11 @@ $nomor_otomatis = "474 / " . $nomor_formatted . " / 31.07.16 / " . $tahun_sekara
                         <label class="form-label form-label-custom">Pejabat Penandatangan</label>
                         <select name="id_pejabat" class="form-select form-control-custom" required>
                             <option value="" disabled selected>-- Pilih Pejabat yang Mengesahkan --</option>
-                            <?php while($pejabat = mysqli_fetch_assoc($pejabat_query)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                            <?php while ($pejabat = mysqli_fetch_assoc($pejabat_query)): ?>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

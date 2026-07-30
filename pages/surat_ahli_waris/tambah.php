@@ -17,47 +17,10 @@ if (mysqli_connect_errno()) {
     exit;
 }
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT AHLI WARIS OTOMATIS
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Mengambil nomor surat terakhir berdasarkan tabel tb_surat_waris & id_waris
-$query_no = "SELECT nomor_surat FROM `tb_surat_waris` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_waris DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 1; // Default jika belum ada data di tahun berjalan
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; // Contoh: "125 /31.07.16/2026"
-    
-    // Pecah string nomor berdasarkan slash (/)
-    $bagian = explode('/', $nomor_terakhir);
-    
-    if (isset($bagian[0])) {
-        // Ambil angka dari bagian pertama
-        $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[0]);
-        
-        // Jika terdapat prefix kode 470 di awal, ambil angka dari bagian berikutnya
-        if ($angka_saja == 470 && isset($bagian[1])) {
-            $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[1]);
-        }
-        
-        if ($angka_saja > 0) {
-            $nomor_urut_baru = $angka_saja + 1;
-        }
-    }
-}
-
-// Format nomor urut menjadi 3 digit (misal: 1 -> 001 atau 126 -> 126)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Format default untuk isian nomor surat
-$nomor_surat_otomatis = $nomor_formatted . " /31.07.16/" . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // Ambil data pejabat untuk pilihan penandatangan
@@ -65,63 +28,63 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.5px;
-}
-
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
-
-.card-header-modern {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.25rem 1.5rem !important;
-    font-weight: 600;
-    color: #495057;
-    font-size: 1.1rem;
-}
-
-.section-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #0d6efd;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 5px;
-}
-
-.btn-custom {
-    border-radius: 8px !important;
-    font-weight: 600;
-    padding: 10px 20px;
-    transition: all 0.25s ease;
-}
-
-.btn-custom:hover {
-    transform: translateY(-2px);
-}
-
-.dynamic-row {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
     }
-}
+
+    .card-header-modern {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.25rem 1.5rem !important;
+        font-weight: 600;
+        color: #495057;
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #0d6efd;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 5px;
+    }
+
+    .btn-custom {
+        border-radius: 8px !important;
+        font-weight: 600;
+        padding: 10px 20px;
+        transition: all 0.25s ease;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+    }
+
+    .dynamic-row {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -320,12 +283,12 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php if ($query_pejabat): ?>
-                            <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
-                            <?php endwhile; ?>
+                                <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                                    <option value="<?= $pejabat['id_pejabat']; ?>">
+                                        <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                        (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                    </option>
+                                <?php endwhile; ?>
                             <?php endif; ?>
                         </select>
                     </div>
@@ -358,14 +321,14 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 
 <!-- JAVASCRIPT UNTUK ATUR FIELD DINAMIS -->
 <script>
-// Fungsi Tambah Baris Anak
-function tambahBarisAnak() {
-    const container = document.getElementById('container_anak');
-    const index = container.children.length + 1;
+    // Fungsi Tambah Baris Anak
+    function tambahBarisAnak() {
+        const container = document.getElementById('container_anak');
+        const index = container.children.length + 1;
 
-    const row = document.createElement('tr');
-    row.className = 'dynamic-row';
-    row.innerHTML = `
+        const row = document.createElement('tr');
+        row.className = 'dynamic-row';
+        row.innerHTML = `
         <td class="text-center fw-bold nomor-anak">${index}</td>
         <td><input type="text" name="nama_anak[]" class="form-control form-control-sm" placeholder="Nama Anak ke-${index}" required></td>
         <td><input type="text" name="pekerjaan_anak[]" class="form-control form-control-sm" placeholder="Contoh: Petani/Perkebun" required></td>
@@ -374,30 +337,30 @@ function tambahBarisAnak() {
             <button type="button" class="btn btn-sm btn-danger" onclick="hapusBarisAnak(this)"><i class="fas fa-trash"></i></button>
         </td>
     `;
-    container.appendChild(row);
-    urutkanNomorAnak();
-}
+        container.appendChild(row);
+        urutkanNomorAnak();
+    }
 
-function hapusBarisAnak(btn) {
-    btn.closest('tr').remove();
-    urutkanNomorAnak();
-}
+    function hapusBarisAnak(btn) {
+        btn.closest('tr').remove();
+        urutkanNomorAnak();
+    }
 
-function urutkanNomorAnak() {
-    const nomorElements = document.querySelectorAll('.nomor-anak');
-    nomorElements.forEach((el, index) => {
-        el.innerText = index + 1;
-    });
-}
+    function urutkanNomorAnak() {
+        const nomorElements = document.querySelectorAll('.nomor-anak');
+        nomorElements.forEach((el, index) => {
+            el.innerText = index + 1;
+        });
+    }
 
-// Fungsi Tambah Baris Saksi
-function tambahBarisSaksi() {
-    const container = document.getElementById('container_saksi');
-    const index = container.children.length + 1;
+    // Fungsi Tambah Baris Saksi
+    function tambahBarisSaksi() {
+        const container = document.getElementById('container_saksi');
+        const index = container.children.length + 1;
 
-    const row = document.createElement('tr');
-    row.className = 'dynamic-row';
-    row.innerHTML = `
+        const row = document.createElement('tr');
+        row.className = 'dynamic-row';
+        row.innerHTML = `
         <td class="text-center fw-bold nomor-saksi">${index}</td>
         <td><input type="text" name="nama_saksi[]" class="form-control form-control-sm" placeholder="Nama Saksi ke-${index}" required></td>
         <td><input type="text" name="pekerjaan_saksi[]" class="form-control form-control-sm" placeholder="Contoh: Perangkat Desa" required></td>
@@ -406,19 +369,19 @@ function tambahBarisSaksi() {
             <button type="button" class="btn btn-sm btn-danger" onclick="hapusBarisSaksi(this)"><i class="fas fa-trash"></i></button>
         </td>
     `;
-    container.appendChild(row);
-    urutkanNomorSaksi();
-}
+        container.appendChild(row);
+        urutkanNomorSaksi();
+    }
 
-function hapusBarisSaksi(btn) {
-    btn.closest('tr').remove();
-    urutkanNomorSaksi();
-}
+    function hapusBarisSaksi(btn) {
+        btn.closest('tr').remove();
+        urutkanNomorSaksi();
+    }
 
-function urutkanNomorSaksi() {
-    const nomorElements = document.querySelectorAll('.nomor-saksi');
-    nomorElements.forEach((el, index) => {
-        el.innerText = index + 1;
-    });
-}
+    function urutkanNomorSaksi() {
+        const nomorElements = document.querySelectorAll('.nomor-saksi');
+        nomorElements.forEach((el, index) => {
+            el.innerText = index + 1;
+        });
+    }
 </script>

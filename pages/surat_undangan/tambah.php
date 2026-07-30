@@ -19,49 +19,10 @@ if (mysqli_connect_errno()) {
     exit;
 }
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT UNDANGAN OTOMATIS
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Query untuk mengambil surat undangan terakhir pada tahun berjalan
-$query_no = "SELECT nomor_surat FROM `tb_surat_undangan` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_undangan DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-// Jika query gagal karena nama primary key beda, fallback cari tanpa ORDER BY ID
-if (!$result_no) {
-    $query_no = "SELECT nomor_surat FROM `tb_surat_undangan` 
-                 WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-                 LIMIT 1";
-    $result_no = mysqli_query($koneksi, $query_no);
-}
-
-$nomor_urut_baru = 1; // Default angka pertama jika belum ada data tahun ini
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; // Contoh: "005/079/31.07.16/2026"
-    
-    // Pecah string nomor berdasarkan karakter "/"
-    $bagian = explode('/', $nomor_terakhir);
-    
-    // Mengambil angka di indeks ke-1 (nomor urut)
-    if (isset($bagian[1])) {
-        $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[1]);
-        if ($angka_saja > 0) {
-            $nomor_urut_baru = $angka_saja + 1;
-        }
-    }
-}
-
-// Format nomor urut jadi 3 digit (misal 1 -> 001, 79 -> 079)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Susun string Nomor Surat Undangan Otomatis
-$nomor_surat_otomatis = "005/ " . $nomor_formatted . " /31.07.16/" . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // Ambil data pejabat untuk dropdown penandatangan surat
@@ -69,19 +30,21 @@ $query_pejabat = mysqli_query($koneksi, "SELECT * FROM `tb_pejabat` ORDER BY `ja
 
 // Proses Simpan Data Form
 if (isset($_POST['simpan'])) {
-    $nomor_surat    = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $sifat          = mysqli_real_escape_string($koneksi, $_POST['sifat']);
-    $lampiran       = mysqli_real_escape_string($koneksi, $_POST['lampiran']);
-    $perihal        = mysqli_real_escape_string($koneksi, $_POST['perihal']);
-    $tempat_surat   = mysqli_real_escape_string($koneksi, $_POST['tempat_surat']);
-    $tanggal_surat  = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $hari_acara     = mysqli_real_escape_string($koneksi, $_POST['hari_acara']);
-    $tanggal_acara  = mysqli_real_escape_string($koneksi, $_POST['tanggal_acara']);
-    $jam_acara      = mysqli_real_escape_string($koneksi, $_POST['jam_acara']);
-    $tempat_acara   = mysqli_real_escape_string($koneksi, $_POST['tempat_acara']);
-    $acara          = mysqli_real_escape_string($koneksi, $_POST['acara']);
-    $keterangan     = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
-    $id_pejabat     = (int)$_POST['id_pejabat'];
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
+    $sifat = mysqli_real_escape_string($koneksi, $_POST['sifat']);
+    $lampiran = mysqli_real_escape_string($koneksi, $_POST['lampiran']);
+    $perihal = mysqli_real_escape_string($koneksi, $_POST['perihal']);
+    $tempat_surat = mysqli_real_escape_string($koneksi, $_POST['tempat_surat']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $hari_acara = mysqli_real_escape_string($koneksi, $_POST['hari_acara']);
+    $tanggal_acara = mysqli_real_escape_string($koneksi, $_POST['tanggal_acara']);
+    $jam_acara = mysqli_real_escape_string($koneksi, $_POST['jam_acara']);
+    $tempat_acara = mysqli_real_escape_string($koneksi, $_POST['tempat_acara']);
+    $acara = mysqli_real_escape_string($koneksi, $_POST['acara']);
+    $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
+    $id_pejabat = (int) $_POST['id_pejabat'];
 
     // Mengaktifkan fitur transaksi database demi keamanan data relasional
     mysqli_begin_transaction($koneksi);
@@ -92,7 +55,7 @@ if (isset($_POST['simpan'])) {
         (`nomor_surat`, `sifat`, `lampiran`, `perihal`, `tempat_surat`, `tanggal_surat`, `hari_acara`, `tanggal_acara`, `jam_acara`, `tempat_acara`, `acara`, `keterangan`, `id_pejabat`) 
         VALUES 
         ('$nomor_surat', '$sifat', '$lampiran', '$perihal', '$tempat_surat', '$tanggal_surat', '$hari_acara', '$tanggal_acara', '$jam_acara', '$tempat_acara', '$acara', '$keterangan', '$id_pejabat')";
-        
+
         if (!mysqli_query($koneksi, $sql_surat)) {
             throw new Exception("Gagal menyimpan data utama surat: " . mysqli_error($koneksi));
         }
@@ -101,9 +64,9 @@ if (isset($_POST['simpan'])) {
         $id_undangan_baru = mysqli_insert_id($koneksi);
 
         // 2. Ambil data array penerima dari form dinamis
-        $nama_tujuan    = $_POST['nama_tujuan'] ?? [];
+        $nama_tujuan = $_POST['nama_tujuan'] ?? [];
         $jabatan_tujuan = $_POST['jabatan_tujuan'] ?? [];
-        $alamat_tujuan  = $_POST['alamat_tujuan'] ?? [];
+        $alamat_tujuan = $_POST['alamat_tujuan'] ?? [];
 
         // Validasi minimal harus ada 1 nama penerima
         if (empty($nama_tujuan) || empty(trim($nama_tujuan[0]))) {
@@ -113,13 +76,13 @@ if (isset($_POST['simpan'])) {
         // Loop untuk memasukkan semua baris penerima
         for ($i = 0; $i < count($nama_tujuan); $i++) {
             if (!empty(trim($nama_tujuan[$i]))) {
-                $nama    = mysqli_real_escape_string($koneksi, $nama_tujuan[$i]);
+                $nama = mysqli_real_escape_string($koneksi, $nama_tujuan[$i]);
                 $jabatan = mysqli_real_escape_string($koneksi, $jabatan_tujuan[$i]);
-                $alamat  = mysqli_real_escape_string($koneksi, $alamat_tujuan[$i]);
+                $alamat = mysqli_real_escape_string($koneksi, $alamat_tujuan[$i]);
 
                 $sql_tujuan = "INSERT INTO `tb_undangan_tujuan` (`id_undangan`, `nama_tujuan`, `jabatan_tujuan`, `alamat_tujuan`) 
                                VALUES ('$id_undangan_baru', '$nama', '$jabatan', '$alamat')";
-                
+
                 if (!mysqli_query($koneksi, $sql_tujuan)) {
                     throw new Exception("Gagal menyimpan data penerima pada baris ke-" . ($i + 1) . ": " . mysqli_error($koneksi));
                 }
@@ -144,27 +107,27 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.form-label-custom {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-}
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
 
-.section-divider {
-    border-top: 2px dashed #e9ecef;
-    margin: 2rem 0;
-}
+    .section-divider {
+        border-top: 2px dashed #e9ecef;
+        margin: 2rem 0;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -265,10 +228,10 @@ if (isset($_POST['simpan'])) {
                             <label class="form-label form-label-custom">Pejabat Penandatangan (Ttd)</label>
                             <select class="form-select" name="id_pejabat" required>
                                 <option value="">-- Pilih Pejabat Desa --</option>
-                                <?php while($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
-                                </option>
+                                <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                                    <option value="<?= $pejabat['id_pejabat']; ?>">
+                                        <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
+                                    </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -329,11 +292,11 @@ if (isset($_POST['simpan'])) {
 
 <!-- JAVASCRIPT LOGIC UNTUK MANIPULASI BARIS PENERIMA -->
 <script>
-document.getElementById('btn-tambah-penerima').addEventListener('click', function() {
-    var container = document.getElementById('container-penerima');
-    var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
+    document.getElementById('btn-tambah-penerima').addEventListener('click', function () {
+        var container = document.getElementById('container-penerima');
+        var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
 
-    var htmlBarisBaru = `
+        var htmlBarisBaru = `
     <div class="card p-3 mb-3 item-penerima border-0 shadow-sm animate__animated animate__fadeIn" style="border-left: 4px solid #198754 !important;">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold text-secondary badge bg-white border">Penerima #${jumlahBaris}</span>
@@ -355,20 +318,20 @@ document.getElementById('btn-tambah-penerima').addEventListener('click', functio
         </div>
     </div>`;
 
-    container.insertAdjacentHTML('beforeend', htmlBarisBaru);
-});
+        container.insertAdjacentHTML('beforeend', htmlBarisBaru);
+    });
 
-// Event Handler dinamis untuk menghapus baris penerima tambahan
-document.getElementById('container-penerima').addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
-        var baris = e.target.closest('.item-penerima');
-        baris.remove();
+    // Event Handler dinamis untuk menghapus baris penerima tambahan
+    document.getElementById('container-penerima').addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
+            var baris = e.target.closest('.item-penerima');
+            baris.remove();
 
-        // Mengurutkan ulang nomor label (Penerima #1, #2, dst) pasca penghapusan
-        var semuaBaris = document.getElementsByClassName('item-penerima');
-        for (var i = 0; i < semuaBaris.length; i++) {
-            semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
+            // Mengurutkan ulang nomor label (Penerima #1, #2, dst) pasca penghapusan
+            var semuaBaris = document.getElementsByClassName('item-penerima');
+            for (var i = 0; i < semuaBaris.length; i++) {
+                semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
+            }
         }
-    }
-});
+    });
 </script>

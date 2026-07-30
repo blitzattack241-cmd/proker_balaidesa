@@ -18,45 +18,10 @@ if (!$isAdmin) {
     exit;
 }
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT DUKCAPIL OTOMATIS
-// Format Target: [NOMOR_URUT] / 31. 07.16 / [TAHUN]
-// Contoh Output: 090 / 31. 07.16 / 2026
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Query nomor surat terakhir dari tb_surat_dukcapil berdasarkan id_surat
-$query_no = "SELECT nomor_surat FROM `tb_surat_dukcapil` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' OR nomor_surat LIKE '%/ $tahun_sekarang' 
-             ORDER BY id_surat DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 90; // Default awal jika database masih kosong
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; 
-    
-    // Pecah string berdasarkan karakter slash (/)
-    $bagian = explode('/', $nomor_terakhir);
-    
-    // Ambil bagian nomor urut depan (indeks 0)
-    if (isset($bagian[0]) && is_numeric(trim($bagian[0]))) {
-        $nomor_urut_baru = (int) trim($bagian[0]) + 1;
-    } else {
-        preg_match_all('/\d+/', $nomor_terakhir, $matches);
-        if (!empty($matches[0])) {
-            $nomor_urut_baru = (int)$matches[0][0] + 1;
-        }
-    }
-}
-
-// Format nomor urut menjadi 3 digit angka (contoh: 090, 091, dst)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Gabungkan menjadi format presisi: "090 / 31. 07.16 / 2026"
-$nomor_surat_otomatis = $nomor_formatted . " / 31. 07.16 / " . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 ?>
 
 <div class="container-fluid px-4">

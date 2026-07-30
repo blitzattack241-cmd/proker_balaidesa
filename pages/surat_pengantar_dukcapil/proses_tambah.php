@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -33,7 +34,8 @@ if (isset($_POST['simpan'])) {
     }
 
     // Mengamankan data inputan dari sql injection
-    $nomor_surat   = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan)
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
     $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
     $jenis_dikirim = mysqli_real_escape_string($koneksi, $_POST['jenis_dikirim']);
     $banyaknya     = mysqli_real_escape_string($koneksi, $_POST['banyaknya']);

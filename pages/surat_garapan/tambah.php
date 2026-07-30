@@ -2,50 +2,10 @@
 // Koneksi database (sesuaikan dengan config Anda jika ada file koneksi global)
 $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT OTOMATIS
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Query untuk mengambil surat terakhir pada tahun berjalan
-// Catatan: Jika primary key Anda id_garapan, pastikan 'ORDER BY id_garapan'
-$query_no = "SELECT nomor_surat FROM tb_surat_garapan 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_garapan DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-// Jika query gagal karena kolom primary key bukan 'id_garapan', coba urutkan dari ID bawaan/terakhir
-if (!$result_no) {
-    $query_no = "SELECT nomor_surat FROM tb_surat_garapan 
-                 WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-                 LIMIT 1";
-    $result_no = mysqli_query($koneksi, $query_no);
-}
-
-$nomor_urut_baru = 1; // Default jika belum ada data sama sekali tahun ini
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; // Contoh: "581/ 005 /31.07.16/2026"
-    
-    // Pecah string nomor berdasarkan karakter "/"
-    $bagian = explode('/', $nomor_terakhir);
-    
-    // Mengambil bagian tengah (nomor urut) dan dikonversi ke angka
-    if (isset($bagian[1])) {
-        $angka_saja = (int) preg_replace('/[^0-9]/', '', $bagian[1]);
-        if ($angka_saja > 0) {
-            $nomor_urut_baru = $angka_saja + 1;
-        }
-    }
-}
-
-// Format nomor urut jadi 3 digit (misal 1 -> 001, 12 -> 012)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Susun string Nomor Surat Otomatis
-$nomor_surat_otomatis = "581/ " . $nomor_formatted . " /31.07.16/" . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // =========================================================================
@@ -53,36 +13,38 @@ $nomor_surat_otomatis = "581/ " . $nomor_formatted . " /31.07.16/" . $tahun_seka
 // =========================================================================
 if (isset($_POST['simpan'])) {
     // Ambil data utama dari form
-    $nomor_surat         = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $tanggal_surat       = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $nama_penggarap      = mysqli_real_escape_string($koneksi, $_POST['nama_penggarap']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $nama_penggarap = mysqli_real_escape_string($koneksi, $_POST['nama_penggarap']);
     $bin_binti_penggarap = mysqli_real_escape_string($koneksi, $_POST['bin_binti_penggarap']);
-    $nama_pasangan       = mysqli_real_escape_string($koneksi, $_POST['nama_pasangan']);
-    $bin_binti_pasangan  = mysqli_real_escape_string($koneksi, $_POST['bin_binti_pasangan']);
-    $tempat_lahir        = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir       = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $agama               = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $pekerjaan           = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $alamat_tinggal      = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $keperluan           = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    
+    $nama_pasangan = mysqli_real_escape_string($koneksi, $_POST['nama_pasangan']);
+    $bin_binti_pasangan = mysqli_real_escape_string($koneksi, $_POST['bin_binti_pasangan']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+
     // 1. Insert ke Tabel Utama
     $sql_utama = "INSERT INTO tb_surat_garapan 
                   (nomor_surat, tanggal_surat, nama_penggarap, bin_binti_penggarap, nama_pasangan, bin_binti_pasangan, tempat_lahir, tanggal_lahir, agama, pekerjaan, alamat_tinggal, keperluan) 
                   VALUES 
                   ('$nomor_surat', '$tanggal_surat', '$nama_penggarap', '$bin_binti_penggarap', '$nama_pasangan', '$bin_binti_pasangan', '$tempat_lahir', '$tanggal_lahir', '$agama', '$pekerjaan', '$alamat_tinggal', '$keperluan')";
-    
+
     if (mysqli_query($koneksi, $sql_utama)) {
         // Ambil ID dari baris utama yang baru saja masuk
         $id_garapan_baru = mysqli_insert_id($koneksi);
-        
+
         // Ambil array baris rincian sawah
-        $atas_nama   = $_POST['sawah_atas_nama'];
-        $desa        = $_POST['terletak_di_desa'];
-        $blok        = $_POST['blok'];
-        $persil      = $_POST['persil'];
-        $luas        = $_POST['luas_m2'];
-        
+        $atas_nama = $_POST['sawah_atas_nama'];
+        $desa = $_POST['terletak_di_desa'];
+        $blok = $_POST['blok'];
+        $persil = $_POST['persil'];
+        $luas = $_POST['luas_m2'];
+
         // 2. Looping rincian sawah untuk di-insert satu per satu
         $sukses_detail = true;
         for ($i = 0; $i < count($atas_nama); $i++) {
@@ -91,8 +53,8 @@ if (isset($_POST['simpan'])) {
                 $ds = mysqli_real_escape_string($koneksi, $desa[$i]);
                 $bk = mysqli_real_escape_string($koneksi, $blok[$i]);
                 $pr = mysqli_real_escape_string($koneksi, $persil[$i]);
-                $ls = (int)$luas[$i];
-                
+                $ls = (int) $luas[$i];
+
                 $sql_detail = "INSERT INTO tb_surat_garapan_detail 
                                (id_garapan, sawah_atas_nama, terletak_di_desa, blok, persil, luas_m2) 
                                VALUES 
@@ -102,7 +64,7 @@ if (isset($_POST['simpan'])) {
                 }
             }
         }
-        
+
         if ($sukses_detail) {
             echo "<script>
                     alert('Data Surat Garapan Berhasil Disimpan!');
@@ -118,16 +80,16 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.form-label {
-    font-weight: 600;
-    color: #495057;
-}
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -303,9 +265,9 @@ if (isset($_POST['simpan'])) {
 
 <!-- JavaScript Penambah & Penghapus Baris Sawah -->
 <script>
-document.getElementById('add_row_sawah').addEventListener('click', function() {
-    var tbody = document.getElementById('sawah_body');
-    var barisBaru = `
+    document.getElementById('add_row_sawah').addEventListener('click', function () {
+        var tbody = document.getElementById('sawah_body');
+        var barisBaru = `
             <tr>
                 <td><input type="text" name="sawah_atas_nama[]" class="form-control" placeholder="Sawah atas nama siapa?" required></td>
                 <td><input type="text" name="terletak_di_desa[]" value="Berugenjang" class="form-control" required></td>
@@ -316,17 +278,17 @@ document.getElementById('add_row_sawah').addEventListener('click', function() {
                     <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
-    tbody.insertAdjacentHTML('beforeend', barisBaru);
-});
+        tbody.insertAdjacentHTML('beforeend', barisBaru);
+    });
 
-document.getElementById('sawah_body').addEventListener('click', function(e) {
-    if (e.target.closest('.remove-row-sawah')) {
-        var totalBaris = document.querySelectorAll('#sawah_body tr').length;
-        if (totalBaris > 1) {
-            e.target.closest('tr').remove();
-        } else {
-            alert('Gagal! Minimal harus ada 1 rincian sawah yang dicatat.');
+    document.getElementById('sawah_body').addEventListener('click', function (e) {
+        if (e.target.closest('.remove-row-sawah')) {
+            var totalBaris = document.querySelectorAll('#sawah_body tr').length;
+            if (totalBaris > 1) {
+                e.target.closest('tr').remove();
+            } else {
+                alert('Gagal! Minimal harus ada 1 rincian sawah yang dicatat.');
+            }
         }
-    }
-});
+    });
 </script>

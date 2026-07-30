@@ -25,57 +25,18 @@ if ($checkTable && mysqli_num_rows($checkTable) > 0) {
     $tableTarget = 'surat_kematian';
 }
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT KEMATIAN OTOMATIS (FORMAT SPECIFIC)
-// Format Target: 145/31.071.6/474.3/[URUT]/F-2.29/2026
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Ambil nomor surat terakhir dari database berdasar id_surat
-$query_no = "SELECT nomor_surat FROM `$tableTarget` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_surat DESC LIMIT 1";
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 1; // Default jika belum ada data tahun ini
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat'];
-
-    // Pecah berdasarkan slash (/)
-    $bagian = explode('/', $nomor_terakhir);
-
-    // Mengambil indeks ke-3 (nomor urut) jika formatnya 145/31.071.6/474.3/XXX/F-2.29/2026
-    if (isset($bagian[3]) && is_numeric(trim($bagian[3]))) {
-        $nomor_urut_baru = (int) trim($bagian[3]) + 1;
-    } else {
-        // Fallback: ekstrak angka menggunakan regex jika format bervariasi
-        preg_match_all('/\d+/', $nomor_terakhir, $matches);
-        if (!empty($matches[0])) {
-            foreach ($matches[0] as $val) {
-                $num = (int) $val;
-                // Abaikan angka bawaan dari format (145, 31, 071, 6, 474, 3, 2026)
-                if (!in_array($num, [145, 31, 71, 6, 474, 3, (int) $tahun_sekarang]) && $num > 0) {
-                    $nomor_urut_baru = $num + 1;
-                    break;
-                }
-            }
-        }
-    }
-}
-
-
-
-// Hasil gabungan format nomor surat lengkap
-$nomor_surat_otomatis = sprintf('145/31.071.6/474.3/%s/F-2.29/%s', $nomor_urut_baru, $tahun_sekarang);
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // PROSES SIMPAN DATA FORM
 if (isset($_POST['simpan'])) {
     // 1. Data Umum Registrasi
-    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
     $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
 
     // 2. Data Jenazah (Sesuai Struktur Blangko F-2.29)
@@ -172,38 +133,38 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #dc3545;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #dc3545;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -383,18 +344,18 @@ if (isset($_POST['simpan'])) {
 </div>
 
 <script>
-// Validasi Interaktif Bootstrap Browser
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    // Validasi Interaktif Bootstrap Browser
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>

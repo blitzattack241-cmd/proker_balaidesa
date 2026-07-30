@@ -21,46 +21,10 @@ if (!isset($koneksi)) {
 // Query data pejabat penandatangan
 $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY id_pejabat ASC");
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT SKTM BUMIL OTOMATIS
-// Format Target: 145 / [NOMOR_URUT] / 31.07.16 / [TAHUN]
-// Contoh Output: 145 / 001 / 31.07.16 / 2026
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Query mencari nomor surat terakhir dari tb_sktm_bumil
-$query_no = "SELECT nomor_surat FROM `tb_sktm_bumil` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' OR nomor_surat LIKE '%/ $tahun_sekarang' 
-             ORDER BY id_sktm DESC LIMIT 1"; 
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 1; // Default angka urut diawali dari 1 jika database kosong
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat']; 
-    
-    // Pecah string berdasarkan karakter slash (/)
-    $bagian = explode('/', $nomor_terakhir);
-    
-    // Ambil bagian nomor urut di posisi tengah (indeks ke-1)
-    if (isset($bagian[1]) && is_numeric(trim($bagian[1]))) {
-        $nomor_urut_baru = (int) trim($bagian[1]) + 1;
-    } else {
-        // Fallback jika format data lama berbeda
-        preg_match_all('/\d+/', $nomor_terakhir, $matches);
-        if (isset($matches[0][1])) {
-            $nomor_urut_baru = (int)$matches[0][1] + 1;
-        }
-    }
-}
-
-// Format nomor urut menjadi 3 digit (contoh: 001, 002, 010)
-$nomor_formatted = sprintf("%03d", $nomor_urut_baru);
-
-// Gabungkan menjadi string nomor surat sesuai format baru
-$nomor_surat_otomatis = "145 / " . $nomor_formatted . " / 31.07.16 / " . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 ?>
 
 <div class="container-fluid px-4">
@@ -202,11 +166,11 @@ $nomor_surat_otomatis = "145 / " . $nomor_formatted . " / 31.07.16 / " . $tahun_
                         <label for="id_pejabat" class="form-label">Pejabat Penandatangan Surat</label>
                         <select class="form-select" id="id_pejabat" name="id_pejabat" required>
                             <option value="">-- Pilih Pejabat Penandatangan --</option>
-                            <?php while($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                            <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

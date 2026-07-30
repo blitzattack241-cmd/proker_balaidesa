@@ -4,67 +4,35 @@ include 'koneksi.php';
 // Ambil data pejabat untuk dropdown
 $query_pejabat = mysqli_query($koneksi, "SELECT * FROM tb_pejabat");
 
-// =========================================================================
-// LOGIKA GENERATE NOMOR SURAT DOMISILI OTOMATIS
-// Format Target: 474/[NOMOR_URUT]/31.07.16/2026
-// =========================================================================
-$tahun_sekarang = date('Y');
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
-// Ambil nomor urut terakhir dari data yang ada untuk tahun ini
-$query_no = "SELECT nomor_surat FROM `tb_surat_domisili` 
-             WHERE nomor_surat LIKE '%/$tahun_sekarang' 
-             ORDER BY id_domisili DESC LIMIT 1";
-
-$result_no = mysqli_query($koneksi, $query_no);
-
-$nomor_urut_baru = 1;
-
-if ($result_no && mysqli_num_rows($result_no) > 0) {
-    $row_no = mysqli_fetch_assoc($result_no);
-    $nomor_terakhir = $row_no['nomor_surat'];
-
-    $bagian = explode('/', $nomor_terakhir);
-    if (isset($bagian[1]) && is_numeric(trim($bagian[1]))) {
-        $nomor_urut_baru = (int) trim($bagian[1]) + 1;
-    } else {
-        preg_match_all('/\d+/', $nomor_terakhir, $matches);
-        if (!empty($matches[0])) {
-            foreach ($matches[0] as $val) {
-                $num = (int) $val;
-                if (!in_array($num, [474, 31, 7, 16, 310716, (int) $tahun_sekarang]) && $num > 0) {
-                    $nomor_urut_baru = $num + 1;
-                    break;
-                }
-            }
-        }
-    }
-}
-
-// Hasil gabungan format nomor surat domisili otomatis
-$nomor_surat_otomatis = '474/' . $nomor_urut_baru . '/31.07.16/' . $tahun_sekarang;
+// Nomor surat global otomatis untuk semua jenis surat
+$nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
 
 // PROSES SIMPAN DATA FORM
 if (isset($_POST['simpan'])) {
     // Sanitasi input
-    $nomor_surat      = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $id_pejabat       = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
-    $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $tempat_lahir     = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $agama            = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $nik              = mysqli_real_escape_string($koneksi, $_POST['nik']);
-    $alamat_jalan     = mysqli_real_escape_string($koneksi, $_POST['alamat_jalan']);
-    $rt               = mysqli_real_escape_string($koneksi, $_POST['rt']);
-    $rw               = mysqli_real_escape_string($koneksi, $_POST['rw']);
-    $desa             = mysqli_real_escape_string($koneksi, $_POST['desa']);
-    $kecamatan        = mysqli_real_escape_string($koneksi, $_POST['kecamatan']);
-    $kabupaten        = mysqli_real_escape_string($koneksi, $_POST['kabupaten']);
-    $keperluan        = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    $berlaku_mulai    = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $keterangan_lain  = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
-    $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
+    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
+    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
+    $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $nik = mysqli_real_escape_string($koneksi, $_POST['nik']);
+    $alamat_jalan = mysqli_real_escape_string($koneksi, $_POST['alamat_jalan']);
+    $rt = mysqli_real_escape_string($koneksi, $_POST['rt']);
+    $rw = mysqli_real_escape_string($koneksi, $_POST['rw']);
+    $desa = mysqli_real_escape_string($koneksi, $_POST['desa']);
+    $kecamatan = mysqli_real_escape_string($koneksi, $_POST['kecamatan']);
+    $kabupaten = mysqli_real_escape_string($koneksi, $_POST['kabupaten']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    $berlaku_mulai = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
+    $keterangan_lain = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
 
     $insert = mysqli_query($koneksi, "INSERT INTO tb_surat_domisili 
         (nomor_surat, id_pejabat, nama_warga, tempat_lahir, tanggal_lahir, jenis_kelamin, agama, nik, alamat_jalan, rt, rw, desa, kecamatan, kabupaten, keperluan, berlaku_mulai, keterangan_lain, tanggal_surat) 
@@ -80,73 +48,73 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.5px;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+    }
 
-.breadcrumb-modern {
-    background: transparent;
-    padding: 0;
-    font-size: 0.9rem;
-}
+    .breadcrumb-modern {
+        background: transparent;
+        padding: 0;
+        font-size: 0.9rem;
+    }
 
-.breadcrumb-modern a {
-    color: #0d6efd;
-    font-weight: 500;
-}
+    .breadcrumb-modern a {
+        color: #0d6efd;
+        font-weight: 500;
+    }
 
-.card-modern {
-    border: 1px solid #dee2e6 !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-}
+    .card-modern {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
 
-.card-header-modern {
-    background-color: #f8f9fa !important;
-    border-bottom: 1px solid #dee2e6 !important;
-    padding: 0.75rem 1.25rem !important;
-}
+    .card-header-modern {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #dee2e6 !important;
+        padding: 0.75rem 1.25rem !important;
+    }
 
-.card-header-title {
-    font-weight: 500;
-    color: #333333;
-    font-size: 0.95rem;
-}
+    .card-header-title {
+        font-weight: 500;
+        color: #333333;
+        font-size: 0.95rem;
+    }
 
-.form-label {
-    font-weight: 500;
-    color: #333333;
-    font-size: 0.9rem;
-    margin-bottom: 0.4rem;
-}
+    .form-label {
+        font-weight: 500;
+        color: #333333;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
 
-.form-control,
-.form-select {
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    padding: 0.45rem 0.75rem;
-    font-size: 0.9rem;
-}
+    .form-control,
+    .form-select {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.9rem;
+    }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
 
-.section-divider {
-    border-top: 1px dashed #dee2e6;
-    margin: 1.5rem 0;
-}
+    .section-divider {
+        border-top: 1px dashed #dee2e6;
+        margin: 1.5rem 0;
+    }
 
-.btn-action {
-    padding: 0.4rem 1.2rem;
-    font-size: 0.9rem;
-    border-radius: 4px;
-    font-weight: 500;
-}
+    .btn-action {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        font-weight: 500;
+    }
 </style>
 
 <div class="container-fluid px-3 py-3">
@@ -188,9 +156,9 @@ if (isset($_POST['simpan'])) {
                         <label class="form-label">Penandatangan (Pejabat)</label>
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat --</option>
-                            <?php while($p = mysqli_fetch_assoc($query_pejabat)) { ?>
-                            <option value="<?= $p['id_pejabat']; ?>"><?= $p['nama_pejabat']; ?> (<?= $p['jabatan']; ?>)
-                            </option>
+                            <?php while ($p = mysqli_fetch_assoc($query_pejabat)) { ?>
+                                <option value="<?= $p['id_pejabat']; ?>"><?= $p['nama_pejabat']; ?> (<?= $p['jabatan']; ?>)
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
