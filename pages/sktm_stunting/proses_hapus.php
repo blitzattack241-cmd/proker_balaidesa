@@ -37,6 +37,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         $query_hapus = "DELETE FROM tb_sktm_stunting WHERE id_sktm = '$id_sktm'";
 
         if (mysqli_query($koneksi, $query_hapus)) {
+            require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+            renumerasiNomorSuratGlobal($koneksi);
             echo "<script>
                     alert('Sukses! Data SKTM Stunting berhasil dihapus.');
                     window.location.href = '../../index.php?page=sktm-stunting';

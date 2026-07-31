@@ -56,6 +56,8 @@ if ($id_sktm > 0) {
         $hapus_utama = mysqli_query($koneksi, "DELETE FROM tb_sktm_rawat WHERE id_sktm = $id_sktm");
 
         if ($hapus_utama) {
+            require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+            renumerasiNomorSuratGlobal($koneksi);
             echo "<script>
                     alert('Data surat pembebasan rawat beserta seluruh lampiran berhasil dihapus!');
                     window.location.href = '../../index.php?page=sktm-rawat';

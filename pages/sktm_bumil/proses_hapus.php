@@ -48,6 +48,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $query_delete = mysqli_query($koneksi, "DELETE FROM tb_sktm_bumil WHERE id_sktm = '$id_sktm'");
 
     if ($query_delete) {
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
         echo "<script>
                 alert('Arsip SKTM Bumil beserta berkas foto rumah berhasil dihapus secara permanen!');
                 window.location.href = '../../index.php?page=sktm-bumil';

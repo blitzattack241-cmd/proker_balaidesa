@@ -11,6 +11,8 @@ if (isset($_GET['id'])) {
     $query_hapus = mysqli_query($koneksi, "DELETE FROM tb_surat_garapan WHERE id_garapan = '$id_garapan'");
 
     if ($query_hapus) {
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
         echo "<script>
                 alert('Data Surat Garapan Sawah berhasil dihapus!');
                 window.location.href = '../../index.php?page=surat-garapan-sawah';

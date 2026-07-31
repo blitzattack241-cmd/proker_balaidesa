@@ -50,6 +50,8 @@ $id_surat = mysqli_real_escape_string($koneksi, $_GET['id']);
 $query_hapus = mysqli_query($koneksi, "DELETE FROM `tb_surat_pengantar` WHERE `id_surat` = '$id_surat'");
 
 if ($query_hapus) {
+    require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+    renumerasiNomorSuratGlobal($koneksi);
     // Jika berhasil dihapus, arahkan kembali dengan notifikasi sukses
     echo "<script>
             alert('Data surat pengantar berhasil dihapus!');

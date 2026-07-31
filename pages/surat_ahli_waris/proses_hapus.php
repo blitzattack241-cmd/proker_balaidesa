@@ -35,6 +35,9 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         // Jika semua query berhasil, lakukan commit ke database
         mysqli_commit($koneksi);
 
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
+
         echo "<script>
                 alert('Data arsip surat ahli waris berhasil dihapus secara permanen!');
                 window.location.href = '../../index.php?page=surat_waris';

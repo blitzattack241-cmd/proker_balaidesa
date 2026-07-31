@@ -38,6 +38,8 @@ if (isset($_GET['id'])) {
     $hapus = mysqli_query($koneksi, $query);
 
     if ($hapus) {
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
         echo "<script>
                 alert('Data surat berhasil dihapus!');
                 window.location.href = '../../index.php?page=surat-pengantar-dukcapil';

@@ -42,6 +42,8 @@ $sql_hapus = "DELETE FROM `tb_surat_undangan` WHERE `id_undangan` = '$id_undanga
 if (mysqli_query($koneksi, $sql_hapus)) {
     // Jika ada record yang terpengaruh/berhasil dihapus
     if (mysqli_affected_rows($koneksi) > 0) {
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
         echo "<script>
                 alert('Surat undangan beserta daftar penerima berhasil dihapus secara permanen.');
                 window.location.href = '../../index.php?page=surat-undangan';

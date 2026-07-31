@@ -45,6 +45,8 @@ if (isset($_GET['id']) && !empty(trim($_GET['id']))) {
         
         // Eksekusi query
         if (mysqli_stmt_execute($stmt)) {
+            require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+            renumerasiNomorSuratGlobal($koneksi);
             echo "<script>
                     alert('Data Surat Kematian Berhasil Dihapus!'); 
                     window.location.href = '../../index.php?page=surat-kematian';

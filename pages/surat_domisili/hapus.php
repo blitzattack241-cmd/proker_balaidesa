@@ -8,6 +8,8 @@ $id = $_GET['id'];
 $query = mysqli_query($koneksi, "DELETE FROM tb_surat_domisili WHERE id_domisili = '$id'");
 
 if ($query) {
+    require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+    renumerasiNomorSuratGlobal($koneksi);
     // SEBELUMNYA: window.location='tampil.php';
     // UBAH MENJADI:
     echo "<script>

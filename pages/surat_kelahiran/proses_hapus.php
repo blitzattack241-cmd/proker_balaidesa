@@ -31,6 +31,8 @@ if ($id > 0) {
     $sqlDelete = "DELETE FROM `$tableTarget` WHERE id_surat = $id";
     
     if (mysqli_query($koneksi, $sqlDelete)) {
+        require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+        renumerasiNomorSuratGlobal($koneksi);
         echo "<script>alert('Arsip Surat Kelahiran berhasil dihapus!'); window.location.href = 'index.php?page=surat-kelahiran';</script>";
     } else {
         echo "<script>alert('Gagal menghapus data: " . mysqli_real_escape_string($koneksi, mysqli_error($koneksi)) . "'); window.location.href = 'index.php?page=surat-kelahiran';</script>";

@@ -36,6 +36,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         $delete = mysqli_query($koneksi, "DELETE FROM tb_sktm_kip WHERE id_sktm = '$id_sktm'");
 
         if ($delete) {
+            require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+            renumerasiNomorSuratGlobal($koneksi);
             echo "<script>
                     alert('Data SKTM KIP berhasil dihapus!');
                     window.location.href = '../../index.php?page=sktm-kip';
