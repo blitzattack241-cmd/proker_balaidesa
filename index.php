@@ -65,6 +65,28 @@ if (!empty($_SESSION['profile_picture']) && file_exists($_SESSION['profile_pictu
 
 // Ambil parameter halaman dari URL (?page=...)
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
+
+$appSearchItems = [
+    ['label' => 'Dashboard', 'page' => 'dashboard', 'href' => 'index.php?page=dashboard', 'description' => 'Ringkasan statistik dan akses cepat layanan desa', 'keywords' => 'dashboard home ringkasan statistik layanan desa'],
+    ['label' => 'Profil', 'page' => 'profil', 'href' => 'index.php?page=profil', 'description' => 'Halaman profil pengguna dan akun Anda', 'keywords' => 'profil akun pengguna setting'],
+    ['label' => 'Daftar Semua Surat', 'page' => 'daftar-surat', 'href' => 'index.php?page=daftar-surat', 'description' => 'Daftar lengkap layanan surat yang tersedia', 'keywords' => 'daftar semua surat layanan'],
+    ['label' => 'Surat Garapan Sawah', 'page' => 'surat-garapan-sawah', 'href' => 'index.php?page=surat-garapan-sawah', 'description' => 'Kelola surat garapan sawah', 'keywords' => 'surat garapan sawah lahan pertanian'],
+    ['label' => 'Surat Ahli Waris', 'page' => 'surat-keterangan-ahli-waris', 'href' => 'index.php?page=surat-keterangan-ahli-waris', 'description' => 'Data surat keterangan ahli waris', 'keywords' => 'surat ahli waris warisan pewaris'],
+    ['label' => 'Surat Undangan', 'page' => 'surat-undangan', 'href' => 'index.php?page=surat-undangan', 'description' => 'Kelola surat undangan resmi', 'keywords' => 'surat undangan acara resmi'],
+    ['label' => 'Surat Kelahiran', 'page' => 'surat-kelahiran', 'href' => 'index.php?page=surat-kelahiran', 'description' => 'Data surat keterangan kelahiran', 'keywords' => 'surat kelahiran lahir bayi'],
+    ['label' => 'Surat Kematian', 'page' => 'surat-kematian', 'href' => 'index.php?page=surat-kematian', 'description' => 'Data surat keterangan kematian', 'keywords' => 'surat kematian meninggal'],
+    ['label' => 'Surat Keterangan / Pengantar', 'page' => 'surat-keterangan-pengantar', 'href' => 'index.php?page=surat-keterangan-pengantar', 'description' => 'Kelola surat keterangan dan pengantar', 'keywords' => 'surat pengantar keterangan'],
+    ['label' => 'Surat Domisili', 'page' => 'surat-domisili', 'href' => 'index.php?page=surat-domisili', 'description' => 'Data surat keterangan domisili', 'keywords' => 'surat domisili tinggal alamat'],
+    ['label' => 'Surat Pengantar Dukcapil', 'page' => 'surat-pengantar-dukcapil', 'href' => 'index.php?page=surat-pengantar-dukcapil', 'description' => 'Pengantar administrasi Dukcapil', 'keywords' => 'surat dukcapil pengantar administrasi'],
+    ['label' => 'SKTM Bumil', 'page' => 'sktm-bumil-tampil', 'href' => 'index.php?page=sktm-bumil-tampil', 'description' => 'Data surat keterangan tidak mampu untuk bumil', 'keywords' => 'sktm bumil ibu hamil'],
+    ['label' => 'SKTM Rawat', 'page' => 'pembebasan-rawat-inab-dan-jalan', 'href' => 'index.php?page=pembebasan-rawat-inab-dan-jalan', 'description' => 'Data surat keterangan tidak mampu rawat inap dan jalan', 'keywords' => 'sktm rawat inap jalan'],
+    ['label' => 'SKTM KIS', 'page' => 'sktm-kis', 'href' => 'index.php?page=sktm-kis', 'description' => 'Data surat keterangan tidak mampu KIS', 'keywords' => 'sktm kis kesehatan'],
+    ['label' => 'SKTM KIP', 'page' => 'sktm-kip', 'href' => 'index.php?page=sktm-kip', 'description' => 'Data surat keterangan tidak mampu KIP', 'keywords' => 'sktm kip sekolah pendidikan'],
+    ['label' => 'Stunting', 'page' => 'stunting', 'href' => 'index.php?page=stunting', 'description' => 'Data penanganan stunting', 'keywords' => 'stunting anak gizi'],
+    ['label' => 'Penduduk', 'page' => 'penduduk', 'href' => 'index.php?page=penduduk', 'description' => 'Manajemen data penduduk desa', 'keywords' => 'penduduk warga desa'],
+    ['label' => 'Profil Desa', 'page' => 'profil-desa', 'href' => 'index.php?page=profil-desa', 'description' => 'Informasi profil desa dan wilayah', 'keywords' => 'profil desa wilayah'],
+];
 
 $suratPages = ['buat-surat', 'surat-garapan', 'surat-garapan-sawah', 'surat-garapan-tambah', 'surat-garapan-edit', 'surat-keterangan-ahli-waris', 'surat_waris', 'surat-waris', 'tambah_surat_waris', 'surat-waris-tambah', 'edit_surat_waris', 'surat-waris-edit', 'surat-undangan', 'surat-undangan-tambah', 'surat-undangan-edit', 'surat-kelahiran', 'surat_kelahiran', 'surat-kelahiran-tambah', 'surat_kelahiran-tambah', 'surat-kematian', 'surat-kematian-tambah', 'surat-kematian-edit'];
 $isSuratOpen = in_array($page, $suratPages, true);
@@ -309,6 +331,140 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
         width: auto;
         margin: 0;
         font-size: 1.2rem;
+    }
+
+    .search-navbar-group {
+        position: relative;
+        min-width: min(320px, 100%);
+        max-width: 420px;
+        width: 100%;
+    }
+
+    .search-navbar-group .form-control {
+        border-radius: 16px;
+        padding-left: 14px;
+        padding-right: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+        background: var(--card-color, #ffffff);
+        color: var(--text-color, #222);
+    }
+
+    .search-navbar-group .btn {
+        border-radius: 16px;
+        min-width: 46px;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        background: #239a58;
+        color: #fff;
+    }
+
+    .search-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        z-index: 2500;
+        display: none;
+        min-width: 100%;
+        width: 100%;
+        padding: 0;
+        border-radius: 18px 0 0 18px;
+        background: var(--card-color, #ffffff);
+        color: var(--text-color, #222);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .search-dropdown.show {
+        display: block;
+    }
+
+    .search-dropdown-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: var(--card-color, #ffffff);
+        color: var(--text-color, #222);
+        font-size: 0.95rem;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .search-dropdown-body {
+        padding: 14px 16px 16px;
+        font-size: 0.92rem;
+    }
+
+    .search-dropdown-close {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .search-dropdown-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .search-dropdown-item {
+        display: block;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--card-color, #ffffff);
+        color: var(--text-color, #222);
+        text-decoration: none;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .search-dropdown-item:hover {
+        background: rgba(0, 127, 62, 0.05);
+        border-color: rgba(0, 127, 62, 0.12);
+        text-decoration: none;
+        color: #007f3e;
+        transform: translateY(-2px);
+    }
+
+    .search-dropdown-item strong {
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .search-dropdown-item small {
+        color: #64748b;
+        display: block;
+    }
+
+    body.dark-mode .search-dropdown {
+        background: rgba(15, 23, 42, 0.97);
+        color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    body.dark-mode .search-dropdown-item {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #f8fafc;
+    }
+
+    body.dark-mode .search-dropdown-item:hover {
+        background: rgba(35, 154, 88, 0.16);
+        color: #ffffff;
+    }
+
+    body.dark-mode .search-dropdown-item small {
+        color: #cbd5e1;
     }
 
     .icon-circle {
@@ -599,11 +755,12 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                 class="fas fa-bars"></i></button>
 
         <!-- Navbar Search-->
-        <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            <div class="input-group">
-                <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." />
-                <button class="btn btn-primary" id="btnNavbarSearch" type="button"
-                    style="background-color: #239a58; border-color: #239a58;"><i class="fas fa-search"></i></button>
+        <form class="d-flex ms-auto me-0 me-md-3 my-2 my-md-0" role="search" action="index.php" method="get" id="navbarSearchForm" autocomplete="off">
+            <input type="hidden" name="page" value="<?= htmlspecialchars($page, ENT_QUOTES, 'UTF-8') ?>" />
+            <div class="input-group search-navbar-group">
+                <input class="form-control" type="text" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" placeholder="Cari modul, surat, atau halaman..." aria-label="Cari data" />
+                <button class="btn btn-primary" id="btnNavbarSearch" type="submit"
+                    style="background-color: #239a58; border-color: #239a58;" aria-label="Cari"><i class="fas fa-search"></i></button>
             </div>
         </form>
 
@@ -1281,6 +1438,141 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
         }
         localStorage.setItem("theme", theme);
     }
+
+    const appSearchItems = <?= json_encode($appSearchItems, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS) ?>;
+
+    function normalizeSearchText(value) {
+        return (value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function getMatchingSearchItems(query) {
+        const searchQuery = normalizeSearchText(query || '');
+        if (!searchQuery) {
+            return [];
+        }
+
+        return appSearchItems.filter((item) => {
+            const haystack = normalizeSearchText(`${item.label} ${item.description} ${item.keywords}`);
+            return haystack.includes(searchQuery);
+        }).slice(0, 6);
+    }
+
+    function hideSearchDropdown() {
+        const dropdown = document.getElementById('navbar-search-dropdown');
+        if (dropdown) {
+            dropdown.classList.remove('show');
+            dropdown.style.display = 'none';
+        }
+    }
+
+    function showSearchDropdown(query, results) {
+        const dropdown = document.getElementById('navbar-search-dropdown');
+        if (!dropdown) {
+            return;
+        }
+
+        if (!query) {
+            hideSearchDropdown();
+            return;
+        }
+
+        let body = '';
+        if (results.length > 0) {
+            body = `
+                <div class="search-dropdown-body">
+                    <div>Temukan modul atau halaman yang paling relevan untuk pencarian <strong>${query}</strong>.</div>
+                    <div class="search-dropdown-list">
+                        ${results.map((item) => `
+                            <a class="search-dropdown-item" href="${item.href}">
+                                <strong>${item.label}</strong>
+                                <small>${item.description}</small>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>`;
+        } else {
+            body = `
+                <div class="search-dropdown-body">
+                    <div>Tidak ada hasil untuk <strong>${query}</strong>. Coba kata kunci lain seperti nama surat, modul, atau halaman.</div>
+                </div>`;
+        }
+
+        dropdown.innerHTML = `
+            <div class="search-dropdown-header">
+                <span>${results.length > 0 ? `${results.length} hasil ditemukan` : 'Tidak ada hasil'}</span>
+                <button class="search-dropdown-close" type="button" aria-label="Tutup pencarian">×</button>
+            </div>
+            ${body}
+        `;
+        dropdown.style.display = 'block';
+        dropdown.classList.add('show');
+
+        const closeButton = dropdown.querySelector('.search-dropdown-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', function() {
+                hideSearchDropdown();
+            });
+        }
+
+        clearTimeout(window.searchDropdownTimer);
+        window.searchDropdownTimer = setTimeout(hideSearchDropdown, 5000);
+    }
+
+    function applyNavbarSearch(query) {
+        const searchQuery = (query || '').trim();
+        const results = getMatchingSearchItems(searchQuery);
+        showSearchDropdown(searchQuery, results);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('#navbarSearchForm input[name="q"]');
+        const form = document.getElementById('navbarSearchForm');
+        const searchGroup = document.querySelector('#navbarSearchForm .search-navbar-group');
+        const dropdown = document.createElement('div');
+        dropdown.id = 'navbar-search-dropdown';
+        dropdown.className = 'search-dropdown';
+        if (searchGroup) {
+            searchGroup.appendChild(dropdown);
+        }
+
+        const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
+        if (searchInput) {
+            searchInput.value = initialQuery;
+        }
+        applyNavbarSearch(initialQuery);
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                applyNavbarSearch(this.value);
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const query = (searchInput ? searchInput.value : '').trim();
+                const results = getMatchingSearchItems(query);
+                showSearchDropdown(query, results);
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!form || !form.contains(event.target)) {
+                hideSearchDropdown();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideSearchDropdown();
+            }
+        });
+    });
 
     window.onload = function() {
         let theme = localStorage.getItem("theme") || "light";
