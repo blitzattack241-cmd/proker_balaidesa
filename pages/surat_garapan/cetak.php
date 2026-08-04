@@ -1,6 +1,7 @@
 <?php
 // 1. Koneksi ke Database
 $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
 if (!isset($_GET['id'])) {
     echo "<script>alert('ID tidak ditemukan!'); window.close();</script>";
@@ -27,6 +28,11 @@ $query_detail = mysqli_query($koneksi, "SELECT * FROM tb_surat_garapan_detail WH
 $rincian_sawah = [];
 while ($row = mysqli_fetch_assoc($query_detail)) {
     $rincian_sawah[] = $row;
+}
+
+$nomor_surat_cetak = !empty($data['nomor_surat']) ? $data['nomor_surat'] : '';
+if (empty($nomor_surat_cetak) || strpos($nomor_surat_cetak, '400.10.2.2/') === false) {
+    $nomor_surat_cetak = formatNomorSuratGlobal($id_garapan);
 }
 
 // Fungsi pembantu untuk konversi tanggal ke format Indonesia
@@ -60,224 +66,224 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
     <meta charset="UTF-8">
     <title>Preview Surat Garapan - <?= htmlspecialchars($data['nama_penggarap']); ?></title>
     <style>
-    /* Desain Background Preview di Browser */
-    html,
-    body {
-        background-color: #525659;
-        /* Warna abu-abu gelap seperti PDF viewer */
-        margin: 0;
-        padding: 0;
-        font-family: "Arial", sans-serif;
-    }
-
-    /* Panel Navigasi Atas (Hanya Muncul di Layar Monitor) */
-    .no-print-header {
-        background-color: #323639;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-    }
-
-    .no-print-header .title {
-        color: #fff;
-        font-size: 11pt;
-        font-weight: bold;
-    }
-
-    .btn-cetak {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        font-size: 10pt;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .btn-cetak:hover {
-        background-color: #0b5ed7;
-    }
-
-    /* Wadah Utama Dokumen (Kertas A4) */
-    .page-wrapper {
-        width: 210mm;
-        /* A4 width */
-        height: 297mm;
-        /* A4 height */
-        padding: 10mm 15mm;
-        margin: 20px auto;
-        /* Memberi jarak atas bawah di preview */
-        box-sizing: border-box;
-        position: relative;
-        background: #fff;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        /* Efek bayangan kertas */
-        font-size: 10.5pt;
-        line-height: 1.3;
-        color: #000;
-        font-family: "Times New Roman", Times, serif;
-    }
-
-    /* Header Dokumen Sesuai Aslinya */
-    .header-dokumen {
-        text-align: center;
-        margin-bottom: 8px;
-    }
-
-    .header-dokumen h1 {
-        font-size: 15pt;
-        font-weight: bold;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .line-bold {
-        border-top: 3px solid #000;
-        margin-top: 2px;
-        margin-bottom: 3px;
-    }
-
-    .sub-header-left {
-        font-size: 10pt;
-        font-weight: bold;
-        text-align: left;
-        margin-bottom: 15px;
-        line-height: 1.2;
-    }
-
-    /* Judul Tengah */
-    .judul-box {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    .judul-box h2 {
-        font-size: 12pt;
-        font-weight: bold;
-        text-transform: uppercase;
-        text-decoration: underline;
-        margin: 0;
-        letter-spacing: 0.5px;
-    }
-
-    .judul-box p {
-        margin: 2px 0 0 0;
-        font-size: 11pt;
-    }
-
-    /* Pembuka */
-    .pembuka {
-        margin-bottom: 10px;
-    }
-
-    /* Form Isian Berstruktur */
-    .table-isi {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 10px;
-    }
-
-    .table-isi td {
-        padding: 2px 0;
-        vertical-align: top;
-    }
-
-    /* Tabel Sawah */
-    .table-sawah {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 5px;
-        margin-bottom: 10px;
-    }
-
-    .table-sawah th,
-    .table-sawah td {
-        border: 1px solid #000;
-        padding: 3px 5px;
-        font-size: 9pt;
-    }
-
-    .table-sawah th {
-        text-align: center;
-        font-weight: bold;
-        font-size: 9pt;
-    }
-
-    .text-center {
-        text-align: center;
-    }
-
-    .text-right {
-        text-align: right;
-    }
-
-    .text-uppercase {
-        text-transform: uppercase;
-    }
-
-    /* Penutup */
-    .penutup {
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-
-    /* Area Tanda Tangan */
-    .ttd-area {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        margin-top: 10px;
-    }
-
-    .ttd-kolom {
-        width: 40%;
-        text-align: center;
-    }
-
-    .ttd-space {
-        height: 50px;
-    }
-
-    .ttd-nama {
-        font-weight: bold;
-        text-decoration: underline;
-    }
-
-    /* ATURAN KHUSUS UNTUK CETAK KERTAS */
-    @media print {
-
+        /* Desain Background Preview di Browser */
         html,
         body {
-            background: none;
-            background-color: #fff;
-        }
-
-        /* SEMBUNYIKAN PANEL TOMBOL CETAK SAAT PRINT */
-        .no-print-header {
-            display: none !important;
-        }
-
-        .page-wrapper {
-            width: 100%;
-            height: 100%;
-            padding: 0;
+            background-color: #525659;
+            /* Warna abu-abu gelap seperti PDF viewer */
             margin: 0;
-            box-shadow: none;
+            padding: 0;
+            font-family: "Arial", sans-serif;
         }
 
-        @page {
-            size: A4;
-            margin: 12mm 15mm 10mm 15mm;
+        /* Panel Navigasi Atas (Hanya Muncul di Layar Monitor) */
+        .no-print-header {
+            background-color: #323639;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 9999;
         }
-    }
+
+        .no-print-header .title {
+            color: #fff;
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        .btn-cetak {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 10pt;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-cetak:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Wadah Utama Dokumen (Kertas A4) */
+        .page-wrapper {
+            width: 210mm;
+            /* A4 width */
+            height: 297mm;
+            /* A4 height */
+            padding: 10mm 15mm;
+            margin: 20px auto;
+            /* Memberi jarak atas bawah di preview */
+            box-sizing: border-box;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            /* Efek bayangan kertas */
+            font-size: 10.5pt;
+            line-height: 1.3;
+            color: #000;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        /* Header Dokumen Sesuai Aslinya */
+        .header-dokumen {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .header-dokumen h1 {
+            font-size: 15pt;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .line-bold {
+            border-top: 3px solid #000;
+            margin-top: 2px;
+            margin-bottom: 3px;
+        }
+
+        .sub-header-left {
+            font-size: 10pt;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        /* Judul Tengah */
+        .judul-box {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .judul-box h2 {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: underline;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .judul-box p {
+            margin: 2px 0 0 0;
+            font-size: 11pt;
+        }
+
+        /* Pembuka */
+        .pembuka {
+            margin-bottom: 10px;
+        }
+
+        /* Form Isian Berstruktur */
+        .table-isi {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .table-isi td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+
+        /* Tabel Sawah */
+        .table-sawah {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .table-sawah th,
+        .table-sawah td {
+            border: 1px solid #000;
+            padding: 3px 5px;
+            font-size: 9pt;
+        }
+
+        .table-sawah th {
+            text-align: center;
+            font-weight: bold;
+            font-size: 9pt;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-uppercase {
+            text-transform: uppercase;
+        }
+
+        /* Penutup */
+        .penutup {
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Area Tanda Tangan */
+        .ttd-area {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .ttd-kolom {
+            width: 40%;
+            text-align: center;
+        }
+
+        .ttd-space {
+            height: 50px;
+        }
+
+        .ttd-nama {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* ATURAN KHUSUS UNTUK CETAK KERTAS */
+        @media print {
+
+            html,
+            body {
+                background: none;
+                background-color: #fff;
+            }
+
+            /* SEMBUNYIKAN PANEL TOMBOL CETAK SAAT PRINT */
+            .no-print-header {
+                display: none !important;
+            }
+
+            .page-wrapper {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+
+            @page {
+                size: A4;
+                margin: 12mm 15mm 10mm 15mm;
+            }
+        }
     </style>
 </head>
 
@@ -308,9 +314,7 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
         <!-- Judul Dokumen Tengah -->
         <div class="judul-box">
             <h2>Surat – Keterangan</h2>
-            <p>Nomor : 581 / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / 31.07.16 /
-                <?= date('Y', strtotime($data['tanggal_surat'])); ?>
-            </p>
+            <p>Nomor : <?= htmlspecialchars($nomor_surat_cetak); ?></p>
         </div>
 
         <!-- Pembuka -->
