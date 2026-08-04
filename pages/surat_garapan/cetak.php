@@ -308,9 +308,7 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
         <!-- Judul Dokumen Tengah -->
         <div class="judul-box">
             <h2>Surat – Keterangan</h2>
-            <p>Nomor : 581 / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / 31.07.16 /
-                <?= date('Y', strtotime($data['tanggal_surat'])); ?>
-            </p>
+            <p>Nomor : <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></p>
         </div>
 
         <!-- Pembuka -->

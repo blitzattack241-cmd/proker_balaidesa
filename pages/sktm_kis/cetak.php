@@ -390,7 +390,7 @@ if (!is_dir($base_upload_dir)) {
 
             <div class="judul-surat">
                 <h5>Surat Keterangan Tidak Mampu</h5>
-                <p>Nomor : <?= htmlspecialchars($data['nomor_surat'] ?? '474 /       /31.07.16 / 2026'); ?></p>
+                <p>Nomor : <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></p>
             </div>
 
             <p class="paragraf-pengantar">

@@ -356,7 +356,7 @@ function tgl_indo($tanggal)
             <!-- Judul Surat -->
             <div class="judul-surat">
                 <h5>Surat Keterangan Tidak Mampu</h5>
-                <p>Nomor: <?= htmlspecialchars($data['nomor_surat']); ?></p>
+                <p>Nomor: 145 / <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></p>
             </div>
 
             <p class="paragraf-pengantar">
