@@ -14,7 +14,9 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+if (!isset($koneksi)) {
+    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+}
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -31,72 +33,72 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
 
 <!-- Style Kustom untuk Formulir Modern -->
 <style>
-    .card-form {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-form {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .card-form-header {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f3f5 !important;
-        padding: 1.5rem !important;
-    }
+.card-form-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    padding: 1.5rem !important;
+}
 
-    .form-label-custom {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-    }
+.form-label-custom {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
 
-    .form-control-custom {
-        border-radius: 8px !important;
-        padding: 0.6rem 1rem !important;
-        border: 1px solid #ced4da !important;
-        transition: all 0.2s ease;
-    }
+.form-control-custom {
+    border-radius: 8px !important;
+    padding: 0.6rem 1rem !important;
+    border: 1px solid #ced4da !important;
+    transition: all 0.2s ease;
+}
 
-    .form-control-custom:focus {
-        border-color: #0d6efd !important;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
-    }
+.form-control-custom:focus {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+}
 
-    .section-divider {
-        border-top: 2px dashed #e9ecef;
-        margin: 2rem 0;
-    }
+.section-divider {
+    border-top: 2px dashed #e9ecef;
+    margin: 2rem 0;
+}
 
-    .section-title-custom {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #0d6efd;
-        margin-bottom: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+.section-title-custom {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0d6efd;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-    .btn-submit-custom {
-        background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-        transition: all 0.25s ease;
-    }
+.btn-submit-custom {
+    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    transition: all 0.25s ease;
+}
 
-    .btn-submit-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-    }
+.btn-submit-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+}
 
-    .btn-batal-custom {
-        border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-weight: 600;
-    }
+.btn-batal-custom {
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -158,10 +160,12 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
                         <input type="text" name="no_ktp" class="form-control form-control-custom"
                             placeholder="Masukkan 16 digit NIK" maxlength="16" required>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label form-label-custom">Nomor Kartu Keluarga (No. KK)</label>
-                        <input type="text" name="no_kk" class="form-control form-control-custom"
-                            placeholder="Masukkan 16 digit Nomor KK" maxlength="16" required>
+                        <!-- PERBAIKAN: name="no_kk" -->
+                        <input type="text" name="no_kk" maxlength="16" class="form-control form-control-custom"
+                            value="331904" placeholder="Contoh: 33190..." required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label form-label-custom">Tempat Lahir</label>
@@ -240,10 +244,10 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
                         <select name="id_pejabat" class="form-select form-control-custom" required>
                             <option value="" disabled selected>-- Pilih Pejabat yang Mengesahkan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($pejabat_query)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -254,7 +258,7 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
                     <a href="index.php?page=sktm-stunting" class="btn btn-outline-secondary btn-batal-custom">
                         <i class="fas fa-arrow-left me-1"></i> Batal
                     </a>
-                    <button type="submit" class="btn btn-primary btn-submit-custom">
+                    <button type="submit" name="simpan" class="btn btn-primary btn-submit-custom">
                         <i class="fas fa-save me-1"></i> Simpan & Buat Surat
                     </button>
                 </div>

@@ -16,31 +16,33 @@ if (!$isAdmin) {
 
 if (isset($_POST['simpan'])) {
     $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
-require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+    if (!$koneksi) {
+        die("Koneksi gagal: " . mysqli_connect_error());
+    }
 
-    // Ambil data dari form input
+    require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+
     // Reservasi nomor surat definitif di sini (saat benar-benar disimpan)
-    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
-    $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $no_ktp           = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
-    $no_kk            = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
-    $tempat_lahir     = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $agama            = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $pekerjaan        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $kewarganegaraan  = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
-    $alamat_tinggal   = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $keperluan        = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    $berlaku_mulai    = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $berlaku_selesai  = mysqli_real_escape_string($koneksi, $_POST['berlaku_selesai']);
-    $keterangan_lain  = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
-    $id_pejabat       = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
-    $nama_camat       = mysqli_real_escape_string($koneksi, $_POST['nama_camat']);
+    $nomor_surat      = generateNomorSuratGlobal($koneksi, true);
+    $tanggal_surat    = $_POST['tanggal_surat'] ?? '';
+    $nama_warga       = $_POST['nama_warga'] ?? '';
+    $jenis_kelamin    = $_POST['jenis_kelamin'] ?? '';
+    $no_ktp           = $_POST['no_ktp'] ?? '';
+    $no_kk            = $_POST['no_kk'] ?? '';
+    $tempat_lahir     = $_POST['tempat_lahir'] ?? '';
+    $tanggal_lahir    = $_POST['tanggal_lahir'] ?? '';
+    $agama            = $_POST['agama'] ?? '';
+    $pekerjaan        = $_POST['pekerjaan'] ?? '';
+    $kewarganegaraan  = $_POST['kewarganegaraan'] ?? '';
+    $alamat_tinggal   = $_POST['alamat_tinggal'] ?? '';
+    $keperluan        = $_POST['keperluan'] ?? '';
+    $berlaku_mulai    = $_POST['berlaku_mulai'] ?? '';
+    $berlaku_selesai  = $_POST['berlaku_selesai'] ?? '';
+    $keterangan_lain  = $_POST['keterangan_lain'] ?? '';
+    $id_pejabat       = $_POST['id_pejabat'] ?? '';
+    $nama_camat       = $_POST['nama_camat'] ?? '';
 
     // Pengaturan Upload Foto Rumah
-    // Sesuaikan target_dir ke folder penyimpanan aset gambar Anda (misal: assets/img/sktm_bumil/)
     $target_dir = "../../assets/img/sktm_bumil/";
     
     // Buat folder otomatis jika belum ada di server
@@ -82,41 +84,52 @@ require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
         }
     }
 
-    // Query simpan data ke tb_sktm_bumil
+    // Menggunakan Prepared Statement untuk Menghindari Error & SQL Injection
     $query_insert = "INSERT INTO tb_sktm_bumil (
         nomor_surat, tanggal_surat, nama_warga, jenis_kelamin, no_ktp, no_kk, 
         tempat_lahir, tanggal_lahir, agama, pekerjaan, kewarganegaraan, 
         alamat_tinggal, keperluan, berlaku_mulai, berlaku_selesai, keterangan_lain, 
         id_pejabat, nama_camat, foto_depan, foto_ruang_tamu, foto_kamar, foto_dapur, foto_toilet
-    ) VALUES (
-        '$nomor_surat', '$tanggal_surat', '$nama_warga', '$jenis_kelamin', '$no_ktp', '$no_kk', 
-        '$tempat_lahir', '$tanggal_lahir', '$agama', '$pekerjaan', '$kewarganegaraan', 
-        '$alamat_tinggal', '$keperluan', '$berlaku_mulai', '$berlaku_selesai', '$keterangan_lain', 
-        '$id_pejabat', '$nama_camat', 
-        '".$nama_file_baru['foto_depan']."', 
-        '".$nama_file_baru['foto_ruang_tamu']."', 
-        '".$nama_file_baru['foto_kamar']."', 
-        '".$nama_file_baru['foto_dapur']."', 
-        '".$nama_file_baru['foto_toilet']."'
-    )";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $eksekusi = mysqli_query($koneksi, $query_insert);
+    $stmt = mysqli_prepare($koneksi, $query_insert);
 
-    if ($eksekusi) {
-        // Berhasil, arahkan kembali ke menu list SKTM Bumil
-        echo "<script>
-                alert('Data SKTM Ibu Hamil berhasil disimpan!');
-                window.location.href = '../../index.php?page=sktm-bumil';
-              </script>";
+    if ($stmt) {
+        mysqli_stmt_bind_param(
+            $stmt, 
+            "ssssssssssssssssissssss", 
+            $nomor_surat, $tanggal_surat, $nama_warga, $jenis_kelamin, $no_ktp, $no_kk,
+            $tempat_lahir, $tanggal_lahir, $agama, $pekerjaan, $kewarganegaraan,
+            $alamat_tinggal, $keperluan, $berlaku_mulai, $berlaku_selesai, $keterangan_lain,
+            $id_pejabat, $nama_camat, 
+            $nama_file_baru['foto_depan'], 
+            $nama_file_baru['foto_ruang_tamu'], 
+            $nama_file_baru['foto_kamar'], 
+            $nama_file_baru['foto_dapur'], 
+            $nama_file_baru['foto_toilet']
+        );
+
+        if (mysqli_stmt_execute($stmt)) {
+            echo "<script>
+                    alert('Data SKTM Ibu Hamil berhasil disimpan!');
+                    window.location.href = '../../index.php?page=sktm-bumil';
+                  </script>";
+        } else {
+            $error_msg = mysqli_stmt_error($stmt);
+            echo "<script>
+                    alert('Gagal menyimpan data ke database! Error: " . addslashes($error_msg) . "');
+                    window.history.back();
+                  </script>";
+        }
+        mysqli_stmt_close($stmt);
     } else {
-        // Gagal eksekusi database
+        $error_msg = mysqli_error($koneksi);
         echo "<script>
-                alert('Gagal menyimpan data ke database. Silakan periksa kembali!');
+                alert('Gagal menyiapkan query database! Error: " . addslashes($error_msg) . "');
                 window.history.back();
               </script>";
     }
 } else {
-    // Jika diakses tanpa submit form
     header("Location: ../../index.php?page=sktm-bumil");
     exit;
 }

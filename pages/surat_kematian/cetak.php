@@ -339,6 +339,20 @@ function renderDateBoxes($dateString) {
         </div>
 
         <div style="height: 10px;"></div>
+        <!-- 0. BLOK KEPALA KELUARGA & KARTU KELUARGA -->
+        <div class="block-black-header">KEPALA KELUARGA</div>
+        <table class="block-border-content">
+            <tr>
+                <td style="width: 170px;">1. Nama Kepala Keluarga</td>
+                <td style="width: 10px;">:</td>
+                <td><?= renderBoxes($data['nama_kepala_keluarga'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td>2. Nomor Kartu Keluarga</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['no_kk'] ?? '', 16); ?></td>
+            </tr>
+        </table>
 
         <!-- 1. BLOK DATA JENAZAH -->
         <div class="block-black-header">JENAZAH</div>
@@ -369,21 +383,21 @@ function renderDateBoxes($dateString) {
                 <td>4. Tanggal Lahir / Umur</td>
                 <td>:</td>
                 <td>
-                    Tgl Lahir: <?= renderDateBoxes($data['tanggal_lahir'] ?? ''); ?> &nbsp;&nbsp;&nbsp;&nbsp;
+                    Tgl Lahir: <?= renderDateBoxes($data['tanggal_lahir_jenazah'] ?? ''); ?> &nbsp;&nbsp;&nbsp;&nbsp;
                     Umur: <?= renderBoxes($data['umur'] ?? '', 3); ?> Tahun
                 </td>
             </tr>
             <tr>
                 <td>5. Tempat Lahir</td>
                 <td>:</td>
-                <td><?= renderBoxes($data['tempat_lahir'] ?? '', 30); ?></td>
+                <td><?= renderBoxes($data['tempat_lahir_jenazah'] ?? '', 30); ?></td>
             </tr>
             <tr>
                 <td>6. Agama</td>
                 <td>:</td>
                 <td>
                     <?php
-                        $ag_input = strtolower($data['agama'] ?? '');
+                        $ag_input = strtolower($data['agama_jenazah'] ?? '');
                         $ag_code = '1';
                         if(strpos($ag_input, 'kristen') !== false) $ag_code = '2';
                         elseif(strpos($ag_input, 'katolik') !== false) $ag_code = '3';
@@ -403,7 +417,7 @@ function renderDateBoxes($dateString) {
             <tr>
                 <td>7. Pekerjaan</td>
                 <td>:</td>
-                <td><?= renderBoxes($data['pekerjaan'] ?? '', 30); ?></td>
+                <td><?= renderBoxes($data['pekerjaan_jenazah'] ?? '', 30); ?></td>
             </tr>
             <tr>
                 <td style="vertical-align: top; padding-top:4px;">8. Alamat Terakhir</td>
@@ -414,8 +428,14 @@ function renderDateBoxes($dateString) {
                         style="margin-bottom:2px;">
                     Desa: <?= renderBoxes($data['desa_jenazah'] ?? '', 18); ?> &nbsp; Kec:
                     <?= renderBoxes($data['kecamatan_jenazah'] ?? '', 18); ?><br style="margin-bottom:2px;">
-                    Kab/Kota: <?= renderBoxes($data['kabupaten_jenazah'] ?? '', 18); ?>
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_jenazah'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_jenazah'] ?? '', 18); ?>
                 </td>
+            </tr>
+            <tr>
+                <td>9. Anak ke</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['anak_ke'] ?? '', 3); ?></td>
             </tr>
         </table>
 
@@ -459,18 +479,118 @@ function renderDateBoxes($dateString) {
                 </td>
             </tr>
             <tr>
-                <td>5. Penyebab Kematian</td>
+                <td>5. Sebab Kematian</td>
                 <td>:</td>
                 <td>
                     <span contenteditable="true" class="inline-editable-text"
                         style="min-width: 250px; border-bottom: 1px dashed #000;">
-                        <?= htmlspecialchars($data['penyebab_kematian'] ?? 'Sakit Biasa / Tua'); ?>
+                        <?= htmlspecialchars($data['sebab_kematian'] ?? 'Sakit Biasa / Tua'); ?>
                     </span>
+                </td>
+            </tr>
+            <tr>
+                <td>6. Yang Menerangkan</td>
+                <td>:</td>
+                <td>
+                    <?php
+                        $ym_input = strtolower($data['penolong_kematian'] ?? '');
+                        $ym_code = '4'; // Default Lainnya
+                        if(strpos($ym_input, 'dokter') !== false) $ym_code = '1';
+                        elseif(strpos($ym_input, 'tenaga') !== false) $ym_code = '2';
+                        elseif(strpos($ym_input, 'polis') !== false) $ym_code = '3';
+                    ?>
+                    <?= renderBoxes($ym_code, 1); ?>
+                    <span class="choice-text-item" style="margin-left: 8px;">1. Dokter</span>
+                    <span class="choice-text-item">2. Tenaga Kesehatan</span>
+                    <span class="choice-text-item">3. Kepolisian</span>
+                    <span class="choice-text-item">4. Lainnya</span>
                 </td>
             </tr>
         </table>
 
-        <!-- 3. BLOK DATA PELAPOR -->
+        <!-- 3. BLOK DATA AYAH -->
+        <div class="block-black-header">AYAH</div>
+        <table class="block-border-content">
+            <tr>
+                <td style="width: 170px;">1. NIK</td>
+                <td style="width: 10px;">:</td>
+                <td><?= renderBoxes($data['nik_ayah'] ?? '', 16); ?></td>
+            </tr>
+            <tr>
+                <td>2. Nama Lengkap</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['nama_ayah'] ?? '', 40); ?></td>
+            </tr>
+            <tr>
+                <td>3. Tanggal Lahir / Umur</td>
+                <td>:</td>
+                <td>
+                    Tgl Lahir: <?= renderDateBoxes($data['tanggal_lahir_ayah'] ?? ''); ?> &nbsp;&nbsp;&nbsp;&nbsp;
+                    Umur: <?= renderBoxes($data['umur_ayah'] ?? '', 3); ?> Tahun
+                </td>
+            </tr>
+            <tr>
+                <td>4. Pekerjaan</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['pekerjaan_ayah'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top:4px;">5. Alamat</td>
+                <td style="vertical-align: top; padding-top:4px;">:</td>
+                <td>
+                    Dukuh/Jl: <span contenteditable="true"
+                        style="font-weight:bold; outline:none; border-bottom:1px dashed #777;"><?= htmlspecialchars($data['alamat_ayah'] ?? ''); ?></span><br
+                        style="margin-bottom:2px;">
+                    Desa: <?= renderBoxes($data['desa_ayah'] ?? '', 18); ?> &nbsp; Kec:
+                    <?= renderBoxes($data['kecamatan_ayah'] ?? '', 18); ?><br style="margin-bottom:2px;">
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_ayah'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_ayah'] ?? '', 18); ?>
+                </td>
+            </tr>
+        </table>
+
+        <!-- 4. BLOK DATA IBU -->
+        <div class="block-black-header">IBU</div>
+        <table class="block-border-content">
+            <tr>
+                <td style="width: 170px;">1. NIK</td>
+                <td style="width: 10px;">:</td>
+                <td><?= renderBoxes($data['nik_ibu'] ?? '', 16); ?></td>
+            </tr>
+            <tr>
+                <td>2. Nama Lengkap</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['nama_ibu'] ?? '', 40); ?></td>
+            </tr>
+            <tr>
+                <td>3. Tanggal Lahir / Umur</td>
+                <td>:</td>
+                <td>
+                    Tgl Lahir: <?= renderDateBoxes($data['tanggal_lahir_ibu'] ?? ''); ?> &nbsp;&nbsp;&nbsp;&nbsp;
+                    Umur: <?= renderBoxes($data['umur_ibu'] ?? '', 3); ?> Tahun
+                </td>
+            </tr>
+            <tr>
+                <td>4. Pekerjaan</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['pekerjaan_ibu'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top:4px;">5. Alamat</td>
+                <td style="vertical-align: top; padding-top:4px;">:</td>
+                <td>
+                    Dukuh/Jl: <span contenteditable="true"
+                        style="font-weight:bold; outline:none; border-bottom:1px dashed #777;"><?= htmlspecialchars($data['alamat_ibu'] ?? ''); ?></span><br
+                        style="margin-bottom:2px;">
+                    Desa: <?= renderBoxes($data['desa_ibu'] ?? '', 18); ?> &nbsp; Kec:
+                    <?= renderBoxes($data['kecamatan_ibu'] ?? '', 18); ?><br style="margin-bottom:2px;">
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_ibu'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_ibu'] ?? '', 18); ?>
+                </td>
+            </tr>
+        </table>
+
+        <!-- 5. BLOK DATA PELAPOR -->
         <div class="block-black-header">PELAPOR</div>
         <table class="block-border-content">
             <tr>
@@ -483,9 +603,40 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td><?= renderBoxes($data['nama_pelapor'] ?? '', 40); ?></td>
             </tr>
+            <tr>
+                <td>3. Tanggal Lahir / Umur</td>
+                <td>:</td>
+                <td>
+                    Tgl Lahir: <?= renderDateBoxes($data['tanggal_lahir_pelapor'] ?? ''); ?> &nbsp;&nbsp;&nbsp;&nbsp;
+                    Umur: <?= renderBoxes($data['umur_pelapor'] ?? '', 3); ?> Tahun
+                </td>
+            </tr>
+            <tr>
+                <td>4. Hubungan dengan Jenazah</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['hubungan_pelapor'] ?? '', 20); ?></td>
+            </tr>
+            <tr>
+                <td>5. Pekerjaan</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['pekerjaan_pelapor'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top:4px;">6. Alamat</td>
+                <td style="vertical-align: top; padding-top:4px;">:</td>
+                <td>
+                    Dukuh/Jl: <span contenteditable="true"
+                        style="font-weight:bold; outline:none; border-bottom:1px dashed #777;"><?= htmlspecialchars($data['alamat_pelapor'] ?? ''); ?></span><br
+                        style="margin-bottom:2px;">
+                    Desa: <?= renderBoxes($data['desa_pelapor'] ?? '', 18); ?> &nbsp; Kec:
+                    <?= renderBoxes($data['kecamatan_pelapor'] ?? '', 18); ?><br style="margin-bottom:2px;">
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_pelapor'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_pelapor'] ?? '', 18); ?>
+                </td>
+            </tr>
         </table>
 
-        <!-- 4. BLOK DATA SAKSI I -->
+        <!-- 6. BLOK DATA SAKSI I -->
         <div class="block-black-header">SAKSI I</div>
         <table class="block-border-content">
             <tr>
@@ -498,9 +649,32 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td><?= renderBoxes($data['nama_saksi1'] ?? '', 40); ?></td>
             </tr>
+            <tr>
+                <td>3. Umur</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['umur_saksi1'] ?? '', 3); ?> Tahun</td>
+            </tr>
+            <tr>
+                <td>4. Pekerjaan</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['pekerjaan_saksi1'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top:4px;">5. Alamat</td>
+                <td style="vertical-align: top; padding-top:4px;">:</td>
+                <td>
+                    Dukuh/Jl: <span contenteditable="true"
+                        style="font-weight:bold; outline:none; border-bottom:1px dashed #777;"><?= htmlspecialchars($data['alamat_saksi1'] ?? ''); ?></span><br
+                        style="margin-bottom:2px;">
+                    Desa: <?= renderBoxes($data['desa_saksi1'] ?? '', 18); ?> &nbsp; Kec:
+                    <?= renderBoxes($data['kecamatan_saksi1'] ?? '', 18); ?><br style="margin-bottom:2px;">
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_saksi1'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_saksi1'] ?? '', 18); ?>
+                </td>
+            </tr>
         </table>
 
-        <!-- 5. BLOK DATA SAKSI II -->
+        <!-- 7. BLOK DATA SAKSI II -->
         <div class="block-black-header">SAKSI II</div>
         <table class="block-border-content" style="margin-bottom: 20px;">
             <tr>
@@ -512,6 +686,29 @@ function renderDateBoxes($dateString) {
                 <td>2. Nama Lengkap</td>
                 <td>:</td>
                 <td><?= renderBoxes($data['nama_saksi2'] ?? '', 40); ?></td>
+            </tr>
+            <tr>
+                <td>3. Umur</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['umur_saksi2'] ?? '', 3); ?> Tahun</td>
+            </tr>
+            <tr>
+                <td>4. Pekerjaan</td>
+                <td>:</td>
+                <td><?= renderBoxes($data['pekerjaan_saksi2'] ?? '', 30); ?></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top:4px;">5. Alamat</td>
+                <td style="vertical-align: top; padding-top:4px;">:</td>
+                <td>
+                    Dukuh/Jl: <span contenteditable="true"
+                        style="font-weight:bold; outline:none; border-bottom:1px dashed #777;"><?= htmlspecialchars($data['alamat_saksi2'] ?? ''); ?></span><br
+                        style="margin-bottom:2px;">
+                    Desa: <?= renderBoxes($data['desa_saksi2'] ?? '', 18); ?> &nbsp; Kec:
+                    <?= renderBoxes($data['kecamatan_saksi2'] ?? '', 18); ?><br style="margin-bottom:2px;">
+                    Kab/Kota: <?= renderBoxes($data['kabupaten_saksi2'] ?? '', 18); ?> &nbsp; Prov:
+                    <?= renderBoxes($data['provinsi_saksi2'] ?? '', 18); ?>
+                </td>
             </tr>
         </table>
 
@@ -533,12 +730,16 @@ function renderDateBoxes($dateString) {
                     <p style="margin:0 0 2px 0;">Berugenjang, <span contenteditable="true"
                             style="outline:none;"><?= !empty($data['tanggal_surat']) ? date('d-m-Y', strtotime($data['tanggal_surat'])) : date('d-m-Y'); ?></span>
                     </p>
-                    <p style="margin:0;">Petinggi / Kepala Desa Berugenjang</p>
+                    <p style="margin:0;">
+                        <?= htmlspecialchars($data['jabatan_penandatangan'] ?? 'Petinggi / Kepala Desa Berugenjang'); ?>
+                    </p>
                     <div class="space-sign-blank"></div>
                     <div class="qr-sign-block">
                         <?= tampilkanQR('surat_kematian', $id, $qr_token); ?>
-                        <p class="ttd-nama" style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;" contenteditable="true">
-                            VIWIT MARIYANTO
+                        <p class="ttd-nama"
+                            style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;"
+                            contenteditable="true">
+                            <?= htmlspecialchars($data['nama_penandatangan'] ?? 'KISWO, S.E'); ?>
                         </p>
                     </div>
                 </td>

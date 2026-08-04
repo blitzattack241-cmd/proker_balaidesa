@@ -48,73 +48,73 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: -0.5px;
-    }
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
 
-    .breadcrumb-modern {
-        background: transparent;
-        padding: 0;
-        font-size: 0.9rem;
-    }
+.breadcrumb-modern {
+    background: transparent;
+    padding: 0;
+    font-size: 0.9rem;
+}
 
-    .breadcrumb-modern a {
-        color: #0d6efd;
-        font-weight: 500;
-    }
+.breadcrumb-modern a {
+    color: #0d6efd;
+    font-weight: 500;
+}
 
-    .card-modern {
-        border: 1px solid #dee2e6 !important;
-        border-radius: 8px !important;
-        box-shadow: none !important;
-    }
+.card-modern {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
 
-    .card-header-modern {
-        background-color: #f8f9fa !important;
-        border-bottom: 1px solid #dee2e6 !important;
-        padding: 0.75rem 1.25rem !important;
-    }
+.card-header-modern {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    padding: 0.75rem 1.25rem !important;
+}
 
-    .card-header-title {
-        font-weight: 500;
-        color: #333333;
-        font-size: 0.95rem;
-    }
+.card-header-title {
+    font-weight: 500;
+    color: #333333;
+    font-size: 0.95rem;
+}
 
-    .form-label {
-        font-weight: 500;
-        color: #333333;
-        font-size: 0.9rem;
-        margin-bottom: 0.4rem;
-    }
+.form-label {
+    font-weight: 500;
+    color: #333333;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
 
-    .form-control,
-    .form-select {
-        border: 1px solid #cccccc;
-        border-radius: 4px;
-        padding: 0.45rem 0.75rem;
-        font-size: 0.9rem;
-    }
+.form-control,
+.form-select {
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
 
-    .section-divider {
-        border-top: 1px dashed #dee2e6;
-        margin: 1.5rem 0;
-    }
+.section-divider {
+    border-top: 1px dashed #dee2e6;
+    margin: 1.5rem 0;
+}
 
-    .btn-action {
-        padding: 0.4rem 1.2rem;
-        font-size: 0.9rem;
-        border-radius: 4px;
-        font-weight: 500;
-    }
+.btn-action {
+    padding: 0.4rem 1.2rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
 </style>
 
 <div class="container-fluid px-3 py-3">
@@ -157,8 +157,8 @@ if (isset($_POST['simpan'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat --</option>
                             <?php while ($p = mysqli_fetch_assoc($query_pejabat)) { ?>
-                                <option value="<?= $p['id_pejabat']; ?>"><?= $p['nama_pejabat']; ?> (<?= $p['jabatan']; ?>)
-                                </option>
+                            <option value="<?= $p['id_pejabat']; ?>"><?= $p['nama_pejabat']; ?> (<?= $p['jabatan']; ?>)
+                            </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -177,7 +177,7 @@ if (isset($_POST['simpan'])) {
 
                     <div class="col-md-6">
                         <label class="form-label">NIK (16 Digit)</label>
-                        <input type="text" name="nik" maxlength="16" class="form-control" value="331904"
+                        <input type="text" name="nik" maxlength="16" class="form-control" value=""
                             placeholder="Contoh: 33190..." required>
                     </div>
 

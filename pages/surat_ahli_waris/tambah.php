@@ -28,63 +28,63 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 ?>
 
 <style>
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: -0.5px;
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
+
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+.card-header-modern {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-weight: 600;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #0d6efd;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 5px;
+}
+
+.btn-custom {
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.25s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+}
+
+.dynamic-row {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
 
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
-
-    .card-header-modern {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f3f5 !important;
-        padding: 1.25rem 1.5rem !important;
-        font-weight: 600;
-        color: #495057;
-        font-size: 1.1rem;
-    }
-
-    .section-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #0d6efd;
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 5px;
-    }
-
-    .btn-custom {
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 20px;
-        transition: all 0.25s ease;
-    }
-
-    .btn-custom:hover {
-        transform: translateY(-2px);
-    }
-
-    .dynamic-row {
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -114,7 +114,7 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Nomor Surat</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-secondary fw-bold">470 /</span>
+
                             <input type="text" name="nomor_surat" class="form-control"
                                 value="<?= $nomor_surat_otomatis; ?>" placeholder="Contoh: 126 /31.07.16/2026" required>
                         </div>
@@ -283,12 +283,12 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php if ($query_pejabat): ?>
-                                <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                    <option value="<?= $pejabat['id_pejabat']; ?>">
-                                        <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                        (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                    </option>
-                                <?php endwhile; ?>
+                            <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
+                            <?php endwhile; ?>
                             <?php endif; ?>
                         </select>
                     </div>
@@ -321,14 +321,14 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 
 <!-- JAVASCRIPT UNTUK ATUR FIELD DINAMIS -->
 <script>
-    // Fungsi Tambah Baris Anak
-    function tambahBarisAnak() {
-        const container = document.getElementById('container_anak');
-        const index = container.children.length + 1;
+// Fungsi Tambah Baris Anak
+function tambahBarisAnak() {
+    const container = document.getElementById('container_anak');
+    const index = container.children.length + 1;
 
-        const row = document.createElement('tr');
-        row.className = 'dynamic-row';
-        row.innerHTML = `
+    const row = document.createElement('tr');
+    row.className = 'dynamic-row';
+    row.innerHTML = `
         <td class="text-center fw-bold nomor-anak">${index}</td>
         <td><input type="text" name="nama_anak[]" class="form-control form-control-sm" placeholder="Nama Anak ke-${index}" required></td>
         <td><input type="text" name="pekerjaan_anak[]" class="form-control form-control-sm" placeholder="Contoh: Petani/Perkebun" required></td>
@@ -337,30 +337,30 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
             <button type="button" class="btn btn-sm btn-danger" onclick="hapusBarisAnak(this)"><i class="fas fa-trash"></i></button>
         </td>
     `;
-        container.appendChild(row);
-        urutkanNomorAnak();
-    }
+    container.appendChild(row);
+    urutkanNomorAnak();
+}
 
-    function hapusBarisAnak(btn) {
-        btn.closest('tr').remove();
-        urutkanNomorAnak();
-    }
+function hapusBarisAnak(btn) {
+    btn.closest('tr').remove();
+    urutkanNomorAnak();
+}
 
-    function urutkanNomorAnak() {
-        const nomorElements = document.querySelectorAll('.nomor-anak');
-        nomorElements.forEach((el, index) => {
-            el.innerText = index + 1;
-        });
-    }
+function urutkanNomorAnak() {
+    const nomorElements = document.querySelectorAll('.nomor-anak');
+    nomorElements.forEach((el, index) => {
+        el.innerText = index + 1;
+    });
+}
 
-    // Fungsi Tambah Baris Saksi
-    function tambahBarisSaksi() {
-        const container = document.getElementById('container_saksi');
-        const index = container.children.length + 1;
+// Fungsi Tambah Baris Saksi
+function tambahBarisSaksi() {
+    const container = document.getElementById('container_saksi');
+    const index = container.children.length + 1;
 
-        const row = document.createElement('tr');
-        row.className = 'dynamic-row';
-        row.innerHTML = `
+    const row = document.createElement('tr');
+    row.className = 'dynamic-row';
+    row.innerHTML = `
         <td class="text-center fw-bold nomor-saksi">${index}</td>
         <td><input type="text" name="nama_saksi[]" class="form-control form-control-sm" placeholder="Nama Saksi ke-${index}" required></td>
         <td><input type="text" name="pekerjaan_saksi[]" class="form-control form-control-sm" placeholder="Contoh: Perangkat Desa" required></td>
@@ -369,19 +369,19 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
             <button type="button" class="btn btn-sm btn-danger" onclick="hapusBarisSaksi(this)"><i class="fas fa-trash"></i></button>
         </td>
     `;
-        container.appendChild(row);
-        urutkanNomorSaksi();
-    }
+    container.appendChild(row);
+    urutkanNomorSaksi();
+}
 
-    function hapusBarisSaksi(btn) {
-        btn.closest('tr').remove();
-        urutkanNomorSaksi();
-    }
+function hapusBarisSaksi(btn) {
+    btn.closest('tr').remove();
+    urutkanNomorSaksi();
+}
 
-    function urutkanNomorSaksi() {
-        const nomorElements = document.querySelectorAll('.nomor-saksi');
-        nomorElements.forEach((el, index) => {
-            el.innerText = index + 1;
-        });
-    }
+function urutkanNomorSaksi() {
+    const nomorElements = document.querySelectorAll('.nomor-saksi');
+    nomorElements.forEach((el, index) => {
+        el.innerText = index + 1;
+    });
+}
 </script>

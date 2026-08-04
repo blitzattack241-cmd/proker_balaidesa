@@ -62,7 +62,8 @@ $sourceTables = [
         'label' => 'Surat Garapan Sawah',
         'candidates' => ['tb_surat_garapan', 'surat_garapan'],
         'name' => ['nama_penggarap', 'nama_pemohon', 'nama_warga'],
-        'tujuan' => ['pekerjaan', 'keperluan', 'perihal'],
+        // PERBAIKAN: Hapus 'pekerjaan' dari kandidat tujuan
+        'tujuan' => ['keperluan', 'perihal', 'keterangan'],
     ],
     [
         'label' => 'Surat Ahli Waris',
@@ -73,25 +74,29 @@ $sourceTables = [
     [
         'label' => 'Surat Undangan',
         'candidates' => ['tb_surat_undangan', 'surat_undangan'],
-        'name' => ['nama_pemohon', 'sifat', 'id_pejabat'],
-        'tujuan' => ['acara', 'perihal', 'tempat_acara'],
+        // PERBAIKAN: Gunakan pengirim/pengundang (misal nama_pejabat / pengundang)
+        'name' => ['nama_pengundang', 'nama_pemohon', 'pengundang', 'nama_pejabat'],
+        // PERBAIKAN: Gunakan kolom tujuan/penerima surat undangan
+        'tujuan' => ['tujuan_surat', 'kepada', 'tujuan', 'penerima', 'acara', 'perihal'],
     ],
     [
         'label' => 'Surat Kelahiran',
         'candidates' => ['tb_surat_kelahiran', 'surat_kelahiran'],
-        'name' => ['nama_kepala_keluarga', 'nama_bayi', 'nama_pelapor'],
-        'tujuan' => ['nama_bayi', 'nomor_kk', 'nama_kepala_keluarga'],
+        'name' => ['nama_bayi', 'nama_pelapor', 'nama_kepala_keluarga'],
+        // Hapus 'nomor_kk' dari kandidat agar tidak mengambil angka KK
+        'tujuan' => ['keperluan', 'keterangan_lain', 'keterangan'],
     ],
     [
         'label' => 'Surat Kematian',
         'candidates' => ['tb_surat_kematian', 'surat_kematian'],
         'name' => ['nama_jenazah', 'nama_pelapor'],
-        'tujuan' => ['nama_pelapor', 'keterangan'],
+        // PERBAIKAN: Prioritaskan keperluan / keterangan / instansi tujuan
+        'tujuan' => ['keperluan', 'keterangan', 'tujuan'],
     ],
     [
         'label' => 'Surat Keterangan / Pengantar',
         'candidates' => ['tb_surat_pengantar', 'surat_pengantar'],
-        'name' => ['nama_pemohon', 'nama_warga'],
+        'name' => ['nama_penduduk', 'nama_pemohon', 'nama_warga'],
         'tujuan' => ['keperluan', 'keterangan_lain', 'keterangan'],
     ],
     [
@@ -103,7 +108,7 @@ $sourceTables = [
     [
         'label' => 'Surat Pengantar Dukcapil',
         'candidates' => ['tb_surat_pengantar_dukcapil', 'tb_surat_dukcapil', 'surat_pengantar_dukcapil', 'surat_dukcapil'],
-        'name' => ['created_by', 'jenis_dikirim'],
+        'name' => ['nama_pemohon', 'created_by'],
         'tujuan' => ['jenis_dikirim', 'banyaknya'],
     ],
     [

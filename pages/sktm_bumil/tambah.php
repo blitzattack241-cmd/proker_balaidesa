@@ -40,7 +40,6 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
             <i class="fas fa-file-medical me-1"></i> Form Input Data SKTM Ibu Hamil
         </div>
         <div class="card-body">
-            <!-- Wajib menggunakan enctype="multipart/form-data" karena ada input file/gambar -->
             <form action="pages/sktm_bumil/proses_tambah.php" method="POST" enctype="multipart/form-data">
 
                 <h5 class="text-primary mb-3"><i class="fas fa-envelope-open-text me-2"></i>Informasi Surat</h5>
@@ -83,10 +82,12 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
                         <input type="text" class="form-control" id="no_ktp" name="no_ktp" maxlength="16"
                             placeholder="16 Digit NIK" required>
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <label for="no_kk" class="form-label">Nomor Kartu Keluarga (KK)</label>
-                        <input type="text" class="form-control" id="no_kk" name="no_kk" maxlength="16"
-                            placeholder="16 Digit No. KK" required>
+                        <!-- Perbaikan: Diberi name="no_kk" agar sesuai dengan proses_tambah.php -->
+                        <input type="text" id="no_kk" name="no_kk" maxlength="16" class="form-control" value="331904"
+                            placeholder="Contoh: 33190..." required>
                     </div>
                 </div>
 
@@ -167,10 +168,10 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
                         <select class="form-select" id="id_pejabat" name="id_pejabat" required>
                             <option value="">-- Pilih Pejabat Penandatangan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

@@ -153,81 +153,81 @@ if (isset($_POST['update'])) {
      3. STYLING CSS MODERN & PREMIUM UI
      ========================================== -->
 <style>
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: -0.5px;
-    }
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
 
-    .breadcrumb-modern a {
-        color: #17a2b8;
-        font-weight: 500;
-    }
+.breadcrumb-modern a {
+    color: #17a2b8;
+    font-weight: 500;
+}
 
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .card-header-modern {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f3f5 !important;
-        padding: 1.25rem 1.5rem !important;
-    }
+.card-header-modern {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    padding: 1.25rem 1.5rem !important;
+}
 
-    .form-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
 
-    .form-control,
-    .form-select {
-        border-radius: 8px !important;
-        padding: 0.6rem 1rem;
-        border: 1.5px solid #e2e8f0;
-        transition: all 0.2s ease-in-out;
-    }
+.form-control,
+.form-select {
+    border-radius: 8px !important;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.2s ease-in-out;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #28a745;
-        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15);
-    }
+.form-control:focus,
+.form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15);
+}
 
-    .btn-custom-update {
-        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 24px;
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
-        transition: all 0.2s ease;
-    }
+.btn-custom-update {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 24px;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    transition: all 0.2s ease;
+}
 
-    .btn-custom-update:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.35);
-        color: #fff;
-    }
+.btn-custom-update:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.35);
+    color: #fff;
+}
 
-    .btn-custom-back {
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 20px;
-        background-color: #f1f5f9 !important;
-        border: 1.5px solid #cbd5e1 !important;
-        color: #475569 !important;
-    }
+.btn-custom-back {
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #475569 !important;
+}
 
-    .btn-custom-back:hover {
-        background-color: #e2e8f0 !important;
-        transform: translateY(-2px);
-    }
+.btn-custom-back:hover {
+    background-color: #e2e8f0 !important;
+    transform: translateY(-2px);
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -266,7 +266,7 @@ if (isset($_POST['update'])) {
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Nomor Surat Resmi (Tengah)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted fw-bold">01 /</span>
+
                             <input type="text" name="nomor_surat" class="form-control"
                                 value="<?= htmlspecialchars($nomor_surat_value); ?>" required>
                         </div>
@@ -328,13 +328,16 @@ if (isset($_POST['update'])) {
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Status Perkawinan (Poin 6)</label>
                         <select name="status_perkawinan" class="form-select" required>
-                            <option value="Belum Kawin" <?= ($data['status_perkawinan'] == 'Belum Kawin') ? 'selected' : ''; ?>>Belum Kawin
+                            <option value="Belum Kawin"
+                                <?= ($data['status_perkawinan'] == 'Belum Kawin') ? 'selected' : ''; ?>>Belum Kawin
                             </option>
                             <option value="Kawin" <?= ($data['status_perkawinan'] == 'Kawin') ? 'selected' : ''; ?>>
                                 Kawin</option>
-                            <option value="Cerai Hidup" <?= ($data['status_perkawinan'] == 'Cerai Hidup') ? 'selected' : ''; ?>>Cerai Hidup
+                            <option value="Cerai Hidup"
+                                <?= ($data['status_perkawinan'] == 'Cerai Hidup') ? 'selected' : ''; ?>>Cerai Hidup
                             </option>
-                            <option value="Cerai Mati" <?= ($data['status_perkawinan'] == 'Cerai Mati') ? 'selected' : ''; ?>>Cerai Mati
+                            <option value="Cerai Mati"
+                                <?= ($data['status_perkawinan'] == 'Cerai Mati') ? 'selected' : ''; ?>>Cerai Mati
                             </option>
                         </select>
                     </div>
@@ -398,13 +401,13 @@ if (isset($_POST['update'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Mengetahui --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <?php
+                            <?php
                                 $selected = (($selected_pejabat_id ?? '') == $pejabat['id_pejabat']) ? 'selected' : '';
                                 ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>" <?= $selected; ?>>
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>" <?= $selected; ?>>
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

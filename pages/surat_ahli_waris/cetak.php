@@ -537,7 +537,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                         <div class="box-ttd-kanan">
                             <!-- TEKS KETERANGAN JABATAN RATA KIRI AGAR SEJAJAR -->
                             <div contenteditable="true" style="text-align: left; display: inline-block;">
-                                Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 470 /
+                                Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
                                 <?= htmlspecialchars($data['nomor_surat']); ?><br>
                                 Tanggal &nbsp;&nbsp;&nbsp;: <?= tgl_indo($data['tanggal_surat']); ?><br>
                                 Disaksikan dan dibenarkan oleh kami,<br>

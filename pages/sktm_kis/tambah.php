@@ -100,36 +100,36 @@ if (isset($_POST['submit'])) {
 ?>
 
 <style>
-    .form-section-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #495057;
-        border-bottom: 2px solid #0d6efd;
-        padding-bottom: 5px;
-        margin-bottom: 20px;
-    }
+.form-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
 
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .btn-save-modern {
-        background: linear-gradient(135deg, #198754, #157347) !important;
-        border: none !important;
-        font-weight: 600;
-        padding: 10px 24px !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
-        color: white !important;
-    }
+.btn-save-modern {
+    background: linear-gradient(135deg, #198754, #157347) !important;
+    border: none !important;
+    font-weight: 600;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+    color: white !important;
+}
 
-    .btn-save-modern:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
-        color: white !important;
-    }
+.btn-save-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
+    color: white !important;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -201,9 +201,10 @@ if (isset($_POST['submit'])) {
                             placeholder="16 Digit NIK" required>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">No. Kartu Keluarga (KK)</label>
-                        <input type="text" name="no_kk" class="form-control" minlength="16" maxlength="16"
-                            placeholder="16 Digit No. KK" required>
+                        <label for="no_kk" class="form-label">Nomor Kartu Keluarga (KK)</label>
+                        <!-- Perbaikan: Diberi name="no_kk" agar sesuai dengan proses_tambah.php -->
+                        <input type="text" id="no_kk" name="no_kk" maxlength="16" class="form-control" value="331904"
+                            placeholder="Contoh: 33190..." required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Pekerjaan</label>
@@ -263,10 +264,10 @@ if (isset($_POST['submit'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)) { ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php } ?>
                         </select>
                     </div>

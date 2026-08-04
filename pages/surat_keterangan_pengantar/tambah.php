@@ -23,6 +23,8 @@ if (mysqli_connect_errno()) {
     exit;
 }
 
+require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
+
 // Ambil list pejabat untuk dropdown TTD secara dinamis
 $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY nama_pejabat ASC");
 
@@ -30,41 +32,40 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 // 2. PROSES SIMPAN DATA (POST SUBMISSION)
 // ==========================================
 if (isset($_POST['simpan'])) {
-    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
-    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
-    $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
-    $kode_surat = mysqli_real_escape_string($koneksi, $_POST['kode_surat']);
-    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $nik = mysqli_real_escape_string($koneksi, $_POST['nik']);
-    $nomor_kk = mysqli_real_escape_string($koneksi, $_POST['nomor_kk']);
-    $nama_penduduk = mysqli_real_escape_string($koneksi, $_POST['nama_penduduk']);
-    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $kewanegaraan = mysqli_real_escape_string($koneksi, $_POST['kewanegaraan']);
-    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $status_perkawinan = mysqli_real_escape_string($koneksi, $_POST['status_perkawinan']);
-    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    $berlaku_mulai = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $berlaku_sampai = mysqli_real_escape_string($koneksi, $_POST['berlaku_sampai']);
-    $keterangan_lain = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
-    $nama_pemohon = mysqli_real_escape_string($koneksi, $_POST['nama_pemohon']);
-
-    // Menerima nilai id_pejabat yang dipilih dari dropdown form
-    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat'] ?? '');
+    $nomor_surat        = generateNomorSuratGlobal($koneksi, true);
+    $kode_surat         = $_POST['kode_surat'] ?? '';
+    $tanggal_surat      = $_POST['tanggal_surat'] ?? '';
+    $nik                = $_POST['nik'] ?? '';
+    $nomor_kk           = $_POST['nomor_kk'] ?? '';
+    $nama_penduduk      = $_POST['nama_penduduk'] ?? '';
+    $jenis_kelamin      = $_POST['jenis_kelamin'] ?? '';
+    $tempat_lahir       = $_POST['tempat_lahir'] ?? '';
+    $tanggal_lahir      = $_POST['tanggal_lahir'] ?? '';
+    $kewarganegaraan    = $_POST['kewarganegaraan'] ?? 'Indonesia';
+    $agama              = $_POST['agama'] ?? '';
+    $status_perkawinan  = $_POST['status_perkawinan'] ?? '';
+    $pekerjaan          = $_POST['pekerjaan'] ?? '';
+    $alamat_tinggal     = $_POST['alamat_tinggal'] ?? '';
+    $keperluan          = $_POST['keperluan'] ?? '';
+    $berlaku_mulai      = $_POST['berlaku_mulai'] ?? '';
+    $berlaku_sampai     = $_POST['berlaku_sampai'] ?? '';
+    $keterangan_lain    = $_POST['keterangan_lain'] ?? '';
+    $nama_pemohon       = $_POST['nama_pemohon'] ?? '';
+    $id_pejabat         = $_POST['id_pejabat'] ?? '';
 
     // Ambil data pejabat penandatangan dari tabel tb_pejabat
     $nama_penandatanganan = '';
     $jabatan_penandatanganan = '';
     if (!empty($id_pejabat)) {
-        $pejabatData = mysqli_query($koneksi, "SELECT nama_pejabat, jabatan FROM tb_pejabat WHERE id_pejabat = '$id_pejabat'");
-        if ($pejabatData && mysqli_num_rows($pejabatData) > 0) {
-            $pej = mysqli_fetch_assoc($pejabatData);
-            $nama_penandatanganan = mysqli_real_escape_string($koneksi, $pej['nama_pejabat']);
-            $jabatan_penandatanganan = mysqli_real_escape_string($koneksi, $pej['jabatan']);
+        $stmt_pejabat = mysqli_prepare($koneksi, "SELECT nama_pejabat, jabatan FROM tb_pejabat WHERE id_pejabat = ?");
+        mysqli_stmt_bind_param($stmt_pejabat, "i", $id_pejabat);
+        mysqli_stmt_execute($stmt_pejabat);
+        $res_pej = mysqli_stmt_get_result($stmt_pejabat);
+        if ($pej = mysqli_fetch_assoc($res_pej)) {
+            $nama_penandatanganan    = $pej['nama_pejabat'];
+            $jabatan_penandatanganan = $pej['jabatan'];
         }
+        mysqli_stmt_close($stmt_pejabat);
     }
 
     // Pengecekan nama tabel dinamis
@@ -74,116 +75,126 @@ if (isset($_POST['simpan'])) {
         $tableName = 'surat_pengantar';
     }
 
-    // QUERY UTAMA INSERT DATA (Menyimpan nama dan jabatan penandatangan)
-    $insert = mysqli_query($koneksi, "
-        INSERT INTO `$tableName` (
-            `nomor_surat`, `kode_surat`, `tanggal_surat`, `nik`, `nomor_kk`, `nama_penduduk`, 
-            `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kewenangnegaraan`, `agama`, 
-            `status_perkawinan`, `pekerjaan`, `alamat_tinggal`, `keperluan`, `berlaku_mulai`, 
-            `berlaku_sampai`, `keterangan_lain`, `nama_pemohon`, `nama_penandatanganan`, `jabatan_penandatanganan`
-        ) VALUES (
-            '$nomor_surat', '$kode_surat', '$tanggal_surat', '$nik', '$nomor_kk', '$nama_penduduk', 
-            '$jenis_kelamin', '$tempat_lahir', '$tanggal_lahir', '$kewanegaraan', '$agama', 
-            '$status_perkawinan', '$pekerjaan', '$alamat_tinggal', '$keperluan', '$berlaku_mulai', 
-            '$berlaku_sampai', '$keterangan_lain', '$nama_pemohon', '$nama_penandatanganan', '$jabatan_penandatanganan'
-        )
-    ");
+    // QUERY UTAMA INSERT DATA (Menggunakan 'kewenangnegaraan' sesuai kolom database)
+    $sql = "INSERT INTO `$tableName` (
+                `nomor_surat`, `kode_surat`, `tanggal_surat`, `nik`, `nomor_kk`, `nama_penduduk`, 
+                `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kewenangnegaraan`, `agama`, 
+                `status_perkawinan`, `pekerjaan`, `alamat_tinggal`, `keperluan`, `berlaku_mulai`, 
+                `berlaku_sampai`, `keterangan_lain`, `nama_pemohon`, `nama_penandatanganan`, `jabatan_penandatanganan`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    if ($insert) {
-        echo "<script>
-                alert('Data Surat Pengantar berhasil ditambahkan!');
-                window.location.href = 'index.php?page=surat-pengantar';
-              </script>";
+    $stmt = mysqli_prepare($koneksi, $sql);
+
+    if ($stmt) {
+        mysqli_stmt_bind_param(
+            $stmt,
+            "sssssssssssssssssssss",
+            $nomor_surat, $kode_surat, $tanggal_surat, $nik, $nomor_kk, $nama_penduduk,
+            $jenis_kelamin, $tempat_lahir, $tanggal_lahir, $kewarganegaraan, $agama,
+            $status_perkawinan, $pekerjaan, $alamat_tinggal, $keperluan, $berlaku_mulai,
+            $berlaku_sampai, $keterangan_lain, $nama_pemohon, $nama_penandatanganan, $jabatan_penandatanganan
+        );
+
+        if (mysqli_stmt_execute($stmt)) {
+            echo "<script>
+                    alert('Data Surat Pengantar berhasil ditambahkan!');
+                    window.location.href = 'index.php?page=surat-pengantar';
+                  </script>";
+            exit;
+        } else {
+            echo "<script>
+                    alert('Gagal menambahkan data: " . addslashes(mysqli_stmt_error($stmt)) . "');
+                  </script>";
+        }
+        mysqli_stmt_close($stmt);
     } else {
         echo "<script>
-                alert('Gagal menambahkan data: " . mysqli_error($koneksi) . "');
+                alert('Gagal menyiapkan query: " . addslashes(mysqli_error($koneksi)) . "');
               </script>";
     }
 }
 
-require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
-
-// Nomor surat global otomatis untuk semua jenis surat
-$no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
+// Nomor surat global otomatis untuk preview form
+$no_surat_auto = generateNomorSuratGlobal($koneksi, false);
 ?>
 
 <!-- ==========================================
      3. STYLING CSS MODERN & PREMIUM UI
      ========================================== -->
 <style>
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: -0.5px;
-    }
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
 
-    .breadcrumb-modern a {
-        color: #17a2b8;
-        font-weight: 500;
-    }
+.breadcrumb-modern a {
+    color: #17a2b8;
+    font-weight: 500;
+}
 
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .card-header-modern {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f3f5 !important;
-        padding: 1.25rem 1.5rem !important;
-    }
+.card-header-modern {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    padding: 1.25rem 1.5rem !important;
+}
 
-    .form-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
 
-    .form-control,
-    .form-select {
-        border-radius: 8px !important;
-        padding: 0.6rem 1rem;
-        border: 1.5px solid #e2e8f0;
-        transition: all 0.2s ease-in-out;
-    }
+.form-control,
+.form-select {
+    border-radius: 8px !important;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.2s ease-in-out;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-    }
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
 
-    .btn-custom-save {
-        background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 24px;
-        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-        transition: all 0.2s ease;
-    }
+.btn-custom-save {
+    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 24px;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    transition: all 0.2s ease;
+}
 
-    .btn-custom-save:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-    }
+.btn-custom-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+}
 
-    .btn-custom-back {
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 20px;
-        background-color: #f1f5f9 !important;
-        border: 1.5px solid #cbd5e1 !important;
-        color: #475569 !important;
-    }
+.btn-custom-back {
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #475569 !important;
+}
 
-    .btn-custom-back:hover {
-        background-color: #e2e8f0 !important;
-        transform: translateY(-2px);
-    }
+.btn-custom-back:hover {
+    background-color: #e2e8f0 !important;
+    transform: translateY(-2px);
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -216,15 +227,14 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tid
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Kode Desa (Kiri Atas)</label>
-                        <input type="text" name="kode_surat" value="471/    /31.07.16/2026" class="form-control"
-                            required>
+                        <input type="text" name="kode_surat" value="31.07.16/2026" class="form-control" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Nomor Surat Resmi (Tengah)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted fw-bold">471 /</span>
-                            <input type="text" name="nomor_surat" class="form-control" value="<?= $no_surat_auto; ?>"
-                                placeholder="Contoh: 471 / 2026" required>
+                            <input type="text" name="nomor_surat" class="form-control"
+                                value="<?= htmlspecialchars($no_surat_auto); ?>" placeholder="Contoh: 471 / 2026"
+                                required>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -292,8 +302,8 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tid
                     </div>
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Tempat Tinggal / Alamat Lengkap (Poin 8)</label>
-                        <textarea name="alamat_tinggal" class="form-control" rows="2"
-                            placeholder="Desa Megawon RT ... RW ... Kecamatan Jati..." required></textarea>
+                        <textarea name="alamat_tinggal" class="form-control" rows="2" placeholder="Alamat RT/RW Desa..."
+                            required></textarea>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Surat Bukti Diri: NIK KTP (Poin 9)</label>
@@ -301,9 +311,10 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tid
                             placeholder="Masukkan 16 digit NIK..." required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Surat Bukti Diri: No Kartu Keluarga (Poin 9)</label>
-                        <input type="text" name="nomor_kk" class="form-control" maxlength="16"
-                            placeholder="Masukkan 16 digit Nomor KK..." required>
+                        <label class="form-label">Surat Bukti Diri: No Kartu Keluarga (Poin 8)</label>
+                        <!-- PERBAIKAN: name="nomor_kk" -->
+                        <input type="text" name="nomor_kk" maxlength="16" class="form-control" value="331904"
+                            placeholder="Contoh: 33190..." required>
                     </div>
                 </div>
 
@@ -331,7 +342,7 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tid
                 <div class="mb-3">
                     <label class="form-label">Keterangan Lain-lain (Poin 12)</label>
                     <textarea name="keterangan_lain" class="form-control"
-                        rows="2">Menerangkan Bahwa Orang tersebut diatas, benar-benar penduduk Desa Megawon dan bertingkah laku baik.</textarea>
+                        rows="2">Menerangkan Bahwa Orang tersebut diatas, benar-benar penduduk Desa dan bertingkah laku baik.</textarea>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -344,10 +355,10 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false); // preview saja, tid
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Mengetahui --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

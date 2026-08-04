@@ -73,22 +73,25 @@ $sourceTables = [
     [
         'label' => 'Surat Undangan',
         'candidates' => ['tb_surat_undangan', 'surat_undangan'],
-        'name' => ['nama_pemohon', 'sifat', 'id_pejabat'],
-        'tujuan' => ['acara', 'perihal', 'tempat_acara'],
+        // PERBAIKAN: Gunakan nama pengundang / pejabat / pemohon
+        'name' => ['nama_pengundang', 'nama_pemohon', 'pengundang', 'nama_pejabat'],
+        // PERBAIKAN: Gunakan kolom tujuan/penerima surat undangan
+        'tujuan' => ['tujuan_surat', 'kepada', 'tujuan', 'penerima', 'acara', 'perihal'],
         'keterangan' => ['keterangan', 'keperluan'],
     ],
     [
         'label' => 'Surat Kelahiran',
         'candidates' => ['tb_surat_kelahiran', 'surat_kelahiran'],
-        'name' => ['nama_kepala_keluarga', 'nama_bayi', 'nama_pelapor'],
-        'tujuan' => ['nama_bayi', 'nomor_kk', 'nama_kepala_keluarga'],
+        'name' => ['nama_bayi', 'nama_kepala_keluarga', 'nama_pelapor'],
+        'tujuan' => ['nama_kepala_keluarga', 'nomor_kk', 'keperluan'],
         'keterangan' => ['keterangan', 'keterangan_lain'],
     ],
     [
         'label' => 'Surat Kematian',
         'candidates' => ['tb_surat_kematian', 'surat_kematian'],
         'name' => ['nama_jenazah', 'nama_pelapor'],
-        'tujuan' => ['nama_pelapor', 'keterangan'],
+        // PERBAIKAN: Gunakan keperluan / keterangan alih-alih nama pelapor
+        'tujuan' => ['keperluan', 'keterangan', 'tujuan'],
         'keterangan' => ['keterangan', 'keterangan_lain'],
     ],
     [
@@ -108,7 +111,7 @@ $sourceTables = [
     [
         'label' => 'Surat Pengantar Dukcapil',
         'candidates' => ['tb_surat_pengantar_dukcapil', 'tb_surat_dukcapil', 'surat_pengantar_dukcapil', 'surat_dukcapil'],
-        'name' => ['created_by', 'jenis_dikirim'],
+        'name' => ['nama_pemohon', 'created_by'],
         'tujuan' => ['jenis_dikirim', 'banyaknya'],
         'keterangan' => ['keterangan'],
     ],
@@ -303,8 +306,8 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
     table.data-table th,
     table.data-table td {
         border: 1px solid #000;
-        padding: 5px 6px;
-        vertical-align: top;
+        padding: 4px 5px;
+        vertical-align: middle;
         word-wrap: break-word;
     }
 
@@ -314,24 +317,32 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
         font-weight: bold;
         font-size: 9.5pt;
         text-transform: uppercase;
-        vertical-align: middle;
     }
 
-    table.data-table td {
-        font-size: 9pt;
-        line-height: 1.2;
-    }
-
-    /* INPUT KETERANGAN & TANGGAL EDITABLE */
-    .input-ket {
+    /* STYLE INPUT KETIKAN / EDITABLE */
+    .input-editable {
         width: 100%;
         box-sizing: border-box;
-        border: none;
-        background: transparent;
+        border: 1px dashed #ccc;
+        background: #fff8dc;
         font-family: inherit;
-        font-size: inherit;
-        padding: 0;
+        font-size: 9pt;
+        padding: 2px 4px;
         outline: none;
+        border-radius: 2px;
+    }
+
+    .input-editable:focus {
+        background: #fff;
+        border: 1px solid #007bff;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .font-bold {
+        font-weight: bold;
     }
 
     .input-tanggal-ttd {
@@ -368,10 +379,21 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
         font-size: 10pt;
     }
 
-    /* SEMBUNYIKAN NAVIGASI SAAT DIPRINT */
+    /* SEMBUNYIKAN UI LAYAR SAAT DIPRINT */
     @media print {
         .btn-bar {
             display: none !important;
+        }
+
+        /* UBAH INPUT MENJADI TEKS POLOS SAAT CETAK */
+        .input-editable {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        .input-editable:placeholder-shown {
+            display: none;
         }
     }
     </style>
@@ -393,7 +415,7 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
         </div>
     </div>
 
-    <!-- MODEL A.7 (DI ATAS KOLOM KETERANGAN / KANAN ATAS TABEL) -->
+    <!-- MODEL A.7 -->
     <div
         style="text-align: right; font-weight: bold; font-family: 'Times New Roman', Times, serif; font-size: 11pt; margin-bottom: 3px;">
         Model A.7
@@ -402,13 +424,13 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
     <!-- TABEL DATA AGENDA -->
     <table class="data-table">
         <thead>
-            <!-- BARIS 1: Header Atas dengan SURAT KELUAR yang membawahi 5 kolom -->
+            <!-- BARIS 1 -->
             <tr>
                 <th rowspan="2" style="width: 4%;">NO</th>
                 <th colspan="5">SURAT KELUAR</th>
                 <th rowspan="2" style="width: 17%;">KETERANGAN</th>
             </tr>
-            <!-- BARIS 2: Rincian kolom -->
+            <!-- BARIS 2 -->
             <tr>
                 <th style="width: 17%;">ISI SINGKAT</th>
                 <th style="width: 16%;">NAMA PEMOHON</th>
@@ -416,7 +438,7 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
                 <th style="width: 18%;">NOMOR SURAT</th>
                 <th style="width: 17%;">TUJUAN</th>
             </tr>
-            <!-- BARIS 3: Penomoran 1 sampai 7 -->
+            <!-- BARIS 3 -->
             <tr>
                 <th>1</th>
                 <th>2</th>
@@ -439,13 +461,40 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
                     ?>
             <tr>
                 <td style="text-align: center; font-weight: bold;"><?php echo $no++; ?></td>
-                <td><strong><?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?></strong></td>
-                <td><?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '-')); ?></td>
-                <td style="text-align: center;"><?php echo htmlspecialchars($tanggal); ?></td>
-                <td><?php echo htmlspecialchars(cleanUtf8($row['nomor_surat'] ?: '-')); ?></td>
-                <td><?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '-')); ?></td>
+
+                <!-- ISI SINGKAT (EDITABLE) -->
                 <td>
-                    <input type="text" class="input-ket">
+                    <input type="text" class="input-editable font-bold"
+                        value="<?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?>">
+                </td>
+
+                <!-- NAMA PEMOHON (EDITABLE) -->
+                <td>
+                    <input type="text" class="input-editable"
+                        value="<?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '')); ?>" placeholder="-">
+                </td>
+
+                <!-- TANGGAL SURAT (EDITABLE) -->
+                <td>
+                    <input type="text" class="input-editable text-center"
+                        value="<?php echo htmlspecialchars($tanggal); ?>">
+                </td>
+
+                <!-- NOMOR SURAT (EDITABLE) -->
+                <td>
+                    <input type="text" class="input-editable"
+                        value="<?php echo htmlspecialchars(cleanUtf8($row['nomor_surat'] ?: '')); ?>" placeholder="-">
+                </td>
+
+                <!-- TUJUAN (EDITABLE) -->
+                <td>
+                    <input type="text" class="input-editable"
+                        value="<?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '')); ?>" placeholder="-">
+                </td>
+
+                <!-- KETERANGAN (EDITABLE) -->
+                <td>
+                    <input type="text" class="input-editable" value="" placeholder="Ketik keterangan...">
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -474,7 +523,6 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
                 </td>
                 <td style="width: 50%;">
                     <p style="margin-bottom: 50px;">
-                        <!-- Input tanggal sekarang diposisikan di tengah seperti Mengetahui, -->
                         <input type="text" class="input-tanggal-ttd"
                             value="Berugenjang, ...................................."><br>
                         <strong>Sekretaris Desa Berugenjang</strong>
