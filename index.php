@@ -755,12 +755,16 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                 class="fas fa-bars"></i></button>
 
         <!-- Navbar Search-->
-        <form class="d-flex ms-auto me-0 me-md-3 my-2 my-md-0" role="search" action="index.php" method="get" id="navbarSearchForm" autocomplete="off">
+        <form class="d-flex ms-auto me-0 me-md-3 my-2 my-md-0" role="search" action="index.php" method="get"
+            id="navbarSearchForm" autocomplete="off">
             <input type="hidden" name="page" value="<?= htmlspecialchars($page, ENT_QUOTES, 'UTF-8') ?>" />
             <div class="input-group search-navbar-group">
-                <input class="form-control" type="text" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" placeholder="Cari modul, surat, atau halaman..." aria-label="Cari data" />
+                <input class="form-control" type="text" name="q"
+                    value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>"
+                    placeholder="Cari modul, surat, atau halaman..." aria-label="Cari data" />
                 <button class="btn btn-primary" id="btnNavbarSearch" type="submit"
-                    style="background-color: #239a58; border-color: #239a58;" aria-label="Cari"><i class="fas fa-search"></i></button>
+                    style="background-color: #239a58; border-color: #239a58;" aria-label="Cari"><i
+                        class="fas fa-search"></i></button>
             </div>
         </form>
 
@@ -910,6 +914,12 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Penduduk
                             <?= ($page == 'penduduk') ? '<div class="active-dot"></div>' : ''; ?>
+                        </a>
+                        <a class="nav-link <?= ($page == 'chart') ? 'active-green' : ''; ?>"
+                            href="index.php?page=chart">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
+                            Grafik & Statistik
+                            <?= ($page == 'chart') ? '<div class="active-dot"></div>' : ''; ?>
                         </a>
                         <a class="nav-link <?= ($page == 'daftar-surat') ? 'active-green' : ''; ?>"
                             href="index.php?page=daftar-surat">
@@ -1119,8 +1129,16 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             include 'pages/daftar_surat.php';
                             break;
                         case 'penduduk':
-                            echo "<h1 class='mt-4'>Data Penduduk</h1>";
-                            echo "<ol class='breadcrumb mb-4'><li class='breadcrumb-item active'>Manajemen Klasifikasi Data Penduduk</li></ol>";
+                            include 'pages/penduduk.php'; // Atau letak file penduduk kamu
+                            break;
+                        case 'chart':
+                            include 'pages/chart.php';
+                            break;
+                        case 'tambah-penduduk':
+                            include 'pages/tambah-penduduk.php';
+                            break;
+                        case 'edit-penduduk':
+                            include 'pages/edit-penduduk.php';
                             break;
                         case 'laporan':
                             echo "<h1 class='mt-4'>Laporan</h1>";
@@ -1129,6 +1147,7 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                         case 'profil-desa':
                             include 'profil_desa.php';
                             break;
+
                         case 'dashboard':
                         default:
                             // Hitung jumlah data setiap layanan (aman walau nama tabel sedikit berbeda)

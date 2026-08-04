@@ -118,6 +118,11 @@ if (isset($_POST['simpan'])) {
 $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
 ?>
 
+<!-- Include Assets Select2 CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
 <!-- ==========================================
      3. STYLING CSS MODERN & PREMIUM UI
      ========================================== -->
@@ -195,6 +200,13 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
     background-color: #e2e8f0 !important;
     transform: translateY(-2px);
 }
+
+.box-pencarian {
+    background-color: #f8fafc;
+    border: 1px dashed #0d6efd;
+    border-radius: 12px;
+    padding: 1.25rem;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -220,6 +232,20 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
         </div>
         <div class="card-body p-4">
             <form action="" method="POST" autocomplete="off">
+
+                <!-- BAGIAN 0: PENCARIAN OTOMATIS PENDUDUK -->
+                <div class="box-pencarian mb-4">
+                    <label class="form-label text-primary fw-bold mb-2">
+                        <i class="fas fa-search me-1"></i> Cari & Auto-fill Data Penduduk (Ketik No. KK / NIK / Nama)
+                    </label>
+                    <select id="cari_penduduk" class="form-select" style="width: 100%;">
+                        <option value="">-- Ketik No. KK, NIK, atau Nama Penduduk... --</option>
+                    </select>
+                    <small class="text-muted mt-1 d-block">
+                        <i class="fas fa-info-circle me-1"></i> Pilih nama warga yang muncul untuk mengisi otomatis
+                        seluruh formulir identitas di bawah ini.
+                    </small>
+                </div>
 
                 <!-- BAGIAN 1: METADATA SURAT -->
                 <h5 class="mb-3 text-primary fw-bold"><i class="fas fa-print me-1"></i> 1. Nomor &amp; Klasifikasi Surat
@@ -252,32 +278,33 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Nama Lengkap Warga (Poin 1)</label>
-                        <input type="text" name="nama_penduduk" class="form-control text-uppercase"
+                        <input type="text" id="input_nama" name="nama_penduduk" class="form-control text-uppercase"
                             placeholder="Nama sesuai KTP..." required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Jenis Kelamin (Poin 2)</label>
-                        <select name="jenis_kelamin" class="form-select" required>
+                        <select id="input_jenis_kelamin" name="jenis_kelamin" class="form-select" required>
                             <option value="Laki-Laki">Laki-Laki</option>
                             <option value="Perempuan">Perempuan</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tempat Lahir (Poin 3)</label>
-                        <input type="text" name="tempat_lahir" class="form-control" placeholder="Tempat Lahir..."
-                            required>
+                        <input type="text" id="input_tempat_lahir" name="tempat_lahir" class="form-control"
+                            placeholder="Tempat Lahir..." required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Lahir (Poin 3)</label>
-                        <input type="date" name="tanggal_lahir" class="form-control" required>
+                        <input type="date" id="input_tanggal_lahir" name="tanggal_lahir" class="form-control" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Kewarganegaraan (Poin 4)</label>
-                        <input type="text" name="kewanegaraan" class="form-control" value="Indonesia" required>
+                        <input type="text" id="input_kewarganegaraan" name="kewarganegaraan" class="form-control"
+                            value="Indonesia" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Agama (Poin 5)</label>
-                        <select name="agama" class="form-select" required>
+                        <select id="input_agama" name="agama" class="form-select" required>
                             <option value="Islam">Islam</option>
                             <option value="Kristen">Kristen</option>
                             <option value="Katolik">Katolik</option>
@@ -288,7 +315,7 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Status Perkawinan (Poin 6)</label>
-                        <select name="status_perkawinan" class="form-select" required>
+                        <select id="input_status_perkawinan" name="status_perkawinan" class="form-select" required>
                             <option value="Belum Kawin">Belum Kawin</option>
                             <option value="Kawin">Kawin</option>
                             <option value="Cerai Hidup">Cerai Hidup</option>
@@ -297,23 +324,22 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Pekerjaan (Poin 7)</label>
-                        <input type="text" name="pekerjaan" class="form-control"
+                        <input type="text" id="input_pekerjaan" name="pekerjaan" class="form-control"
                             placeholder="Contoh: Karyawan Swasta..." required>
                     </div>
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Tempat Tinggal / Alamat Lengkap (Poin 8)</label>
-                        <textarea name="alamat_tinggal" class="form-control" rows="2" placeholder="Alamat RT/RW Desa..."
-                            required></textarea>
+                        <textarea id="input_alamat" name="alamat_tinggal" class="form-control" rows="2"
+                            placeholder="Alamat RT/RW Desa..." required></textarea>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Surat Bukti Diri: NIK KTP (Poin 9)</label>
-                        <input type="text" name="nik" class="form-control" maxlength="16"
+                        <input type="text" id="input_nik" name="nik" class="form-control" maxlength="16"
                             placeholder="Masukkan 16 digit NIK..." required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Surat Bukti Diri: No Kartu Keluarga (Poin 8)</label>
-                        <!-- PERBAIKAN: name="nomor_kk" -->
-                        <input type="text" name="nomor_kk" maxlength="16" class="form-control" value="331904"
+                        <input type="text" id="input_nomor_kk" name="nomor_kk" maxlength="16" class="form-control"
                             placeholder="Contoh: 33190..." required>
                     </div>
                 </div>
@@ -347,8 +373,8 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Nama Pemohon (Tanda Tangan Kanan)</label>
-                        <input type="text" name="nama_pemohon" class="form-control" placeholder="Nama Pemohon..."
-                            required>
+                        <input type="text" id="input_nama_pemohon" name="nama_pemohon" class="form-control"
+                            placeholder="Nama Pemohon..." required>
                     </div>
                     <div class="col-md-6 mb-4">
                         <label class="form-label">Pejabat Otoritas Penandatangan (Kiri Bawah)</label>
@@ -376,3 +402,84 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
         </div>
     </div>
 </div>
+
+<!-- Script jQuery & Select2 Autocomplete -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi Dropdown Select2
+    $('#cari_penduduk').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Ketik No. KK, NIK, atau Nama Penduduk... --',
+        allowClear: true,
+        ajax: {
+            url: 'api/get_penduduk.php',
+            dataType: 'json',
+            delay: 300,
+            data: function(params) {
+                return {
+                    search: params.term // Kirim kata kunci ke API
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Event ketika item dipilih dari dropdown
+    $('#cari_penduduk').on('select2:select', function(e) {
+        var data = e.params.data;
+
+        // Isikan otomatis data ke input form
+        $('#input_nama').val(data.nama);
+        $('#input_nama_pemohon').val(data.nama);
+        $('#input_nik').val(data.nik);
+        $('#input_nomor_kk').val(data.no_kk);
+        $('#input_pekerjaan').val(data.pekerjaan);
+        $('#input_alamat').val(data.alamat_lengkap);
+
+        // Pisahkan tempat lahir dan tanggal lahir jika ada
+        if (data.tempat_tgl_lahir) {
+            var ttl = data.tempat_tgl_lahir.split(',');
+            if (ttl.length > 1) {
+                $('#input_tempat_lahir').val(ttl[0].trim());
+            } else {
+                $('#input_tempat_lahir').val(data.tempat_tgl_lahir);
+            }
+        }
+
+        // Auto Select Jenis Kelamin
+        if (data.jenis_kelamin) {
+            var jk = data.jenis_kelamin.toLowerCase();
+            if (jk.includes('l')) {
+                $('#input_jenis_kelamin').val('Laki-Laki');
+            } else if (jk.includes('p')) {
+                $('#input_jenis_kelamin').val('Perempuan');
+            }
+        }
+
+        // Auto Select Agama
+        if (data.agama) {
+            $('#input_agama').val(data.agama);
+        }
+    });
+
+    // Event ketika pilihan dibersihkan (Clear)
+    $('#cari_penduduk').on('select2:clear', function(e) {
+        $('#input_nama').val('');
+        $('#input_nama_pemohon').val('');
+        $('#input_nik').val('');
+        $('#input_nomor_kk').val('');
+        $('#input_tempat_lahir').val('');
+        $('#input_tanggal_lahir').val('');
+        $('#input_pekerjaan').val('');
+        $('#input_alamat').val('');
+    });
+});
+</script>
