@@ -36,6 +36,40 @@ function chooseColumnExpr(mysqli $koneksi, string $table, array $candidates, str
     return "'" . mysqli_real_escape_string($koneksi, $default) . "'";
 }
 
+function chooseNomorSuratExpr(mysqli $koneksi, string $table): string {
+    $candidates = ['nomor_surat', 'kode_surat', 'no_surat', 'surat_nomor', 'nomor'];
+    $parts = [];
+
+    foreach ($candidates as $column) {
+        if (columnExists($koneksi, $table, $column)) {
+            $parts[] = "NULLIF(TRIM(`$column`), '')";
+        }
+    }
+
+    if (empty($parts)) {
+        return "''";
+    }
+
+    return "TRIM(COALESCE(" . implode(', ', $parts) . ", ''))";
+}
+
+function normalizeNomorSuratValue($value): string {
+    if ($value === null) {
+        return '';
+    }
+
+    if (is_int($value) || is_float($value)) {
+        return $value == 0 ? '' : (string) $value;
+    }
+
+    $trimmed = trim((string) $value);
+    if ($trimmed === '' || $trimmed === '0') {
+        return '';
+    }
+
+    return $trimmed;
+}
+
 function chooseColumnName(mysqli $koneksi, string $table, array $candidates): string {
     foreach ($candidates as $column) {
         if (columnExists($koneksi, $table, $column)) return $column;
@@ -152,44 +186,31 @@ $sourceTables = [
     ],
 ];
 
-$unionQueries = [];
+$suratRows = [];
 foreach ($sourceTables as $config) {
     $table = findExistingTable($koneksi, $config['candidates']);
     if (!$table) continue;
 
     $jenis = mysqli_real_escape_string($koneksi, $config['label']);
-    $nomor = chooseColumnExpr($koneksi, $table, ['nomor_surat'], '');
+    $nomor = chooseNomorSuratExpr($koneksi, $table);
     $tanggal = chooseColumnExpr($koneksi, $table, ['tanggal_surat'], '');
     $nama = chooseColumnExpr($koneksi, $table, $config['name'], '');
     $tujuan = chooseColumnExpr($koneksi, $table, $config['tujuan'], '');
     $idColumnName = chooseColumnName($koneksi, $table, ['id', 'id_surat', 'id_kelahiran', 'id_kematian', 'id_penggarap', 'id_sktm', 'id_undangan', 'id_pasien', 'id_waris']);
     $idExpr = $idColumnName ? "`" . $idColumnName . "`" : "0";
 
-    $coll = ' COLLATE utf8mb4_general_ci';
-    $jenisExpr = "'" . $jenis . "'" . $coll . " AS jenis_surat";
-    $sumberExpr = "'" . mysqli_real_escape_string($koneksi, $table) . "'" . $coll . " AS sumber_tabel";
+    $query = "SELECT
+        '" . $jenis . "' AS jenis_surat,
+        '" . mysqli_real_escape_string($koneksi, $table) . "' AS sumber_tabel,
+        " . $nomor . " AS nomor_surat,
+        " . $tanggal . " AS tanggal_surat,
+        " . $nama . " AS nama_pemohon,
+        " . $tujuan . " AS tujuan,
+        '' AS keterangan,
+        " . $idExpr . " AS id_value,
+        '" . mysqli_real_escape_string($koneksi, $idColumnName) . "' AS id_column
+        FROM `" . mysqli_real_escape_string($koneksi, $table) . "`";
 
-    $applyTextCollation = function ($expr) use ($coll) {
-        $trim = ltrim($expr);
-        if ($trim === "''" || (isset($trim[0]) && $trim[0] === "'")) return $expr . $coll;
-        if (strpos($expr, "`") !== false || stripos($expr, 'concat') !== false || stripos($expr, 'trim') !== false) {
-            return 'CONVERT(' . $expr . " USING utf8mb4)";
-        }
-        return $expr . $coll;
-    };
-
-    $nomorExpr = $applyTextCollation($nomor) . " AS nomor_surat";
-    $tanggalExpr = $tanggal . " AS tanggal_surat";
-    $namaExpr = $applyTextCollation($nama) . " AS nama_pemohon";
-    $tujuanExpr = $applyTextCollation($tujuan) . " AS tujuan";
-    $idColumnExpr = "'" . mysqli_real_escape_string($koneksi, $idColumnName) . "'" . $coll . " AS id_column";
-
-    $unionQueries[] = "SELECT " . $jenisExpr . ", " . $sumberExpr . ", " . $nomorExpr . ", " . $tanggalExpr . ", " . $namaExpr . ", " . $tujuanExpr . ", ''" . $coll . " AS keterangan, " . $idExpr . " AS id_value, " . $idColumnExpr . " FROM `" . mysqli_real_escape_string($koneksi, $table) . "`";
-}
-
-$suratRows = [];
-if (!empty($unionQueries)) {
-    $query = implode(' UNION ALL ', $unionQueries) . ' ORDER BY tanggal_surat ASC, nomor_surat ASC';
     $result = mysqli_query($koneksi, $query);
     if ($result) {
         while ($data = mysqli_fetch_assoc($result)) {
@@ -197,6 +218,17 @@ if (!empty($unionQueries)) {
         }
     }
 }
+
+usort($suratRows, function ($a, $b) {
+    $left = $a['tanggal_surat'] ?? '';
+    $right = $b['tanggal_surat'] ?? '';
+    $cmp = strcmp($left, $right);
+    if ($cmp !== 0) {
+        return $cmp;
+    }
+
+    return strcmp(($a['nomor_surat'] ?? ''), ($b['nomor_surat'] ?? ''));
+});
 
 // Filter Data
 $filteredRows = [];
@@ -483,7 +515,7 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
                 <!-- NOMOR SURAT (EDITABLE) -->
                 <td>
                     <input type="text" class="input-editable"
-                        value="<?php echo htmlspecialchars(cleanUtf8($row['nomor_surat'] ?: '')); ?>" placeholder="-">
+                        value="<?php echo htmlspecialchars(cleanUtf8(normalizeNomorSuratValue($row['nomor_surat'] ?? '') ?: '')); ?>" placeholder="-">
                 </td>
 
                 <!-- TUJUAN (EDITABLE) -->
