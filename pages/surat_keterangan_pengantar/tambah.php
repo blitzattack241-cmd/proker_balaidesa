@@ -75,7 +75,7 @@ if (isset($_POST['simpan'])) {
         $tableName = 'surat_pengantar';
     }
 
-    // QUERY UTAMA INSERT DATA (Menggunakan 'kewenangnegaraan' sesuai kolom database)
+    // QUERY UTAMA INSERT DATA
     $sql = "INSERT INTO `$tableName` (
                 `nomor_surat`, `kode_surat`, `tanggal_surat`, `nik`, `nomor_kk`, `nama_penduduk`, 
                 `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kewenangnegaraan`, `agama`, 
@@ -123,9 +123,6 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
     rel="stylesheet" />
 
-<!-- ==========================================
-     3. STYLING CSS MODERN & PREMIUM UI
-     ========================================== -->
 <style>
 .page-title-modern {
     font-weight: 700;
@@ -241,6 +238,8 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                     <select id="cari_penduduk" class="form-select" style="width: 100%;">
                         <option value="">-- Ketik No. KK, NIK, atau Nama Penduduk... --</option>
                     </select>
+                    <pre id="debug_penduduk"
+                        style="display:none;background:#f8fafc;border:1px dashed #0d6efd;padding:0.75rem;border-radius:8px;margin-top:0.75rem;font-size:0.85rem;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto;"></pre>
                     <small class="text-muted mt-1 d-block">
                         <i class="fas fa-info-circle me-1"></i> Pilih nama warga yang muncul untuk mengisi otomatis
                         seluruh formulir identitas di bawah ini.
@@ -259,9 +258,10 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
                         <label class="form-label">Nomor Surat Resmi (Tengah)</label>
                         <div class="input-group">
                             <input type="text" name="nomor_surat" class="form-control"
-                                value="<?= htmlspecialchars($no_surat_auto); ?>" placeholder="Contoh: 471 / 2026"
-                                required>
+                                value="<?= htmlspecialchars($no_surat_auto); ?>" required>
                         </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                            manual)</small>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Tanggal Keluar Surat</label>
@@ -409,6 +409,44 @@ $no_surat_auto = generateNomorSuratGlobal($koneksi, false);
 
 <script>
 $(document).ready(function() {
+    // Helper fungsi formatting tanggal ke YYYY-MM-DD
+    function formatTanggalKeYMD(strTanggal) {
+        if (!strTanggal) return '';
+        strTanggal = strTanggal.trim();
+
+        // Jika sudah YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(strTanggal)) {
+            return strTanggal;
+        }
+
+        // Jika format DD-MM-YYYY atau DD/MM/YYYY
+        if (strTanggal.includes('-') || strTanggal.includes('/')) {
+            var delim = strTanggal.includes('-') ? '-' : '/';
+            var parts = strTanggal.split(delim);
+            if (parts.length === 3) {
+                // Kasus DD-MM-YYYY
+                if (parts[0].length === 2 && parts[2].length === 4) {
+                    return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+                }
+            }
+        }
+
+        // Coba parser JS standar
+        var d = new Date(strTanggal);
+        if (!isNaN(d.getTime())) {
+            var month = '' + (d.getMonth() + 1);
+            var day = '' + d.getDate();
+            var year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+        return '';
+    }
+
     // Inisialisasi Dropdown Select2
     $('#cari_penduduk').select2({
         theme: 'bootstrap-5',
@@ -420,7 +458,7 @@ $(document).ready(function() {
             delay: 300,
             data: function(params) {
                 return {
-                    search: params.term // Kirim kata kunci ke API
+                    search: params.term
                 };
             },
             processResults: function(data) {
@@ -434,27 +472,64 @@ $(document).ready(function() {
 
     // Event ketika item dipilih dari dropdown
     $('#cari_penduduk').on('select2:select', function(e) {
-        var data = e.params.data;
+        var sel = e.params.data || {};
 
-        // Isikan otomatis data ke input form
-        $('#input_nama').val(data.nama);
-        $('#input_nama_pemohon').val(data.nama);
-        $('#input_nik').val(data.nik);
-        $('#input_nomor_kk').val(data.no_kk);
-        $('#input_pekerjaan').val(data.pekerjaan);
-        $('#input_alamat').val(data.alamat_lengkap);
-
-        // Pisahkan tempat lahir dan tanggal lahir jika ada
-        if (data.tempat_tgl_lahir) {
-            var ttl = data.tempat_tgl_lahir.split(',');
-            if (ttl.length > 1) {
-                $('#input_tempat_lahir').val(ttl[0].trim());
-            } else {
-                $('#input_tempat_lahir').val(data.tempat_tgl_lahir);
-            }
+        // Jika server sudah mengembalikan detail lengkap, gunakan langsung
+        if (sel.tgl_lahir || sel.tempat_lahir || sel.tempat_tgl_lahir) {
+            applyPendudukData(sel);
+            return;
         }
 
-        // Auto Select Jenis Kelamin
+        // Jika tidak, ambil detail lengkap dari endpoint berdasarkan ID
+        if (sel.id) {
+            $.getJSON('api/get_penduduk.php', {
+                    id: sel.id
+                })
+                .done(function(res) {
+                    if (res && res.status === 'success' && res.data) {
+                        applyPendudukData(res.data);
+                    } else if (res && res.data) {
+                        applyPendudukData(res.data);
+                    } else {
+                        // Fallback: gunakan data minimal dari select2
+                        applyPendudukData(sel);
+                    }
+                })
+                .fail(function() {
+                    applyPendudukData(sel);
+                });
+        } else {
+            applyPendudukData(sel);
+        }
+    });
+
+    // Fungsi bantu untuk menerapkan data penduduk ke form
+    function applyPendudukData(data) {
+        $('#input_nama').val(data.nama || '');
+        $('#input_nama_pemohon').val(data.nama || '');
+        $('#input_nik').val(data.nik || '');
+        $('#input_nomor_kk').val(data.no_kk || data.no_kk || '');
+        $('#input_pekerjaan').val(data.pekerjaan || '');
+        $('#input_alamat').val(data.alamat_lengkap || data.alamat || '');
+
+        // Tempat & tanggal lahir
+        var tempatLahir = '';
+        var tglLahirFormatted = '';
+
+        if (data.tempat_lahir) tempatLahir = data.tempat_lahir;
+        if (data.tgl_lahir) tglLahirFormatted = formatTanggalKeYMD(data.tgl_lahir);
+        if (!tglLahirFormatted && data.tanggal_lahir) tglLahirFormatted = formatTanggalKeYMD(data
+            .tanggal_lahir);
+        if (data.tempat_tgl_lahir) {
+            var parts = data.tempat_tgl_lahir.split(',');
+            if (parts.length > 0 && !tempatLahir) tempatLahir = parts[0].trim();
+            if (parts.length > 1 && !tglLahirFormatted) tglLahirFormatted = formatTanggalKeYMD(parts[1].trim());
+        }
+
+        if (tempatLahir) $('#input_tempat_lahir').val(tempatLahir);
+        if (tglLahirFormatted) $('#input_tanggal_lahir').val(tglLahirFormatted);
+
+        // Jenis kelamin
         if (data.jenis_kelamin) {
             var jk = data.jenis_kelamin.toLowerCase();
             if (jk.includes('l')) {
@@ -464,11 +539,26 @@ $(document).ready(function() {
             }
         }
 
-        // Auto Select Agama
+        // Agama
         if (data.agama) {
-            $('#input_agama').val(data.agama);
+            var agamaOpt = data.agama.toLowerCase();
+            $('#input_agama option').each(function() {
+                if ($(this).val().toLowerCase() === agamaOpt) {
+                    $('#input_agama').val($(this).val());
+                }
+            });
         }
-    });
+
+        // Status Perkawinan
+        if (data.status_pernikahan || data.status_perkawinan) {
+            var statusStr = (data.status_pernikahan || data.status_perkawinan).toLowerCase();
+            $('#input_status_perkawinan option').each(function() {
+                if (statusStr.includes($(this).val().toLowerCase())) {
+                    $('#input_status_perkawinan').val($(this).val());
+                }
+            });
+        }
+    }
 
     // Event ketika pilihan dibersihkan (Clear)
     $('#cari_penduduk').on('select2:clear', function(e) {

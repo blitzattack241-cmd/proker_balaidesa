@@ -48,8 +48,8 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
                         <label for="nomor_surat" class="form-label">Nomor Surat</label>
                         <input type="text" class="form-control" id="nomor_surat" name="nomor_surat"
                             value="<?= htmlspecialchars($nomor_surat_otomatis); ?>" required>
-                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis dengan format: 145 /
-                            [URUT] / 31.07.16 / 2026</small>
+                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                            manual)</small>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="tanggal_surat" class="form-label">Tanggal Surat</label>

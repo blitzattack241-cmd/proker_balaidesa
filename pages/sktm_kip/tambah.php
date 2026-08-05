@@ -25,14 +25,11 @@ require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 // Nomor surat global otomatis untuk semua jenis surat
 $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 
-
 // Ambil list pejabat untuk dropdown TTD
 $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabatan FROM tb_pejabat ORDER BY nama_pejabat ASC");
 
 // Proses Simpan Data
 if (isset($_POST['simpan'])) {
-    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
-    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
     $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
     $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
     $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
@@ -72,69 +69,87 @@ if (isset($_POST['simpan'])) {
 }
 ?>
 
+<!-- Library Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
 <style>
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: -0.5px;
-    }
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
 
-    .breadcrumb-modern a {
-        color: #17a2b8;
-        font-weight: 500;
-    }
+.breadcrumb-modern a {
+    color: #17a2b8;
+    font-weight: 500;
+}
 
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .card-header-modern {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #f1f3f5 !important;
-        padding: 1.25rem 1.5rem !important;
-    }
+.card-header-modern {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    padding: 1.25rem 1.5rem !important;
+}
 
-    .form-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-    }
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
 
-    .form-control,
-    .form-select {
-        border-radius: 8px !important;
-        padding: 0.6rem 1rem;
-        border: 1px solid #ced4da;
-    }
+.form-control,
+.form-select {
+    border-radius: 8px !important;
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-    }
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
 
-    .btn-custom-save {
-        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 24px;
-        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
-        transition: all 0.2s ease;
-    }
+.btn-custom-save {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 24px;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    transition: all 0.2s ease;
+}
 
-    .btn-custom-save:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
-    }
+.btn-custom-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
 
-    .btn-custom-back {
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 10px 20px;
-    }
+.btn-custom-back {
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 10px 20px;
+}
+
+/* Styling Box Pencarian Penduduk */
+.box-pencarian-container {
+    background-color: #f8faff;
+    border: 1px dashed #0d6efd;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__clear {
+    cursor: pointer;
+    margin-right: 10px;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -158,21 +173,34 @@ if (isset($_POST['simpan'])) {
     <div class="card card-modern mb-4">
         <div class="card-header-modern">
             <span class="fs-5 fw-bold text-dark"><i class="fas fa-file-invoice me-2 text-primary"></i> Formulir
-                Pembuatan Surat</span>
+                Pembuatan Surat Keterangan Tidak Mampu (KIP)</span>
         </div>
         <div class="card-body p-4">
             <form action="" method="POST">
+
+                <!-- Box Pencarian & Auto-fill Data Penduduk -->
+                <div class="box-pencarian-container mb-4">
+                    <label class="form-label text-primary fw-bold mb-2">
+                        <i class="fas fa-search me-1"></i> CARI & AUTO-FILL DATA PENDUDUK (KETIK NO. KK / NIK / NAMA)
+                    </label>
+                    <select id="cari_penduduk" class="form-select" style="width: 100%;">
+                        <option value=""></option>
+                    </select>
+                    <small class="text-muted mt-2 d-block" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> Pilih nama warga yang muncul untuk mengisi otomatis
+                        seluruh formulir identitas di bawah ini.
+                    </small>
+                </div>
 
                 <div class="row">
                     <!-- Bagian Kiri: Metadata Surat -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Nomor Surat</label>
-                        <!-- Input terisi otomatis via variable $nomor_surat_otomatis -->
                         <input type="text" name="nomor_surat" class="form-control"
                             value="<?= htmlspecialchars($nomor_surat_otomatis); ?>"
                             placeholder="Contoh: 474 / 001 / 31.07.16 / 2026" required>
-                        <small class="text-muted">*Terisi otomatis sesuai penomoran registrasi desa (dapat disesuaikan
-                            manual jika perlu).</small>
+                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                            manual)</small>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -191,13 +219,13 @@ if (isset($_POST['simpan'])) {
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Nama Lengkap</label>
-                        <input type="text" name="nama_warga" class="form-control text-uppercase"
+                        <input type="text" name="nama_warga" id="input_nama" class="form-control text-uppercase"
                             placeholder="Nama lengkap warga" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Jenis Kelamin</label>
-                        <select name="jenis_kelamin" class="form-select" required>
+                        <select name="jenis_kelamin" id="input_jenis_kelamin" class="form-select" required>
                             <option value="">-- Pilih Jenis Kelamin --</option>
                             <option value="Laki-laki">Laki-laki</option>
                             <option value="Perempuan">Perempuan</option>
@@ -208,32 +236,32 @@ if (isset($_POST['simpan'])) {
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tempat Lahir</label>
-                        <input type="text" name="tempat_lahir" class="form-control" placeholder="Kabupaten/Kota lahir"
-                            required>
+                        <input type="text" name="tempat_lahir" id="input_tempat_lahir" class="form-control"
+                            placeholder="Kabupaten/Kota lahir" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" class="form-control" required>
+                        <input type="date" name="tanggal_lahir" id="input_tanggal_lahir" class="form-control" required>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">NIK (Nomor Induk Kependudukan)</label>
-                        <input type="text" name="no_ktp" class="form-control" placeholder="16 digit NIK" maxlength="16"
-                            required>
+                        <input type="text" name="no_ktp" id="input_nik" class="form-control" placeholder="16 digit NIK"
+                            maxlength="16" required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">No. Kartu Keluarga (KK)</label>
-                        <input type="text" name="no_kk" class="form-control" placeholder="16 digit No KK" maxlength="16"
-                            value="331904" required>
+                        <input type="text" name="no_kk" id="input_no_kk" class="form-control"
+                            placeholder="16 digit No KK" maxlength="16" required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Agama</label>
-                        <select name="agama" class="form-select" required>
+                        <select name="agama" id="input_agama" class="form-select" required>
                             <option value="Islam">Islam</option>
                             <option value="Kristen">Kristen</option>
                             <option value="Katolik">Katolik</option>
@@ -247,12 +275,13 @@ if (isset($_POST['simpan'])) {
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Kewarganegaraan</label>
-                        <input type="text" name="kewarganegaraan" class="form-control" value="Indonesia" required>
+                        <input type="text" name="kewarganegaraan" id="input_kewarganegaraan" class="form-control"
+                            value="Indonesia" required>
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Status Pernikahan</label>
-                        <select name="status_perkawinan" class="form-select" required>
+                        <select name="status_perkawinan" id="input_status_perkawinan" class="form-select" required>
                             <option value="Belum Kawin">Belum Kawin</option>
                             <option value="Kawin">Kawin</option>
                             <option value="Cerai Hidup">Cerai Hidup</option>
@@ -262,13 +291,14 @@ if (isset($_POST['simpan'])) {
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Pekerjaan</label>
-                        <input type="text" name="pekerjaan" class="form-control" value="Pelajar/Mahasiswa" required>
+                        <input type="text" name="pekerjaan" id="input_pekerjaan" class="form-control"
+                            value="Pelajar/Mahasiswa" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Alamat Tinggal Lengkap</label>
-                    <textarea name="alamat_tinggal" class="form-control" rows="2"
+                    <textarea name="alamat_tinggal" id="input_alamat" class="form-control" rows="2"
                         placeholder="Contoh: Desa Berugenjang Rt 002 Rw 002 Kec. Undaan Kab. Kudus" required></textarea>
                 </div>
 
@@ -292,10 +322,10 @@ if (isset($_POST['simpan'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Penandatangan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                            <option value="<?= $pejabat['id_pejabat']; ?>">
+                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                            </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -313,3 +343,112 @@ if (isset($_POST['simpan'])) {
         </div>
     </div>
 </div>
+
+<!-- Library jQuery & Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi Select2 AJAX
+    $('#cari_penduduk').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Ketik No. KK, NIK, atau Nama Penduduk... --',
+        allowClear: true, // Tombol silang untuk hapus/clear
+        minimumInputLength: 2,
+        ajax: {
+            url: 'api/get_penduduk.php',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    search: params.term
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Auto-fill saat item dipilih
+    $('#cari_penduduk').on('select2:select', function(e) {
+        var data = e.params.data;
+
+        $('#input_nama').val(data.nama || '');
+        $('#input_nik').val(data.nik || '');
+        $('#input_no_kk').val(data.no_kk || data.kk || '331904');
+
+        // Pembedaan data tempat & tanggal lahir
+        if (data.tgl_lahir) {
+            $('#input_tanggal_lahir').val(data.tgl_lahir);
+        } else if (data.tanggal_lahir) {
+            $('#input_tanggal_lahir').val(data.tanggal_lahir);
+        }
+
+        if (data.tempat_lahir) {
+            $('#input_tempat_lahir').val(data.tempat_lahir);
+        } else if (data.tempat_tgl_lahir) {
+            var ttl = data.tempat_tgl_lahir.split(',');
+            $('#input_tempat_lahir').val(ttl[0].trim());
+
+            if (ttl.length > 1 && !$('#input_tanggal_lahir').val()) {
+                var rawDate = ttl[1].trim();
+                if (rawDate.includes('-') || rawDate.includes('/')) {
+                    var delimiter = rawDate.includes('-') ? '-' : '/';
+                    var parts = rawDate.split(delimiter);
+                    if (parts[0].length === 2 && parts[2].length === 4) {
+                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                            2, '0');
+                    }
+                }
+                $('#input_tanggal_lahir').val(rawDate);
+            }
+        }
+
+        // Auto select jenis kelamin
+        if (data.jenis_kelamin) {
+            var jk = data.jenis_kelamin.toLowerCase();
+            if (jk.includes('l')) {
+                $('#input_jenis_kelamin').val('Laki-laki');
+            } else if (jk.includes('p')) {
+                $('#input_jenis_kelamin').val('Perempuan');
+            }
+        }
+
+        if (data.agama) {
+            $('#input_agama').val(data.agama);
+        }
+
+        if (data.status_perkawinan) {
+            $('#input_status_perkawinan').val(data.status_perkawinan);
+        }
+
+        if (data.pekerjaan) {
+            $('#input_pekerjaan').val(data.pekerjaan);
+        }
+
+        if (data.alamat_tinggal || data.alamat_jalan || data.alamat_lengkap) {
+            $('#input_alamat').val(data.alamat_tinggal || data.alamat_jalan || data.alamat_lengkap);
+        }
+    });
+
+    // Reset/Clear seluruh form identitas ketika tombol silang (X) diklik
+    $('#cari_penduduk').on('select2:clear', function(e) {
+        $('#input_nama').val('');
+        $('#input_nik').val('');
+        $('#input_no_kk').val('331904');
+        $('#input_tempat_lahir').val('');
+        $('#input_tanggal_lahir').val('');
+        $('#input_jenis_kelamin').val('');
+        $('#input_agama').val('Islam');
+        $('#input_kewarganegaraan').val('Indonesia');
+        $('#input_status_perkawinan').val('Belum Kawin');
+        $('#input_pekerjaan').val('Pelajar/Mahasiswa');
+        $('#input_alamat').val('');
+    });
+});
+</script>

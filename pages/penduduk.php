@@ -10,20 +10,25 @@ if (mysqli_connect_errno()) {
     return;
 }
 
-// Pastikan tabel tb_penduduk sudah ada
+// Skema tabel disesuaikan dengan struktur Excel
 $createTableQuery = "CREATE TABLE IF NOT EXISTS `tb_penduduk` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `nik` VARCHAR(20) NOT NULL UNIQUE,
-  `no_kk` VARCHAR(20) DEFAULT NULL,
+  `rt` VARCHAR(10) DEFAULT NULL,
+  `rw` VARCHAR(10) DEFAULT NULL,
+  `no_kk` VARCHAR(30) DEFAULT NULL,
+  `kepala_kk` VARCHAR(100) DEFAULT NULL,
+  `nik` VARCHAR(30) NOT NULL UNIQUE,
   `nama` VARCHAR(100) NOT NULL,
   `jenis_kelamin` VARCHAR(20) DEFAULT NULL,
-  `tempat_tgl_lahir` VARCHAR(100) DEFAULT NULL,
-  `umur` INT DEFAULT NULL,
+  `status_keluarga` VARCHAR(50) DEFAULT NULL,
+  `tempat_lahir` VARCHAR(50) DEFAULT NULL,
+  `tgl_lahir` DATE DEFAULT NULL,
+  `status_pernikahan` VARCHAR(50) DEFAULT NULL,
   `agama` VARCHAR(30) DEFAULT NULL,
-  `pekerjaan` VARCHAR(100) DEFAULT NULL,
-  `alamat` TEXT DEFAULT NULL,
-  `rt` VARCHAR(5) DEFAULT NULL,
-  `rw` VARCHAR(5) DEFAULT NULL
+  `kewarganegaraan` VARCHAR(50) DEFAULT NULL,
+  `suku` VARCHAR(50) DEFAULT NULL,
+  `pendidikan` VARCHAR(100) DEFAULT NULL,
+  `pekerjaan` VARCHAR(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 mysqli_query($koneksi, $createTableQuery);
 
@@ -46,13 +51,26 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus_semua') {
 $search = isset($_GET['search']) ? mysqli_real_escape_string($koneksi, trim($_GET['search'])) : '';
 $where = "";
 if (!empty($search)) {
-    $where = "WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' OR pekerjaan LIKE '%$search%'";
+    $where = "WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' OR pekerjaan LIKE '%$search%' OR kepala_kk LIKE '%$search%' OR suku LIKE '%$search%'";
 }
 
-// Query Ambil Data
-$query = "SELECT * FROM tb_penduduk $where ORDER BY id DESC";
+// --- LOGIKA PAGINATION ---
+$limit = 10; // Jumlah data per halaman
+$page_num = isset($_GET['p']) ? (int)$_GET['p'] : 1;
+if ($page_num < 1) { $page_num = 1; }
+$offset = ($page_num - 1) * $limit;
+
+// Query Total Data untuk Kalkulasi Halaman
+$queryCount = "SELECT COUNT(*) AS total FROM tb_penduduk $where";
+$resCount = mysqli_query($koneksi, $queryCount);
+$rowCount = mysqli_fetch_assoc($resCount);
+$totalData = $rowCount['total'];
+$totalPages = ceil($totalData / $limit);
+
+// Query Ambil Data dengan Limit & Offset
+$query = "SELECT * FROM tb_penduduk $where ORDER BY id ASC LIMIT $limit OFFSET $offset";
 $result = mysqli_query($koneksi, $query);
-$totalData = mysqli_num_rows($result);
+$displayedRows = mysqli_num_rows($result);
 ?>
 
 <style>
@@ -86,16 +104,17 @@ body {
 
 .table-custom {
     margin-bottom: 0;
+    white-space: nowrap;
 }
 
 .table-custom thead th {
     background-color: #f1f5f9;
     color: #475569;
     font-weight: 600;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 12px 14px;
+    padding: 12px 10px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -108,8 +127,8 @@ body {
 }
 
 .table-custom tbody td {
-    padding: 12px 14px;
-    font-size: 0.875rem;
+    padding: 10px;
+    font-size: 0.85rem;
     color: var(--text-main);
     vertical-align: middle;
     border-bottom: 1px solid #f1f5f9;
@@ -125,37 +144,29 @@ body {
     background-color: #e0f2fe;
     color: #0369a1;
     font-weight: 600;
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
 }
 
 .badge-gender-p {
     background-color: #fce7f3;
     color: #be185d;
     font-weight: 600;
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
 }
 
 /* Action Buttons */
 .btn-action {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     transition: all 0.2s ease;
 }
 
@@ -205,6 +216,24 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 8px;
 }
+
+/* Pagination Customizing */
+.pagination-info {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.pagination .page-link {
+    color: #0d6efd;
+    border-color: #dee2e6;
+    padding: 6px 14px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
 </style>
 
 <div class="container-fluid px-4 py-4">
@@ -213,7 +242,7 @@ body {
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h3 class="fw-bold text-dark mb-1">Data Penduduk</h3>
-            <p class="text-muted mb-0 small">Manajemen & Klasifikasi Data Penduduk Desa Berugenjang</p>
+            <p class="text-muted mb-0 small">Manajemen & Data Penduduk Desa Berugenjang</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <!-- Tombol Hapus Semua Data -->
@@ -244,7 +273,7 @@ body {
                 <div class="input-group search-input-group">
                     <span class="input-group-text border-end-0"><i class="fas fa-search"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0"
-                        placeholder="Cari berdasarkan Nama, NIK, No. KK, atau Pekerjaan..."
+                        placeholder="Cari berdasarkan Nama, NIK, No. KK, Suku, atau Pekerjaan..."
                         value="<?php echo htmlspecialchars($search); ?>">
                     <button type="submit" class="btn btn-primary px-4 fw-semibold">Cari</button>
                     <?php if (!empty($search)): ?>
@@ -263,53 +292,88 @@ body {
     </div>
 
     <!-- Tabel Data Penduduk -->
-    <div class="main-card p-0 overflow-hidden">
+    <div class="main-card p-0 overflow-hidden mb-3">
         <div class="table-responsive">
             <table class="table table-custom align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 4%;" class="text-center">NO</th>
-                        <th style="width: 15%;">NIK</th>
-                        <th style="width: 14%;">NO. KK</th>
-                        <th style="width: 18%;">NAMA LENGKAP</th>
-                        <th style="width: 6%;" class="text-center">JK</th>
-                        <th style="width: 18%;">TEMPAT, TGL LAHIR</th>
-                        <th style="width: 13%;">PEKERJAAN</th>
-                        <th style="width: 12%;" class="text-center">ALAMAT</th>
-                        <th style="width: 10%;" class="text-center">AKSI</th>
+                        <th class="text-center">NO</th>
+                        <th class="text-center">RT/RW</th>
+                        <th>NO. KK</th>
+                        <th>KEPALA KK</th>
+                        <th>NIK</th>
+                        <th>ANGGOTA KELUARGA</th>
+                        <th class="text-center">JK</th>
+                        <th>STATUS KELUARGA</th>
+                        <th>TTL</th>
+                        <th>STATUS PERNIKAHAN</th>
+                        <th>AGAMA</th>
+                        <th>KEWARGANEGARAAN</th>
+                        <th>ETNIS/SUKU</th>
+                        <th>PENDIDIKAN</th>
+                        <th>PEKERJAAN</th>
+                        <th class="text-center">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($totalData > 0): ?>
-                    <?php $no = 1; ?>
+                    <?php if ($displayedRows > 0): ?>
+                    <?php $no = $offset + 1; ?>
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td class="text-center text-muted small fw-semibold"><?php echo $no++; ?></td>
-                        <td><span
-                                class="fw-bold font-mono text-dark"><?php echo htmlspecialchars($row['nik']); ?></span>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border">
+                                <?php echo htmlspecialchars($row['rt'] ?: '0'); ?>/<?php echo htmlspecialchars($row['rw'] ?: '0'); ?>
+                            </span>
                         </td>
                         <td><span
                                 class="font-mono text-secondary"><?php echo htmlspecialchars($row['no_kk'] ?: '-'); ?></span>
                         </td>
+                        <td><span
+                                class="text-dark small fw-semibold"><?php echo htmlspecialchars($row['kepala_kk'] ?: '-'); ?></span>
+                        </td>
+                        <td><span
+                                class="fw-bold font-mono text-dark"><?php echo htmlspecialchars($row['nik']); ?></span>
+                        </td>
                         <td><strong class="text-dark"><?php echo htmlspecialchars($row['nama']); ?></strong></td>
                         <td class="text-center">
                             <?php if (strtoupper(substr($row['jenis_kelamin'] ?? 'L', 0, 1)) === 'L'): ?>
-                            <span class="badge-gender-l" title="Laki-laki">L</span>
+                            <span class="badge-gender-l" title="Laki-laki">LAKI-LAKI</span>
                             <?php else: ?>
-                            <span class="badge-gender-p" title="Perempuan">P</span>
+                            <span class="badge-gender-p" title="Perempuan">PEREMPUAN</span>
                             <?php endif; ?>
                         </td>
                         <td><span
-                                class="text-secondary"><?php echo htmlspecialchars($row['tempat_tgl_lahir'] ?: '-'); ?></span>
+                                class="text-secondary small"><?php echo htmlspecialchars($row['status_keluarga'] ?: '-'); ?></span>
+                        </td>
+                        <td>
+                            <span class="text-dark small d-block">
+                                <?php 
+                                    $ttl = htmlspecialchars($row['tempat_lahir'] ?: '');
+                                    if (!empty($row['tgl_lahir'])) {
+                                        $ttl .= (!empty($ttl) ? ', ' : '') . date('d-m-Y', strtotime($row['tgl_lahir']));
+                                    }
+                                    echo $ttl ?: '-';
+                                ?>
+                            </span>
                         </td>
                         <td><span
-                                class="text-secondary"><?php echo htmlspecialchars($row['pekerjaan'] ?: '-'); ?></span>
+                                class="text-secondary small"><?php echo htmlspecialchars($row['status_pernikahan'] ?: '-'); ?></span>
                         </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark border">
-                                RT <?php echo htmlspecialchars($row['rt'] ?: '0'); ?> / RW
-                                <?php echo htmlspecialchars($row['rw'] ?: '0'); ?>
-                            </span>
+                        <td><span
+                                class="text-secondary small"><?php echo htmlspecialchars($row['agama'] ?: '-'); ?></span>
+                        </td>
+                        <td><span
+                                class="text-secondary small"><?php echo htmlspecialchars($row['kewarganegaraan'] ?: '-'); ?></span>
+                        </td>
+                        <td><span
+                                class="text-secondary small"><?php echo htmlspecialchars($row['suku'] ?: '-'); ?></span>
+                        </td>
+                        <td><span
+                                class="text-secondary small"><?php echo htmlspecialchars($row['pendidikan'] ?: '-'); ?></span>
+                        </td>
+                        <td><span
+                                class="text-secondary small"><?php echo htmlspecialchars($row['pekerjaan'] ?: '-'); ?></span>
                         </td>
                         <td class="text-center">
                             <div class="d-inline-flex gap-1">
@@ -329,7 +393,7 @@ body {
                     <?php endwhile; ?>
                     <?php else: ?>
                     <tr>
-                        <td colspan="9" class="text-center py-5">
+                        <td colspan="16" class="text-center py-5">
                             <div class="py-3">
                                 <i class="fas fa-folder-open text-muted opacity-50 mb-3" style="font-size: 3rem;"></i>
                                 <h6 class="fw-semibold text-dark mb-1">Data Penduduk Tidak Ditemukan</h6>
@@ -343,6 +407,50 @@ body {
             </table>
         </div>
     </div>
+
+    <!-- Section Info Teks & Pagination -->
+    <?php if ($totalData > 0): ?>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-2 py-1">
+        <!-- Teks Kiri: Menampilkan X dari Y data penduduk -->
+        <div class="pagination-info">
+            Menampilkan <strong><?php echo $displayedRows; ?></strong> dari
+            <strong><?php echo number_format($totalData); ?></strong> data penduduk
+        </div>
+
+        <!-- Tombol Pagination Kanan -->
+        <?php if ($totalPages > 1): ?>
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm m-0">
+                <!-- Tombol Previous -->
+                <li class="page-item <?php echo ($page_num <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link"
+                        href="index.php?page=penduduk<?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>&p=<?php echo $page_num - 1; ?>">Previous</a>
+                </li>
+
+                <!-- Digital Page Items -->
+                <?php
+                $start_page = max(1, $page_num - 2);
+                $end_page = min($totalPages, $page_num + 2);
+
+                for ($i = $start_page; $i <= $end_page; $i++):
+                ?>
+                <li class="page-item <?php echo ($i == $page_num) ? 'active' : ''; ?>">
+                    <a class="page-link"
+                        href="index.php?page=penduduk<?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>&p=<?php echo $i; ?>"><?php echo $i; ?></a>
+                </li>
+                <?php endfor; ?>
+
+                <!-- Tombol Next -->
+                <li class="page-item <?php echo ($page_num >= $totalPages) ? 'disabled' : ''; ?>">
+                    <a class="page-link"
+                        href="index.php?page=penduduk<?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>&p=<?php echo $page_num + 1; ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
 </div>
 
 <!-- Modal Import Data Excel -->

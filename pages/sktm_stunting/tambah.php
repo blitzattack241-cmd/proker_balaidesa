@@ -133,8 +133,8 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
                         <input type="text" name="nomor_surat" class="form-control form-control-custom"
                             placeholder="Contoh: 474 / 001 / 31.07.16 / 2026" required
                             value="<?= htmlspecialchars($nomor_otomatis); ?>">
-                        <small class="text-muted">*Terisi otomatis sesuai registrasi desa (dapat disesuaikan jika
-                            perlu).</small>
+                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                            manual)</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-custom">Tanggal Surat dibuat</label>

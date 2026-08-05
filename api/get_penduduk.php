@@ -7,48 +7,163 @@ if (!$koneksi) {
     exit();
 }
 
+// Helper: Parse tempat_tgl_lahir - Handle multiple date formats
+function extractTglLahir($tempat_tgl_lahir)
+{
+    if (!$tempat_tgl_lahir) return '';
+    $str = trim($tempat_tgl_lahir);
+
+    // 1. Ekstrak format YYYY-MM-DD
+    if (preg_match('/(\d{4}-\d{2}-\d{2})/', $str, $matches)) {
+        return $matches[1];
+    }
+
+    // 2. Ekstrak format DD-MM-YYYY -> YYYY-MM-DD
+    if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $str, $matches)) {
+        return $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+    }
+
+    // 3. Ekstrak format DD/MM/YYYY -> YYYY-MM-DD
+    if (preg_match('/(\d{2})\/(\d{2})\/(\d{4})/', $str, $matches)) {
+        return $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+    }
+
+    return '';
+}
+
+// Helper: Extract tempat lahir dengan menghapus pola tanggal dari string
+function extractTempatLahir($tempat_tgl_lahir)
+{
+    if (!$tempat_tgl_lahir) return '';
+
+    $str = trim($tempat_tgl_lahir);
+
+    // Jika dipisahkan oleh koma (misal: "Kudus, 1995-08-17")
+    if (strpos($str, ',') !== false) {
+        $parts = explode(',', $str);
+        return trim($parts[0]);
+    }
+
+    // Jika tidak ada koma (misal: "Kudus 1995-08-17" atau "Kudus 17-08-1995")
+    // Hapus semua format tanggal angka dari string
+    $cleanStr = preg_replace('/\b(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4}|\d{2}\/\d{2}\/\d{4})\b/', '', $str);
+
+    return trim($cleanStr);
+}
+
+// Helper: Hitung umur dari tanggal lahir
+function calculateAge($birthDate)
+{
+    if (!$birthDate) return 0;
+    try {
+        $birthDateTime = new DateTime($birthDate);
+        $today = new DateTime();
+        $age = $today->diff($birthDateTime)->y;
+        return (int) max(0, $age);
+    } catch (Exception $e) {
+        return 0;
+    }
+}
+
 // 1. Jika melakukan pencarian dinamis (autocomplete select2)
-if (isset($_GET['search'])) {
-    $search = mysqli_real_escape_string($koneksi, trim($_GET['search']));
-    
+$searchTerm = '';
+if (isset($_GET['search']) && $_GET['search'] !== '') {
+    $searchTerm = trim($_GET['search']);
+} elseif (isset($_GET['q']) && $_GET['q'] !== '') {
+    $searchTerm = trim($_GET['q']);
+}
+
+if ($searchTerm !== '') {
+    $search = mysqli_real_escape_string($koneksi, $searchTerm);
+
     // Cari berdasarkan Nama, NIK, atau No. KK
     $query = "SELECT id, nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, pekerjaan, alamat, rt, rw 
               FROM tb_penduduk 
               WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' 
+              ORDER BY nama ASC
               LIMIT 15";
-    
+
     $result = mysqli_query($koneksi, $query);
     $data = [];
-    
+
     while ($row = mysqli_fetch_assoc($result)) {
+        $alamat_lengkap = trim(($row['alamat'] ?? '') . ' ' . ($row['rt'] ? 'RT ' . sprintf("%03d", $row['rt']) : '') . ' ' . ($row['rw'] ? '/ RW ' . sprintf("%03d", $row['rw']) : ''));
+
+        // Extract tanggal lahir dan tempat lahir
+        $tgl_lahir = extractTglLahir($row['tempat_tgl_lahir']);
+        $tempat_lahir = extractTempatLahir($row['tempat_tgl_lahir']);
+        $umur = calculateAge($tgl_lahir);
+
         $data[] = [
-            'id' => $row['id'],
+            'id' => (string) $row['id'],
             'text' => $row['nama'] . " | NIK: " . $row['nik'] . " | KK: " . ($row['no_kk'] ?: '-'),
             'nik' => $row['nik'],
             'no_kk' => $row['no_kk'],
             'nama' => $row['nama'],
             'tempat_tgl_lahir' => $row['tempat_tgl_lahir'],
+            'tgl_lahir' => $tgl_lahir,
+            'tanggal_lahir' => $tgl_lahir,
+            'tempat_lahir' => $tempat_lahir,
+            'umur' => (int) $umur,
             'pekerjaan' => $row['pekerjaan'],
-            'alamat_lengkap' => $row['alamat'] . " RT " . $row['rt'] . " / RW " . $row['rw']
+            'jenis_kelamin' => $row['jenis_kelamin'],
+            'alamat_lengkap' => $alamat_lengkap,
+            'alamat' => $row['alamat'] ?? '',
+            'rt' => $row['rt'] ?? '',
+            'rw' => $row['rw'] ?? '',
+            '_debug_tgl' => [
+                'raw' => $row['tempat_tgl_lahir'],
+                'parsed_tgl' => $tgl_lahir,
+                'parsed_tempat' => $tempat_lahir,
+                'age' => (int) $umur
+            ]
         ];
     }
-    
+
     echo json_encode(['results' => $data]);
     exit();
 }
 
 // 2. Jika mengambil detail 1 penduduk berdasarkan ID yang dipilih
 if (isset($_GET['id'])) {
-    $id = (int)$_GET['id'];
+    $id = (int) $_GET['id'];
     $query = "SELECT * FROM tb_penduduk WHERE id = $id";
     $result = mysqli_query($koneksi, $query);
     $row = mysqli_fetch_assoc($result);
 
     if ($row) {
-        $row['alamat_lengkap'] = $row['alamat'] . " RT " . sprintf("%03d", $row['rt']) . " / RW " . sprintf("%03d", $row['rw']);
+        $tgl_lahir = extractTglLahir($row['tempat_tgl_lahir']);
+        $tempat_lahir = extractTempatLahir($row['tempat_tgl_lahir']);
+        $umur = calculateAge($tgl_lahir);
+
+        $row['tgl_lahir'] = $tgl_lahir;
+        $row['tanggal_lahir'] = $tgl_lahir;
+        $row['tempat_lahir'] = $tempat_lahir;
+        $row['umur'] = (int) $umur;
+        $row['alamat_lengkap'] = trim(($row['alamat'] ?? '') . " RT " . sprintf("%03d", $row['rt']) . " / RW " . sprintf("%03d", $row['rw']));
         echo json_encode(['status' => 'success', 'data' => $row]);
     } else {
         echo json_encode(['status' => 'error']);
+    }
+    exit();
+}
+
+// 3. Test endpoint untuk debug
+if (isset($_GET['test'])) {
+    $test_nik = $_GET['test'];
+    $search = mysqli_real_escape_string($koneksi, $test_nik);
+    $query = "SELECT id, nik, nama, tempat_tgl_lahir FROM tb_penduduk WHERE nik LIKE '%$search%' LIMIT 1";
+    $result = mysqli_query($koneksi, $query);
+    $row = mysqli_fetch_assoc($result);
+
+    if ($row) {
+        echo json_encode([
+            'raw_data' => $row,
+            'tempat_lahir_parsed' => extractTempatLahir($row['tempat_tgl_lahir']),
+            'tgl_lahir_parsed' => extractTglLahir($row['tempat_tgl_lahir'])
+        ]);
+    } else {
+        echo json_encode(['error' => 'No data found']);
     }
     exit();
 }

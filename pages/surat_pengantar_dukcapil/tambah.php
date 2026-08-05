@@ -43,8 +43,7 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
                     <label for="nomor_surat" class="form-label">Nomor Surat</label>
                     <input type="text" class="form-control" id="nomor_surat" name="nomor_surat"
                         value="<?= htmlspecialchars($nomor_surat_otomatis); ?>" required>
-                    <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis dari nomor surat
-                        terakhir.</small>
+                    <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah manual)</small>
                 </div>
 
                 <div class="mb-3">

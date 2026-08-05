@@ -208,7 +208,7 @@ if (mysqli_connect_errno()) {
                                 ?>
                         <tr>
                             <td class="text-center fw-bold text-secondary"><?= $no++; ?></td>
-                            <td class="fw-semibold text-dark">145 / <?= htmlspecialchars($data['nomor_surat']); ?></td>
+                            <td class="fw-semibold text-dark"> <?= htmlspecialchars($data['nomor_surat']); ?></td>
                             <td><?= $tanggal; ?></td>
                             <td class="fw-bold text-uppercase text-primary">
                                 <?= htmlspecialchars($data['nama_warga']); ?></td>

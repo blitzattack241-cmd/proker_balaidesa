@@ -12,26 +12,36 @@ if (mysqli_connect_errno()) {
 
 // Proses Simpan Data Penduduk
 if (isset($_POST['simpan'])) {
-    $nik              = mysqli_real_escape_string($koneksi, trim($_POST['nik']));
-    $no_kk            = mysqli_real_escape_string($koneksi, trim($_POST['no_kk']));
-    $nama             = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, trim($_POST['jenis_kelamin']));
-    $tempat_tgl_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tempat_tgl_lahir']));
-    $umur             = (int)$_POST['umur'];
-    $agama            = mysqli_real_escape_string($koneksi, trim($_POST['agama']));
-    $pekerjaan        = mysqli_real_escape_string($koneksi, trim($_POST['pekerjaan']));
-    $alamat           = mysqli_real_escape_string($koneksi, trim($_POST['alamat']));
-    $rt               = mysqli_real_escape_string($koneksi, trim($_POST['rt']));
-    $rw               = mysqli_real_escape_string($koneksi, trim($_POST['rw']));
+    $nik               = mysqli_real_escape_string($koneksi, trim($_POST['nik']));
+    $no_kk             = mysqli_real_escape_string($koneksi, trim($_POST['no_kk']));
+    $kepala_kk         = mysqli_real_escape_string($koneksi, trim($_POST['kepala_kk']));
+    $nama              = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
+    $jenis_kelamin     = mysqli_real_escape_string($koneksi, trim($_POST['jenis_kelamin']));
+    $status_keluarga   = mysqli_real_escape_string($koneksi, trim($_POST['status_keluarga']));
+    $tempat_lahir      = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir']));
+    $tgl_lahir         = mysqli_real_escape_string($koneksi, trim($_POST['tgl_lahir']));
+    $status_pernikahan = mysqli_real_escape_string($koneksi, trim($_POST['status_pernikahan']));
+    $agama             = mysqli_real_escape_string($koneksi, trim($_POST['agama']));
+    $kewarganegaraan   = mysqli_real_escape_string($koneksi, trim($_POST['kewarganegaraan']));
+    $suku              = mysqli_real_escape_string($koneksi, trim($_POST['suku']));
+    $pendidikan        = mysqli_real_escape_string($koneksi, trim($_POST['pendidikan']));
+    $pekerjaan         = mysqli_real_escape_string($koneksi, trim($_POST['pekerjaan']));
+    $rt                = mysqli_real_escape_string($koneksi, trim($_POST['rt']));
+    $rw                = mysqli_real_escape_string($koneksi, trim($_POST['rw']));
+
+    // Format nilai tanggal untuk Query
+    $tgl_lahir_val = !empty($tgl_lahir) ? "'$tgl_lahir'" : "NULL";
 
     // Cek apakah NIK sudah terdaftar
     $cekNik = mysqli_query($koneksi, "SELECT nik FROM tb_penduduk WHERE nik = '$nik'");
     if (mysqli_num_rows($cekNik) > 0) {
         echo "<script>alert('NIK $nik sudah terdaftar di database!');</script>";
     } else {
-        $query = "INSERT INTO tb_penduduk (nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, umur, agama, pekerjaan, alamat, rt, rw) 
-                  VALUES ('$nik', '$no_kk', '$nama', '$jenis_kelamin', '$tempat_tgl_lahir', '$umur', '$agama', '$pekerjaan', '$alamat', '$rt', '$rw')";
-        
+        $query = "INSERT INTO tb_penduduk 
+            (rt, rw, no_kk, kepala_kk, nik, nama, jenis_kelamin, status_keluarga, tempat_lahir, tgl_lahir, status_pernikahan, agama, kewarganegaraan, suku, pendidikan, pekerjaan) 
+            VALUES 
+            ('$rt', '$rw', '$no_kk', '$kepala_kk', '$nik', '$nama', '$jenis_kelamin', '$status_keluarga', '$tempat_lahir', $tgl_lahir_val, '$status_pernikahan', '$agama', '$kewarganegaraan', '$suku', '$pendidikan', '$pekerjaan')";
+
         if (mysqli_query($koneksi, $query)) {
             echo "<script>alert('Data penduduk berhasil ditambahkan!'); window.location='index.php?page=penduduk';</script>";
             exit();
@@ -48,6 +58,15 @@ if (isset($_POST['simpan'])) {
     border-radius: 16px;
     border: 1px solid #e2e8f0;
     padding: 2rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 </style>
 
@@ -67,7 +86,38 @@ if (isset($_POST['simpan'])) {
     <!-- Form Tambah Penduduk -->
     <div class="form-card shadow-sm">
         <form action="" method="POST">
-            <div class="row g-3">
+
+            <!-- SEKSI 1: KELUARGA & WILAYAH -->
+            <div class="section-title">
+                <i class="fas fa-home me-2 text-primary"></i>Data Keluarga & Wilayah
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">No. KK (Kartu Keluarga)</label>
+                    <input type="text" name="no_kk" class="form-control" maxlength="16" placeholder="16 digit No. KK">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Nama Kepala Keluarga</label>
+                    <input type="text" name="kepala_kk" class="form-control" placeholder="Nama Kepala KK">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">RT</label>
+                    <input type="text" name="rt" class="form-control" placeholder="Contoh: 1">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">RW</label>
+                    <input type="text" name="rw" class="form-control" placeholder="Contoh: 1">
+                </div>
+            </div>
+
+            <!-- SEKSI 2: IDENTITAS DIRI -->
+            <div class="section-title">
+                <i class="fas fa-user me-2 text-primary"></i>Identitas Diri
+            </div>
+            <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">NIK (Nomor Induk Kependudukan) <span
                             class="text-danger">*</span></label>
@@ -76,12 +126,6 @@ if (isset($_POST['simpan'])) {
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">No. KK (Kartu Keluarga)</label>
-                    <input type="text" name="no_kk" class="form-control" maxlength="16"
-                        placeholder="Masukkan 16 digit No. KK">
-                </div>
-
-                <div class="col-md-8">
                     <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
                     <input type="text" name="nama" class="form-control" placeholder="Masukkan nama lengkap" required>
                 </div>
@@ -95,57 +139,87 @@ if (isset($_POST['simpan'])) {
                     </select>
                 </div>
 
-                <div class="col-md-8">
-                    <label class="form-label fw-semibold">Tempat, Tanggal Lahir</label>
-                    <input type="text" name="tempat_tgl_lahir" class="form-control"
-                        placeholder="Contoh: Kudus, 12 Agustus 1995">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Status Hubungan Keluarga</label>
+                    <select name="status_keluarga" class="form-select">
+                        <option value="KEPALA KELUARGA">KEPALA KELUARGA</option>
+                        <option value="SUAMI">SUAMI</option>
+                        <option value="ISTRI">ISTRI</option>
+                        <option value="ANAK" selected>ANAK</option>
+                        <option value="CUCU">CUCU</option>
+                        <option value="ORANG TUA">ORANG TUA</option>
+                        <option value="MERTUA">MERTUA</option>
+                        <option value="FAMILI LAIN">FAMILI LAIN</option>
+                    </select>
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label fw-semibold">Umur (Tahun)</label>
-                    <input type="number" name="umur" class="form-control" placeholder="Contoh: 28">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Agama</label>
-                    <select name="agama" class="form-select">
-                        <option value="Islam" selected>Islam</option>
-                        <option value="Kristen">Kristen</option>
-                        <option value="Katolik">Katolik</option>
-                        <option value="Hindu">Hindu</option>
-                        <option value="Buddha">Buddha</option>
-                        <option value="Khonghucu">Khonghucu</option>
+                    <label class="form-label fw-semibold">Status Pernikahan</label>
+                    <select name="status_pernikahan" class="form-select">
+                        <option value="BELUM KAWIN" selected>BELUM KAWIN</option>
+                        <option value="KAWIN">KAWIN</option>
+                        <option value="CERAI HIDUP">CERAI HIDUP</option>
+                        <option value="CERAI MATI">CERAI MATI</option>
                     </select>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Pekerjaan</label>
-                    <input type="text" name="pekerjaan" class="form-control"
-                        placeholder="Contoh: Wiraswasta, Buruh, PNS">
+                    <label class="form-label fw-semibold">Tempat Lahir</label>
+                    <input type="text" name="tempat_lahir" class="form-control" placeholder="Contoh: Kudus">
                 </div>
 
-                <div class="col-md-8">
-                    <label class="form-label fw-semibold">Alamat / Dukuh</label>
-                    <input type="text" name="alamat" class="form-control" placeholder="Contoh: Dukuh Berugenjang">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">RT</label>
-                    <input type="text" name="rt" class="form-control" placeholder="001">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">RW</label>
-                    <input type="text" name="rw" class="form-control" placeholder="002">
-                </div>
-
-                <div class="col-12 mt-4 text-end">
-                    <button type="reset" class="btn btn-light me-2 fw-semibold px-4">Reset</button>
-                    <button type="submit" name="simpan" class="btn btn-primary fw-semibold px-4">
-                        <i class="fas fa-save me-1"></i> Simpan Data
-                    </button>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tanggal Lahir</label>
+                    <input type="date" name="tgl_lahir" class="form-control">
                 </div>
             </div>
+
+            <!-- SEKSI 3: INFORMASI TAMBAHAN -->
+            <div class="section-title">
+                <i class="fas fa-info-circle me-2 text-primary"></i>Informasi Tambahan
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Agama</label>
+                    <select name="agama" class="form-select">
+                        <option value="ISLAM" selected>ISLAM</option>
+                        <option value="KRISTEN">KRISTEN</option>
+                        <option value="KATOLIK">KATOLIK</option>
+                        <option value="HINDU">HINDU</option>
+                        <option value="BUDDHA">BUDDHA</option>
+                        <option value="KHONGHUCU">KHONGHUCU</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kewarganegaraan</label>
+                    <input type="text" name="kewarganegaraan" class="form-control" value="WNI">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Suku</label>
+                    <input type="text" name="suku" class="form-control" value="JAWA">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Pendidikan Terakhir</label>
+                    <input type="text" name="pendidikan" class="form-control" placeholder="Contoh: SLTA/SEDERAJAT">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Pekerjaan</label>
+                    <input type="text" name="pekerjaan" class="form-control" placeholder="Contoh: WIRASWASTA">
+                </div>
+            </div>
+
+            <!-- BUTTON ACTION -->
+            <div class="col-12 mt-4 text-end border-top pt-3">
+                <button type="reset" class="btn btn-light me-2 fw-semibold px-4">Reset</button>
+                <button type="submit" name="simpan" class="btn btn-primary fw-semibold px-4">
+                    <i class="fas fa-save me-1"></i> Simpan Data
+                </button>
+            </div>
+
         </form>
     </div>
 </div>

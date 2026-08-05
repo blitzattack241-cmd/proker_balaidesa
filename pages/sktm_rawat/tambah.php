@@ -171,8 +171,8 @@ if (isset($_POST['simpan'])) {
                                 <label class="form-label fw-semibold">Nomor Surat</label>
                                 <input type="text" class="form-control bg-light" name="nomor_surat"
                                     value="<?= htmlspecialchars($nomor_surat_otomatis); ?>" required>
-                                <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis oleh sistem,
-                                    namun tetap dapat disesuaikan jika perlu.</small>
+                                <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                                    manual)</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Nama Lengkap Pemohon</label>
@@ -297,10 +297,10 @@ if (isset($_POST['simpan'])) {
                             <select class="form-select" name="id_pejabat" required>
                                 <option value="" disabled selected>-- Pilih Pejabat --</option>
                                 <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                    <option value="<?= $pejabat['id_pejabat']; ?>">
-                                        <?= htmlspecialchars($pejabat['nama_pejabat']); ?> -
-                                        (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                    </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?> -
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -384,19 +384,19 @@ if (isset($_POST['simpan'])) {
 
 <!-- JAVASCRIPT VALIDASI & DINAMISASI FORM -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const containerPasien = document.getElementById("container-pasien");
-        const btnAddPasien = document.getElementById("add-pasien-row");
+document.addEventListener("DOMContentLoaded", function() {
+    const containerPasien = document.getElementById("container-pasien");
+    const btnAddPasien = document.getElementById("add-pasien-row");
 
-        // 1. Fungsi Tambah Baris Pasien Baru (One-To-Many)
-        btnAddPasien.addEventListener("click", function () {
-            const rows = containerPasien.querySelectorAll(".pasien-row");
-            const lastRow = rows[rows.length - 1];
+    // 1. Fungsi Tambah Baris Pasien Baru (One-To-Many)
+    btnAddPasien.addEventListener("click", function() {
+        const rows = containerPasien.querySelectorAll(".pasien-row");
+        const lastRow = rows[rows.length - 1];
 
-            // Buat element baru
-            const newRow = document.createElement("div");
-            newRow.className = "row g-2 mb-3 pasien-row";
-            newRow.innerHTML = `
+        // Buat element baru
+        const newRow = document.createElement("div");
+        newRow.className = "row g-2 mb-3 pasien-row";
+        newRow.innerHTML = `
             <div class="col-md-6">
                 <input type="text" name="nama_pasien[]" class="form-control" placeholder="Masukkan Nama Pasien" required>
             </div>
@@ -410,50 +410,50 @@ if (isset($_POST['simpan'])) {
             </div>
         `;
 
-            containerPasien.appendChild(newRow);
-            toggleRemoveButtons();
-        });
+        containerPasien.appendChild(newRow);
+        toggleRemoveButtons();
+    });
 
-        // 2. Event Listener untuk Hapus Baris Pasien
-        containerPasien.addEventListener("click", function (e) {
-            if (e.target.closest(".btn-remove-pasien")) {
-                const row = e.target.closest(".pasien-row");
-                row.remove();
-                toggleRemoveButtons();
+    // 2. Event Listener untuk Hapus Baris Pasien
+    containerPasien.addEventListener("click", function(e) {
+        if (e.target.closest(".btn-remove-pasien")) {
+            const row = e.target.closest(".pasien-row");
+            row.remove();
+            toggleRemoveButtons();
+        }
+    });
+
+    // Fungsi Mengaktifkan/Menonaktifkan Tombol Hapus Baris Pasien
+    function toggleRemoveButtons() {
+        const rows = containerPasien.querySelectorAll(".pasien-row");
+        rows.forEach((row, index) => {
+            const btnRemove = row.querySelector(".btn-remove-pasien");
+            if (rows.length === 1) {
+                btnRemove.setAttribute("disabled", "true");
+            } else {
+                btnRemove.removeAttribute("disabled");
             }
         });
+    }
 
-        // Fungsi Mengaktifkan/Menonaktifkan Tombol Hapus Baris Pasien
-        function toggleRemoveButtons() {
-            const rows = containerPasien.querySelectorAll(".pasien-row");
-            rows.forEach((row, index) => {
-                const btnRemove = row.querySelector(".btn-remove-pasien");
-                if (rows.length === 1) {
-                    btnRemove.setAttribute("disabled", "true");
-                } else {
-                    btnRemove.removeAttribute("disabled");
-                }
-            });
-        }
+    // 3. Fitur Pratinjau Gambar Langsung (Live Preview Image)
+    const imgInputs = document.querySelectorAll(".img-input");
+    imgInputs.forEach(input => {
+        input.addEventListener("change", function() {
+            const targetId = this.getAttribute("data-target");
+            const previewImg = document.getElementById(targetId);
 
-        // 3. Fitur Pratinjau Gambar Langsung (Live Preview Image)
-        const imgInputs = document.querySelectorAll(".img-input");
-        imgInputs.forEach(input => {
-            input.addEventListener("change", function () {
-                const targetId = this.getAttribute("data-target");
-                const previewImg = document.getElementById(targetId);
-
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        previewImg.setAttribute("src", e.target.result);
-                        previewImg.style.display = "block";
-                    };
-                    reader.readAsDataURL(this.files[0]);
-                } else {
-                    previewImg.style.display = "none";
-                }
-            });
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.setAttribute("src", e.target.result);
+                    previewImg.style.display = "block";
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewImg.style.display = "none";
+            }
         });
     });
+});
 </script>

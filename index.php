@@ -311,26 +311,73 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
     }
 
     .theme-dropdown .dropdown-toggle {
-        width: 45px;
-        height: 45px;
+        width: 46px;
+        height: 46px;
         padding: 0;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        color: #fff !important;
+        transition: all 0.25s ease;
+        backdrop-filter: blur(4px);
+        font-size: 1.1rem;
+    }
+
+    .theme-dropdown .dropdown-toggle:hover {
+        background: rgba(255, 255, 255, 0.22) !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-dropdown .dropdown-toggle::after {
+        display: none;
     }
 
     .theme-dropdown .dropdown-menu {
-        min-width: 120px;
+        min-width: 140px;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        padding: 8px;
+        backdrop-filter: blur(8px);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
     }
 
     .theme-dropdown .dropdown-item {
-        padding: 10px 0;
+        padding: 10px 12px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .theme-dropdown .dropdown-item:hover {
+        background: rgba(0, 127, 62, 0.10);
+        color: #007f3e;
+        transform: translateY(-2px);
     }
 
     .theme-dropdown .dropdown-item i {
+        font-size: 1.3rem;
         width: auto;
         margin: 0;
-        font-size: 1.2rem;
+        display: inline-block;
+    }
+
+    .theme-dropdown .dropdown-item.active,
+    .theme-dropdown .dropdown-item:active {
+        background: rgba(0, 127, 62, 0.15);
+        color: #007f3e;
     }
 
     .search-navbar-group {
@@ -770,17 +817,22 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
 
         <!-- Pilihan Tema -->
         <div class="dropdown me-2 theme-dropdown">
-            <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-label="Tema">
-                <i class="fas fa-moon"></i>
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-label="Pilih Tema">
+                <i class="fas fa-palette"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item text-center" href="#" onclick="setTheme('light')" title="Light"><i
-                            class="fas fa-sun text-warning"></i></a></li>
-                <li><a class="dropdown-item text-center" href="#" onclick="setTheme('dark')" title="Dark"><i
-                            class="fas fa-moon text-primary"></i></a></li>
-                <li><a class="dropdown-item text-center" href="#" onclick="setTheme('auto')" title="Auto"><i
-                            class="fas fa-desktop"></i></a></li>
+                <li><a class="dropdown-item" href="#" onclick="setTheme('light')" title="Mode Terang">
+                        <i class="fas fa-sun text-warning"></i>
+                        <span>Terang</span>
+                    </a></li>
+                <li><a class="dropdown-item" href="#" onclick="setTheme('dark')" title="Mode Gelap">
+                        <i class="fas fa-moon text-info"></i>
+                        <span>Gelap</span>
+                    </a></li>
+                <li><a class="dropdown-item" href="#" onclick="setTheme('auto')" title="Otomatis">
+                        <i class="fas fa-desktop text-secondary"></i>
+                        <span>Otomatis</span>
+                    </a></li>
             </ul>
         </div>
 

@@ -1,4 +1,76 @@
 <?php
+function simdes_extract_tempat_lahir($value): string
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return 'Tidak Diketahui';
+    }
+
+    if (preg_match('/^([^,]+),/u', $value, $matches)) {
+        return trim($matches[1]);
+    }
+
+    if (preg_match('/^([A-Za-zÀ-ÿ\s\.\-]+)(?:\s|$)/u', $value, $matches)) {
+        $place = trim($matches[1]);
+        if ($place !== '') {
+            return $place;
+        }
+    }
+
+    return 'Tidak Diketahui';
+}
+
+function simdes_extract_bulan_lahir($value): string
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return 'Tidak Diketahui';
+    }
+
+    $monthMap = [
+        'januari' => 'Januari',
+        'jan' => 'Januari',
+        'februari' => 'Februari',
+        'feb' => 'Februari',
+        'maret' => 'Maret',
+        'mar' => 'Maret',
+        'april' => 'April',
+        'apr' => 'April',
+        'mei' => 'Mei',
+        'may' => 'Mei',
+        'juni' => 'Juni',
+        'jun' => 'Juni',
+        'juli' => 'Juli',
+        'jul' => 'Juli',
+        'agustus' => 'Agustus',
+        'agu' => 'Agustus',
+        'aug' => 'Agustus',
+        'september' => 'September',
+        'sept' => 'September',
+        'sep' => 'September',
+        'oktober' => 'Oktober',
+        'oct' => 'Oktober',
+        'november' => 'November',
+        'nov' => 'November',
+        'desember' => 'Desember',
+        'dec' => 'Desember',
+    ];
+
+    foreach ($monthMap as $key => $label) {
+        if (stripos($value, $key) !== false) {
+            return $label;
+        }
+    }
+
+    if (preg_match('/(?:^|[^0-9])(0?[1-9]|1[0-2])(?:[^0-9]|$)/', $value, $matches)) {
+        $num = (int) $matches[1];
+        $names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return $names[$num - 1] ?? 'Tidak Diketahui';
+    }
+
+    return 'Tidak Diketahui';
+}
+
 // Koneksi ke Database (Sesuaikan dengan file koneksi Anda, misal: include 'koneksi.php';)
 $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
 
@@ -43,6 +115,25 @@ while ($r = mysqli_fetch_assoc($q_agama)) {
     $data_agama[] = (int) $r['total'];
 }
 
+// 5. Data Statistik Tempat Lahir dan Bulan Lahir
+$q_lahir = mysqli_query($koneksi, "SELECT tempat_tgl_lahir FROM tb_penduduk WHERE tempat_tgl_lahir IS NOT NULL AND TRIM(tempat_tgl_lahir) != ''");
+$stat_tempat_lahir = [];
+$stat_bulan_lahir = [];
+while ($r = mysqli_fetch_assoc($q_lahir)) {
+    $tempat = simdes_extract_tempat_lahir($r['tempat_tgl_lahir']);
+    $bulan = simdes_extract_bulan_lahir($r['tempat_tgl_lahir']);
+    $stat_tempat_lahir[$tempat] = ($stat_tempat_lahir[$tempat] ?? 0) + 1;
+    $stat_bulan_lahir[$bulan] = ($stat_bulan_lahir[$bulan] ?? 0) + 1;
+}
+
+ksort($stat_tempat_lahir);
+ksort($stat_bulan_lahir);
+
+$label_tempat_lahir = array_keys($stat_tempat_lahir);
+$data_tempat_lahir = array_values($stat_tempat_lahir);
+$label_bulan_lahir = array_keys($stat_bulan_lahir);
+$data_bulan_lahir = array_values($stat_bulan_lahir);
+
 if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_agama)) {
     $label_rt = ['RT 001'];
     $data_rt = [0];
@@ -52,7 +143,30 @@ if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_
     $data_jk = [0];
     $label_agama = ['Belum Ada Data'];
     $data_agama = [0];
+    $label_tempat_lahir = ['Tidak Diketahui'];
+    $data_tempat_lahir = [0];
+    $label_bulan_lahir = ['Tidak Diketahui'];
+    $data_bulan_lahir = [0];
 }
+// 6. Data Statistik Kelompok Usia (berdasarkan kolom umur yang tersedia)
+$q_usia = mysqli_query($koneksi, "
+    SELECT
+        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 0 AND 5 THEN 1 ELSE 0 END) AS balita,
+        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 6 AND 17 THEN 1 ELSE 0 END) AS anak_anak,
+        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 18 AND 59 THEN 1 ELSE 0 END) AS produktif,
+        SUM(CASE WHEN umur IS NOT NULL AND umur >= 60 THEN 1 ELSE 0 END) AS lansia
+    FROM tb_penduduk
+");
+
+$d_usia = mysqli_fetch_assoc($q_usia);
+
+$label_usia = ['Balita (0-5 thn)', 'Anak-anak (6-17 thn)', 'Usia Produktif (18-59 thn)', 'Lansia (60+ thn)'];
+$data_usia = [
+    (int) ($d_usia['balita'] ?? 0),
+    (int) ($d_usia['anak_anak'] ?? 0),
+    (int) ($d_usia['produktif'] ?? 0),
+    (int) ($d_usia['lansia'] ?? 0)
+];
 ?>
 
 <!-- Load CDN Chart.js -->
@@ -137,6 +251,36 @@ if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_
             </div>
         </div>
 
+        <!-- 5. Chart Tempat Lahir -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">Statistik Tempat Lahir</div>
+                <div class="chart-container">
+                    <canvas id="chartTempatLahir"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Chart Bulan Lahir -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">Statistik Bulan Lahir</div>
+                <div class="chart-container">
+                    <canvas id="chartBulanLahir"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Chart Kelompok Usia -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">Statistik Kelompok Usia</div>
+                <div class="chart-container">
+                    <canvas id="chartUsia"></canvas>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -153,6 +297,10 @@ if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_
 
     const labelAgama = <?= json_encode($label_agama) ?>;
     const dataAgama = <?= json_encode($data_agama) ?>;
+    const labelTempatLahir = <?= json_encode($label_tempat_lahir) ?>;
+    const dataTempatLahir = <?= json_encode($data_tempat_lahir) ?>;
+    const labelBulanLahir = <?= json_encode($label_bulan_lahir) ?>;
+    const dataBulanLahir = <?= json_encode($data_bulan_lahir) ?>;
 
     // --- 1. Render Line Chart (Persebaran Per RT) ---
     new Chart(document.getElementById('chartRT'), {
@@ -280,6 +428,124 @@ if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_
                 legend: {
                     display: true,
                     position: 'top'
+                }
+            }
+        }
+    });
+
+    // --- 5. Render Bar Chart (Tempat Lahir) ---
+    new Chart(document.getElementById('chartTempatLahir'), {
+        type: 'bar',
+        data: {
+            labels: labelTempatLahir,
+            datasets: [{
+                label: 'Jumlah Penduduk',
+                data: dataTempatLahir,
+                backgroundColor: '#0f766e',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+
+    // --- 6. Render Bar Chart (Bulan Lahir) ---
+    new Chart(document.getElementById('chartBulanLahir'), {
+        type: 'bar',
+        data: {
+            labels: labelBulanLahir,
+            datasets: [{
+                label: 'Jumlah Penduduk',
+                data: dataBulanLahir,
+                backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#14b8a6',
+                    '#fb7185', '#84cc16', '#6366f1', '#f97316', '#0ea5e9', '#64748b'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Data Usia dari PHP ke JS
+    const labelUsia = <?= json_encode($label_usia) ?>;
+    const dataUsia = <?= json_encode($data_usia) ?>;
+
+    // --- Render Bar/Doughnut Chart (Kelompok Usia) ---
+    new Chart(document.getElementById('chartUsia'), {
+        type: 'bar',
+        data: {
+            labels: labelUsia,
+            datasets: [{
+                label: 'Jumlah Penduduk',
+                data: dataUsia,
+                backgroundColor: ['#38bdf8', '#4ade80', '#facc15', '#f87171'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
                 }
             }
         }

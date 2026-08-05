@@ -161,8 +161,8 @@ if (isset($_POST['submit'])) {
                         <label class="form-label fw-bold">Nomor Surat</label>
                         <input type="text" name="nomor_surat" class="form-control bg-light"
                             value="<?= htmlspecialchars($nomor_surat_otomatis); ?>" required>
-                        <small class="text-muted" style="font-size: 0.75rem;">*Nomor terisi otomatis (Kode SKTM KIS:
-                            474), tetap dapat diubah jika diperlukan.</small>
+                        <small class="text-muted" style="font-size: 0.75rem;">*Terisi otomatis (dapat diubah
+                            manual)</small>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Lengkap Pemohon</label>

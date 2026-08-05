@@ -118,7 +118,7 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
                             <input type="text" name="nomor_surat" class="form-control"
                                 value="<?= $nomor_surat_otomatis; ?>" placeholder="Contoh: 126 /31.07.16/2026" required>
                         </div>
-                        <small class="text-muted">*Terisi otomatis dari urutan data terakhir.</small>
+                        <small class="text-muted">*Terisi otomatis (dapat diubah manual)</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Tanggal Surat</label>
