@@ -1,14 +1,14 @@
 <?php
 session_start();
 
+// 1. Koneksi ke database
+require_once 'koneksi.php';
+
 // Proteksi Halaman: Jika belum login, paksa kembali ke login.php
 if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     header("Location: login.php");
     exit;
 }
-
-// 1. Koneksi ke database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
 
 if (mysqli_connect_errno()) {
     die("Koneksi database gagal: " . mysqli_connect_error());
@@ -112,685 +112,685 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
 
     <!-- Custom CSS untuk Tema & Modifikasi Dropdown Profil -->
     <style>
-    .sb-topnav.navbar {
-        background-color: #007f3e !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .sb-sidenav-dark {
-        background: linear-gradient(180deg, #007f3e 0%, #016b37 100%) !important;
-        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .sidebar-brand-box {
-        display: flex;
-        align-items: center;
-        padding: 18px 16px 16px;
-        margin: 0 10px 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .sidebar-logo-web {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #ffffff;
-        color: #007f3e;
-        font-size: 20px;
-        margin-right: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
-
-    .sidebar-brand-text h6 {
-        margin: 0;
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-    }
-
-    .sidebar-brand-text small {
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 12px;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu {
-        padding-top: 6px;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu .nav-link {
-        color: rgba(255, 255, 255, 0.9) !important;
-        font-size: 16px;
-        padding: 11px 16px !important;
-        margin: 4px 12px;
-        border-radius: 10px;
-        transition: all 0.25s ease;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start;
-        position: relative;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu .nav-link:hover {
-        color: #ffffff !important;
-        background-color: rgba(255, 255, 255, 0.14);
-        transform: translateX(3px);
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu .nav-link .menu-label-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
-        color: rgba(255, 255, 255, 0.9) !important;
-        font-size: 15px;
-        width: 18px;
-        text-align: center;
-        margin-right: 12px;
-        flex-shrink: 0;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-menu .nav-link.active-green {
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1)) !important;
-        color: #ffffff !important;
-        font-weight: 600;
-        border-left: 4px solid #ffffff;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-    }
-
-    .active-dot {
-        width: 6px;
-        height: 6px;
-        background-color: white;
-        border-radius: 50%;
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
-        flex-shrink: 0;
-        margin-left: auto;
-        position: static;
-    }
-
-    .sb-sidenav-dark .sb-sidenav-footer {
-        background-color: transparent !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-        color: rgba(255, 255, 255, 0.72) !important;
-        padding: 14px 18px;
-        font-size: 12px;
-        line-height: 1.5;
-    }
-
-    #layoutSidenav_nav .sb-sidenav {
-        overflow-y: auto;
-        overflow-x: hidden;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    #layoutSidenav_nav .sb-sidenav::-webkit-scrollbar {
-        width: 0px;
-        background: transparent;
-    }
-
-    .profile-dropdown-btn {
-        background: transparent !important;
-        border: none !important;
-        display: flex;
-        align-items: center;
-        padding: 5px 10px;
-        color: white !important;
-    }
-
-    .profile-dropdown-btn:focus,
-    .profile-dropdown-btn:active {
-        box-shadow: none !important;
-    }
-
-    .profile-img-nav {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        margin-right: 10px;
-    }
-
-    .profile-info-nav {
-        text-align: left;
-        margin-right: 8px;
-        line-height: 1.2;
-    }
-
-    .profile-info-nav .profile-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #ffffff;
-        display: block;
-    }
-
-    .profile-info-nav .profile-role {
-        font-size: 0.8rem;
-        color: #60a5fa;
-        /* Biru muda cerah */
-        font-weight: 600;
-        display: block;
-    }
-
-    .dropdown-menu-profile {
-        border: none !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-        border-radius: 12px !important;
-        padding: 8px 0 !important;
-        min-width: 180px !important;
-    }
-
-    .dropdown-menu-profile .dropdown-item {
-        padding: 10px 20px !important;
-        font-size: 0.95rem !important;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        color: #334155;
-    }
-
-    .dropdown-menu-profile .dropdown-item i {
-        margin-right: 10px;
-        font-size: 1.1rem;
-        width: 20px;
-        text-align: center;
-        flex-shrink: 0;
-    }
-
-    .dropdown-menu-profile .dropdown-item {
-        gap: 8px;
-    }
-
-    .theme-dropdown .dropdown-toggle {
-        width: 46px;
-        height: 46px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
-        color: #fff !important;
-        transition: all 0.25s ease;
-        backdrop-filter: blur(4px);
-        font-size: 1.1rem;
-    }
-
-    .theme-dropdown .dropdown-toggle:hover {
-        background: rgba(255, 255, 255, 0.22) !important;
-        border-color: rgba(255, 255, 255, 0.35) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .theme-dropdown .dropdown-toggle::after {
-        display: none;
-    }
-
-    .theme-dropdown .dropdown-menu {
-        min-width: 140px;
-        border-radius: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-        padding: 8px;
-        backdrop-filter: blur(8px);
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
-    }
-
-    .theme-dropdown .dropdown-item {
-        padding: 10px 12px;
-        border-radius: 12px;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: #64748b;
-    }
-
-    .theme-dropdown .dropdown-item:hover {
-        background: rgba(0, 127, 62, 0.10);
-        color: #007f3e;
-        transform: translateY(-2px);
-    }
-
-    .theme-dropdown .dropdown-item i {
-        font-size: 1.3rem;
-        width: auto;
-        margin: 0;
-        display: inline-block;
-    }
-
-    .theme-dropdown .dropdown-item.active,
-    .theme-dropdown .dropdown-item:active {
-        background: rgba(0, 127, 62, 0.15);
-        color: #007f3e;
-    }
-
-    .search-navbar-group {
-        position: relative;
-        min-width: min(320px, 100%);
-        max-width: 420px;
-        width: 100%;
-    }
-
-    .search-navbar-group .form-control {
-        border-radius: 16px;
-        padding-left: 14px;
-        padding-right: 14px;
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
-        background: var(--card-color, #ffffff);
-        color: var(--text-color, #222);
-    }
-
-    .search-navbar-group .btn {
-        border-radius: 16px;
-        min-width: 46px;
-        margin-left: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        background: #239a58;
-        color: #fff;
-    }
-
-    .search-dropdown {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        right: 0;
-        z-index: 2500;
-        display: none;
-        min-width: 100%;
-        width: 100%;
-        padding: 0;
-        border-radius: 18px 0 0 18px;
-        background: var(--card-color, #ffffff);
-        color: var(--text-color, #222);
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-        overflow: hidden;
-    }
-
-    .search-dropdown.show {
-        display: block;
-    }
-
-    .search-dropdown-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 14px;
-        background: var(--card-color, #ffffff);
-        color: var(--text-color, #222);
-        font-size: 0.95rem;
-        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-    }
-
-    .search-dropdown-body {
-        padding: 14px 16px 16px;
-        font-size: 0.92rem;
-    }
-
-    .search-dropdown-close {
-        border: 0;
-        background: transparent;
-        color: inherit;
-        font-size: 1.1rem;
-        line-height: 1;
-        cursor: pointer;
-    }
-
-    .search-dropdown-list {
-        display: grid;
-        gap: 12px;
-        margin-top: 12px;
-    }
-
-    .search-dropdown-item {
-        display: block;
-        padding: 14px 16px;
-        border-radius: 18px;
-        background: var(--card-color, #ffffff);
-        color: var(--text-color, #222);
-        text-decoration: none;
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
-        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .search-dropdown-item:hover {
-        background: rgba(0, 127, 62, 0.05);
-        border-color: rgba(0, 127, 62, 0.12);
-        text-decoration: none;
-        color: #007f3e;
-        transform: translateY(-2px);
-    }
-
-    .search-dropdown-item strong {
-        display: block;
-        margin-bottom: 2px;
-    }
-
-    .search-dropdown-item small {
-        color: #64748b;
-        display: block;
-    }
-
-    body.dark-mode .search-dropdown {
-        background: rgba(15, 23, 42, 0.97);
-        color: #e2e8f0;
-        border-color: rgba(255, 255, 255, 0.16);
-    }
-
-    body.dark-mode .search-dropdown-item {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: #f8fafc;
-    }
-
-    body.dark-mode .search-dropdown-item:hover {
-        background: rgba(35, 154, 88, 0.16);
-        color: #ffffff;
-    }
-
-    body.dark-mode .search-dropdown-item small {
-        color: #cbd5e1;
-    }
-
-    .icon-circle {
-        width: 54px;
-        height: 54px;
-        border-radius: 16px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-    }
-
-    .card-modern-soft {
-        border: 0;
-        border-radius: 18px;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card-modern-soft:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
-    }
-
-    .theme-dropdown .dropdown-menu {
-        min-width: 120px;
-    }
-
-    .theme-dropdown .dropdown-item {
-        padding: 10px 0;
-    }
-
-    .theme-dropdown .dropdown-item i {
-        width: auto;
-        margin: 0;
-        font-size: 1.2rem;
-    }
-
-    .dropdown-menu-profile .item-profile i {
-        color: #2563eb;
-    }
-
-    .dropdown-menu-profile .item-logout {
-        color: #dc2626 !important;
-        border-top: 1px solid #f1f5f9;
-    }
-
-    /* LIGHT & DARK MODE VARIABLES */
-    :root {
-        --bg-color: #f5f6fa;
-        --card-color: #ffffff;
-        --text-color: #222;
-        --sidebar: #007f3e;
-        --navbar: #007f3e;
-    }
-
-    body.dark-mode {
-        --bg-color: #121212;
-        --card-color: #1f1f1f;
-        --text-color: #ffffff;
-        --sidebar: #1a1a1a;
-        --navbar: #222;
-    }
-
-    body {
-        background: var(--bg-color);
-        color: var(--text-color);
-        transition: .3s;
-    }
-
-    #layoutSidenav_content {
-        background: var(--bg-color);
-    }
-
-    .card {
-        background: var(--card-color);
-        color: var(--text-color);
-    }
-
-    .sb-topnav {
-        background: var(--navbar) !important;
-    }
-
-    .sb-sidenav-dark {
-        background: var(--sidebar) !important;
-    }
-
-    footer {
-        background: var(--card-color) !important;
-        color: var(--text-color);
-    }
-
-    .table {
-        color: var(--text-color);
-    }
-
-    .form-control {
-        background: var(--card-color);
-        color: var(--text-color);
-    }
-
-    /* ===== DASHBOARD MODERN ===== */
-    .dash-hero {
-        background: linear-gradient(120deg, #007f3e 0%, #049a4b 55%, #16b866 100%);
-        border-radius: 22px;
-        padding: 32px 34px;
-        color: #ffffff;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 20px 45px rgba(0, 127, 62, 0.25);
-    }
-
-    .dash-hero::after {
-        content: "";
-        position: absolute;
-        right: -60px;
-        top: -60px;
-        width: 220px;
-        height: 220px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 50%;
-    }
-
-    .dash-hero::before {
-        content: "";
-        position: absolute;
-        right: 60px;
-        bottom: -90px;
-        width: 160px;
-        height: 160px;
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 50%;
-    }
-
-    .dash-hero h2 {
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-
-    .dash-hero p {
-        opacity: 0.9;
-        margin-bottom: 0;
-        max-width: 520px;
-    }
-
-    .dash-hero .dash-date-badge {
-        background: rgba(255, 255, 255, 0.16);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 12px;
-        padding: 10px 18px;
-        font-size: 0.85rem;
-        backdrop-filter: blur(4px);
-    }
-
-    .stat-card-modern {
-        border: 0;
-        border-radius: 18px;
-        background: var(--card-color);
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
-        padding: 22px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        height: 100%;
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-    .stat-card-modern:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
-    }
-
-    .stat-card-modern .stat-icon-box {
-        width: 52px;
-        height: 52px;
-        min-width: 52px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        color: #fff;
-    }
-
-    .stat-card-modern .stat-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        line-height: 1.1;
-        color: var(--text-color);
-    }
-
-    .stat-card-modern .stat-label {
-        font-size: 0.82rem;
-        color: #8a94a6;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-
-    .dash-section-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 34px 0 16px;
-    }
-
-    .dash-section-title .bar {
-        width: 5px;
-        height: 22px;
-        border-radius: 4px;
-        background: #007f3e;
-    }
-
-    .dash-section-title h6 {
-        margin: 0;
-        font-weight: 700;
-        color: var(--text-color);
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-    }
-
-    .menu-tile {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        background: var(--card-color);
-        border-radius: 16px;
-        padding: 16px 18px;
-        text-decoration: none;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-        transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-        height: 100%;
-        border: 1px solid rgba(0, 0, 0, 0.04);
-    }
-
-    .menu-tile:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
-    }
-
-    .menu-tile .tile-icon {
-        width: 46px;
-        height: 46px;
-        min-width: 46px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 1.05rem;
-    }
-
-    .menu-tile .tile-title {
-        font-weight: 600;
-        font-size: 0.92rem;
-        color: var(--text-color);
-        margin-bottom: 2px;
-        display: block;
-    }
-
-    .menu-tile .tile-count {
-        font-size: 0.78rem;
-        color: #8a94a6;
-        font-weight: 500;
-    }
-
-    .menu-tile .tile-count .badge-count {
-        background: rgba(0, 127, 62, 0.12);
-        color: #007f3e;
-        border-radius: 20px;
-        padding: 2px 9px;
-        font-weight: 700;
-        margin-right: 4px;
-    }
-
-    body.dark-mode .menu-tile {
-        border-color: rgba(255, 255, 255, 0.06);
-    }
+        .sb-topnav.navbar {
+            background-color: #007f3e !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sb-sidenav-dark {
+            background: linear-gradient(180deg, #007f3e 0%, #016b37 100%) !important;
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-brand-box {
+            display: flex;
+            align-items: center;
+            padding: 18px 16px 16px;
+            margin: 0 10px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .sidebar-logo-web {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            color: #007f3e;
+            font-size: 20px;
+            margin-right: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-brand-text h6 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-brand-text small {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 12px;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu {
+            padding-top: 6px;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 16px;
+            padding: 11px 16px !important;
+            margin: 4px 12px;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link:hover {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.14);
+            transform: translateX(3px);
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link .menu-label-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 15px;
+            width: 18px;
+            text-align: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-menu .nav-link.active-green {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1)) !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-left: 4px solid #ffffff;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .active-dot {
+            width: 6px;
+            height: 6px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
+            flex-shrink: 0;
+            margin-left: auto;
+            position: static;
+        }
+
+        .sb-sidenav-dark .sb-sidenav-footer {
+            background-color: transparent !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            color: rgba(255, 255, 255, 0.72) !important;
+            padding: 14px 18px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        #layoutSidenav_nav .sb-sidenav {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        #layoutSidenav_nav .sb-sidenav::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .profile-dropdown-btn {
+            background: transparent !important;
+            border: none !important;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            color: white !important;
+        }
+
+        .profile-dropdown-btn:focus,
+        .profile-dropdown-btn:active {
+            box-shadow: none !important;
+        }
+
+        .profile-img-nav {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-right: 10px;
+        }
+
+        .profile-info-nav {
+            text-align: left;
+            margin-right: 8px;
+            line-height: 1.2;
+        }
+
+        .profile-info-nav .profile-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+        }
+
+        .profile-info-nav .profile-role {
+            font-size: 0.8rem;
+            color: #60a5fa;
+            /* Biru muda cerah */
+            font-weight: 600;
+            display: block;
+        }
+
+        .dropdown-menu-profile {
+            border: none !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 12px !important;
+            padding: 8px 0 !important;
+            min-width: 180px !important;
+        }
+
+        .dropdown-menu-profile .dropdown-item {
+            padding: 10px 20px !important;
+            font-size: 0.95rem !important;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            color: #334155;
+        }
+
+        .dropdown-menu-profile .dropdown-item i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .dropdown-menu-profile .dropdown-item {
+            gap: 8px;
+        }
+
+        .theme-dropdown .dropdown-toggle {
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            color: #fff !important;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(4px);
+            font-size: 1.1rem;
+        }
+
+        .theme-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.22) !important;
+            border-color: rgba(255, 255, 255, 0.35) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .theme-dropdown .dropdown-menu {
+            min-width: 140px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+            padding: 8px;
+            backdrop-filter: blur(8px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+        }
+
+        .theme-dropdown .dropdown-item {
+            padding: 10px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .theme-dropdown .dropdown-item:hover {
+            background: rgba(0, 127, 62, 0.10);
+            color: #007f3e;
+            transform: translateY(-2px);
+        }
+
+        .theme-dropdown .dropdown-item i {
+            font-size: 1.3rem;
+            width: auto;
+            margin: 0;
+            display: inline-block;
+        }
+
+        .theme-dropdown .dropdown-item.active,
+        .theme-dropdown .dropdown-item:active {
+            background: rgba(0, 127, 62, 0.15);
+            color: #007f3e;
+        }
+
+        .search-navbar-group {
+            position: relative;
+            min-width: min(320px, 100%);
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .search-navbar-group .form-control {
+            border-radius: 16px;
+            padding-left: 14px;
+            padding-right: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+            background: var(--card-color, #ffffff);
+            color: var(--text-color, #222);
+        }
+
+        .search-navbar-group .btn {
+            border-radius: 16px;
+            min-width: 46px;
+            margin-left: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            background: #239a58;
+            color: #fff;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            z-index: 2500;
+            display: none;
+            min-width: 100%;
+            width: 100%;
+            padding: 0;
+            border-radius: 18px 0 0 18px;
+            background: var(--card-color, #ffffff);
+            color: var(--text-color, #222);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .search-dropdown.show {
+            display: block;
+        }
+
+        .search-dropdown-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--card-color, #ffffff);
+            color: var(--text-color, #222);
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .search-dropdown-body {
+            padding: 14px 16px 16px;
+            font-size: 0.92rem;
+        }
+
+        .search-dropdown-close {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .search-dropdown-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .search-dropdown-item {
+            display: block;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: var(--card-color, #ffffff);
+            color: var(--text-color, #222);
+            text-decoration: none;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .search-dropdown-item:hover {
+            background: rgba(0, 127, 62, 0.05);
+            border-color: rgba(0, 127, 62, 0.12);
+            text-decoration: none;
+            color: #007f3e;
+            transform: translateY(-2px);
+        }
+
+        .search-dropdown-item strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .search-dropdown-item small {
+            color: #64748b;
+            display: block;
+        }
+
+        body.dark-mode .search-dropdown {
+            background: rgba(15, 23, 42, 0.97);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        body.dark-mode .search-dropdown-item {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+
+        body.dark-mode .search-dropdown-item:hover {
+            background: rgba(35, 154, 88, 0.16);
+            color: #ffffff;
+        }
+
+        body.dark-mode .search-dropdown-item small {
+            color: #cbd5e1;
+        }
+
+        .icon-circle {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-modern-soft {
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-modern-soft:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
+        }
+
+        .theme-dropdown .dropdown-menu {
+            min-width: 120px;
+        }
+
+        .theme-dropdown .dropdown-item {
+            padding: 10px 0;
+        }
+
+        .theme-dropdown .dropdown-item i {
+            width: auto;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .dropdown-menu-profile .item-profile i {
+            color: #2563eb;
+        }
+
+        .dropdown-menu-profile .item-logout {
+            color: #dc2626 !important;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        /* LIGHT & DARK MODE VARIABLES */
+        :root {
+            --bg-color: #f5f6fa;
+            --card-color: #ffffff;
+            --text-color: #222;
+            --sidebar: #007f3e;
+            --navbar: #007f3e;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-color: #1f1f1f;
+            --text-color: #ffffff;
+            --sidebar: #1a1a1a;
+            --navbar: #222;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: .3s;
+        }
+
+        #layoutSidenav_content {
+            background: var(--bg-color);
+        }
+
+        .card {
+            background: var(--card-color);
+            color: var(--text-color);
+        }
+
+        .sb-topnav {
+            background: var(--navbar) !important;
+        }
+
+        .sb-sidenav-dark {
+            background: var(--sidebar) !important;
+        }
+
+        footer {
+            background: var(--card-color) !important;
+            color: var(--text-color);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .form-control {
+            background: var(--card-color);
+            color: var(--text-color);
+        }
+
+        /* ===== DASHBOARD MODERN ===== */
+        .dash-hero {
+            background: linear-gradient(120deg, #007f3e 0%, #049a4b 55%, #16b866 100%);
+            border-radius: 22px;
+            padding: 32px 34px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 45px rgba(0, 127, 62, 0.25);
+        }
+
+        .dash-hero::after {
+            content: "";
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 220px;
+            height: 220px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .dash-hero::before {
+            content: "";
+            position: absolute;
+            right: 60px;
+            bottom: -90px;
+            width: 160px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+        }
+
+        .dash-hero h2 {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .dash-hero p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            max-width: 520px;
+        }
+
+        .dash-hero .dash-date-badge {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-card-modern {
+            border: 0;
+            border-radius: 18px;
+            background: var(--card-color);
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 100%;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .stat-card-modern:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+        }
+
+        .stat-card-modern .stat-icon-box {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .stat-card-modern .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--text-color);
+        }
+
+        .stat-card-modern .stat-label {
+            font-size: 0.82rem;
+            color: #8a94a6;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .dash-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 34px 0 16px;
+        }
+
+        .dash-section-title .bar {
+            width: 5px;
+            height: 22px;
+            border-radius: 4px;
+            background: #007f3e;
+        }
+
+        .dash-section-title h6 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--text-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-tile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--card-color);
+            border-radius: 16px;
+            padding: 16px 18px;
+            text-decoration: none;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+            height: 100%;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .menu-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .menu-tile .tile-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.05rem;
+        }
+
+        .menu-tile .tile-title {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--text-color);
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .menu-tile .tile-count {
+            font-size: 0.78rem;
+            color: #8a94a6;
+            font-weight: 500;
+        }
+
+        .menu-tile .tile-count .badge-count {
+            background: rgba(0, 127, 62, 0.12);
+            color: #007f3e;
+            border-radius: 20px;
+            padding: 2px 9px;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        body.dark-mode .menu-tile {
+            border-color: rgba(255, 255, 255, 0.06);
+        }
     </style>
 </head>
 
@@ -1231,253 +1231,253 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                             $tanggal_hari_ini = $hari_indo[date('l')] . ', ' . date('j') . ' ' . $bulan_indo[date('F')] . ' ' . date('Y');
                             ?>
 
-                    <!-- HERO GREETING -->
-                    <div class="dash-hero mt-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <h2>Selamat Datang, <?= htmlspecialchars($user_nama ?: 'Admin'); ?> 👋</h2>
-                            <p>Berikut ringkasan layanan administrasi desa hari ini. Semoga harimu lancar dan
-                                produktif.</p>
-                        </div>
-                        <div class="dash-date-badge">
-                            <i class="fas fa-calendar-alt me-2"></i><?= $tanggal_hari_ini; ?>
-                        </div>
-                    </div>
-
-                    <!-- RINGKASAN TOTAL -->
-                    <div class="row g-4 mt-1">
-                        <div class="col-xl-3 col-md-6">
-                            <a href="index.php?page=daftar-surat" class="stat-card-modern" title="Lihat semua layanan"
-                                style="text-decoration:none;">
-                                <div class="stat-icon-box" style="background:#007f3e;"><i
-                                        class="fas fa-layer-group"></i></div>
+                            <!-- HERO GREETING -->
+                            <div class="dash-hero mt-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                                 <div>
-                                    <div class="stat-value"><?= number_format($total_layanan); ?></div>
-                                    <div class="stat-label">Total Seluruh Layanan</div>
+                                    <h2>Selamat Datang, <?= htmlspecialchars($user_nama ?: 'Admin'); ?> 👋</h2>
+                                    <p>Berikut ringkasan layanan administrasi desa hari ini. Semoga harimu lancar dan
+                                        produktif.</p>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="stat-card-modern">
-                                <div class="stat-icon-box" style="background:#2563eb;"><i class="fas fa-envelope"></i>
-                                </div>
-                                <div>
-                                    <div class="stat-value"><?= number_format($total_surat); ?></div>
-                                    <div class="stat-label">Layanan Surat</div>
+                                <div class="dash-date-badge">
+                                    <i class="fas fa-calendar-alt me-2"></i><?= $tanggal_hari_ini; ?>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="stat-card-modern">
-                                <div class="stat-icon-box" style="background:#16a34a;"><i
-                                        class="fas fa-file-signature"></i></div>
-                                <div>
-                                    <div class="stat-value"><?= number_format($total_keterangan); ?></div>
-                                    <div class="stat-label">Layanan Keterangan</div>
+
+                            <!-- RINGKASAN TOTAL -->
+                            <div class="row g-4 mt-1">
+                                <div class="col-xl-3 col-md-6">
+                                    <a href="index.php?page=daftar-surat" class="stat-card-modern" title="Lihat semua layanan"
+                                        style="text-decoration:none;">
+                                        <div class="stat-icon-box" style="background:#007f3e;"><i
+                                                class="fas fa-layer-group"></i></div>
+                                        <div>
+                                            <div class="stat-value"><?= number_format($total_layanan); ?></div>
+                                            <div class="stat-label">Total Seluruh Layanan</div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-xl-3 col-md-6">
+                                    <div class="stat-card-modern">
+                                        <div class="stat-icon-box" style="background:#2563eb;"><i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <div class="stat-value"><?= number_format($total_surat); ?></div>
+                                            <div class="stat-label">Layanan Surat</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6">
+                                    <div class="stat-card-modern">
+                                        <div class="stat-icon-box" style="background:#16a34a;"><i
+                                                class="fas fa-file-signature"></i></div>
+                                        <div>
+                                            <div class="stat-value"><?= number_format($total_keterangan); ?></div>
+                                            <div class="stat-label">Layanan Keterangan</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6">
+                                    <div class="stat-card-modern">
+                                        <div class="stat-icon-box" style="background:#d97706;"><i
+                                                class="fas fa-hand-holding-medical"></i></div>
+                                        <div>
+                                            <div class="stat-value"><?= number_format($total_sktm); ?></div>
+                                            <div class="stat-label">Keterangan Tidak Mampu</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="stat-card-modern">
-                                <div class="stat-icon-box" style="background:#d97706;"><i
-                                        class="fas fa-hand-holding-medical"></i></div>
-                                <div>
-                                    <div class="stat-value"><?= number_format($total_sktm); ?></div>
-                                    <div class="stat-label">Keterangan Tidak Mampu</div>
+
+                            <!-- LAYANAN SURAT -->
+                            <div class="dash-section-title">
+                                <div class="bar"></div>
+                                <h6>Layanan Surat</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-garapan-sawah" class="menu-tile">
+                                        <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-tractor"></i></div>
+                                        <div>
+                                            <span class="tile-title">Garapan Sawah</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_garapan; ?></span>data</span>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-keterangan-ahli-waris" class="menu-tile">
+                                        <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-scroll"></i></div>
+                                        <div>
+                                            <span class="tile-title">Ahli Waris</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_waris; ?></span>data</span>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-undangan" class="menu-tile">
+                                        <div class="tile-icon" style="background:#2563eb;"><i
+                                                class="fas fa-envelope-open-text"></i></div>
+                                        <div>
+                                            <span class="tile-title">Undangan</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_undangan; ?></span>data</span>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-kelahiran" class="menu-tile">
+                                        <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-baby"></i></div>
+                                        <div>
+                                            <span class="tile-title">Kelahiran</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_kelahiran; ?></span>data</span>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-kematian" class="menu-tile">
+                                        <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-cross"></i></div>
+                                        <div>
+                                            <span class="tile-title">Kematian</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_kematian; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- LAYANAN SURAT -->
-                    <div class="dash-section-title">
-                        <div class="bar"></div>
-                        <h6>Layanan Surat</h6>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-garapan-sawah" class="menu-tile">
-                                <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-tractor"></i></div>
-                                <div>
-                                    <span class="tile-title">Garapan Sawah</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_garapan; ?></span>data</span>
+                            <!-- LAYANAN KETERANGAN -->
+                            <div class="dash-section-title">
+                                <div class="bar" style="background:#16a34a;"></div>
+                                <h6>Layanan Keterangan</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-keterangan-pengantar" class="menu-tile">
+                                        <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-file-signature"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">Keterangan / Pengantar</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_pengantar; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-keterangan-ahli-waris" class="menu-tile">
-                                <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-scroll"></i></div>
-                                <div>
-                                    <span class="tile-title">Ahli Waris</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_waris; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-domisili" class="menu-tile">
+                                        <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-house-user"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">Domisili</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_domisili; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-undangan" class="menu-tile">
-                                <div class="tile-icon" style="background:#2563eb;"><i
-                                        class="fas fa-envelope-open-text"></i></div>
-                                <div>
-                                    <span class="tile-title">Undangan</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_undangan; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=surat-pengantar-dukcapil" class="menu-tile">
+                                        <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-id-card"></i></div>
+                                        <div>
+                                            <span class="tile-title">Pengantar Dukcapil</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_dukcapil; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-kelahiran" class="menu-tile">
-                                <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-baby"></i></div>
-                                <div>
-                                    <span class="tile-title">Kelahiran</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_kelahiran; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-kematian" class="menu-tile">
-                                <div class="tile-icon" style="background:#2563eb;"><i class="fas fa-cross"></i></div>
-                                <div>
-                                    <span class="tile-title">Kematian</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_kematian; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+                            </div>
 
-                    <!-- LAYANAN KETERANGAN -->
-                    <div class="dash-section-title">
-                        <div class="bar" style="background:#16a34a;"></div>
-                        <h6>Layanan Keterangan</h6>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-keterangan-pengantar" class="menu-tile">
-                                <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-file-signature"></i>
+                            <!-- SKTM -->
+                            <div class="dash-section-title">
+                                <div class="bar" style="background:#d97706;"></div>
+                                <h6>Surat Keterangan Tidak Mampu</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=sktm-bumil-tampil" class="menu-tile">
+                                        <div class="tile-icon" style="background:#d97706;"><i class="fas fa-baby-carriage"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">Ibu Hamil (Bumil)</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_bumil; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                                <div>
-                                    <span class="tile-title">Keterangan / Pengantar</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_pengantar; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=pembebasan-rawat-inab-dan-jalan" class="menu-tile">
+                                        <div class="tile-icon" style="background:#d97706;"><i class="fas fa-procedures"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">Rawat Inap / Jalan</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_rawat; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-domisili" class="menu-tile">
-                                <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-house-user"></i>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=sktm-kis" class="menu-tile">
+                                        <div class="tile-icon" style="background:#d97706;"><i class="fas fa-notes-medical"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">SKTM KIS</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_kis; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                                <div>
-                                    <span class="tile-title">Domisili</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_domisili; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=sktm-kip" class="menu-tile">
+                                        <div class="tile-icon" style="background:#d97706;"><i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">SKTM KIP</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_kip; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=surat-pengantar-dukcapil" class="menu-tile">
-                                <div class="tile-icon" style="background:#16a34a;"><i class="fas fa-id-card"></i></div>
-                                <div>
-                                    <span class="tile-title">Pengantar Dukcapil</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_dukcapil; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=stunting" class="menu-tile">
+                                        <div class="tile-icon" style="background:#d97706;"><i class="fas fa-child"></i></div>
+                                        <div>
+                                            <span class="tile-title">Stunting</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_stunting; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                    </div>
+                            </div>
 
-                    <!-- SKTM -->
-                    <div class="dash-section-title">
-                        <div class="bar" style="background:#d97706;"></div>
-                        <h6>Surat Keterangan Tidak Mampu</h6>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=sktm-bumil-tampil" class="menu-tile">
-                                <div class="tile-icon" style="background:#d97706;"><i class="fas fa-baby-carriage"></i>
+                            <!-- MENU LAINNYA -->
+                            <div class="dash-section-title">
+                                <div class="bar" style="background:#dc2626;"></div>
+                                <h6>Menu Lainnya</h6>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=penduduk" class="menu-tile">
+                                        <div class="tile-icon" style="background:#dc2626;"><i class="fas fa-users"></i></div>
+                                        <div>
+                                            <span class="tile-title">Data Penduduk</span>
+                                            <span class="tile-count"><span
+                                                    class="badge-count"><?= $cnt_penduduk; ?></span>data</span>
+                                        </div>
+                                    </a>
                                 </div>
-                                <div>
-                                    <span class="tile-title">Ibu Hamil (Bumil)</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_bumil; ?></span>data</span>
+                                <div class="col-xl-3 col-md-4 col-6">
+                                    <a href="index.php?page=profil-desa" class="menu-tile">
+                                        <div class="tile-icon" style="background:#64748b;"><i class="fas fa-map-marked-alt"></i>
+                                        </div>
+                                        <div>
+                                            <span class="tile-title">Profil Desa</span>
+                                            <span class="tile-count">Sejarah &amp; pemerintahan</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=pembebasan-rawat-inab-dan-jalan" class="menu-tile">
-                                <div class="tile-icon" style="background:#d97706;"><i class="fas fa-procedures"></i>
-                                </div>
-                                <div>
-                                    <span class="tile-title">Rawat Inap / Jalan</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_rawat; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=sktm-kis" class="menu-tile">
-                                <div class="tile-icon" style="background:#d97706;"><i class="fas fa-notes-medical"></i>
-                                </div>
-                                <div>
-                                    <span class="tile-title">SKTM KIS</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_kis; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=sktm-kip" class="menu-tile">
-                                <div class="tile-icon" style="background:#d97706;"><i class="fas fa-graduation-cap"></i>
-                                </div>
-                                <div>
-                                    <span class="tile-title">SKTM KIP</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_kip; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=stunting" class="menu-tile">
-                                <div class="tile-icon" style="background:#d97706;"><i class="fas fa-child"></i></div>
-                                <div>
-                                    <span class="tile-title">Stunting</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_stunting; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+                            </div>
 
-                    <!-- MENU LAINNYA -->
-                    <div class="dash-section-title">
-                        <div class="bar" style="background:#dc2626;"></div>
-                        <h6>Menu Lainnya</h6>
-                    </div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=penduduk" class="menu-tile">
-                                <div class="tile-icon" style="background:#dc2626;"><i class="fas fa-users"></i></div>
-                                <div>
-                                    <span class="tile-title">Data Penduduk</span>
-                                    <span class="tile-count"><span
-                                            class="badge-count"><?= $cnt_penduduk; ?></span>data</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-xl-3 col-md-4 col-6">
-                            <a href="index.php?page=profil-desa" class="menu-tile">
-                                <div class="tile-icon" style="background:#64748b;"><i class="fas fa-map-marked-alt"></i>
-                                </div>
-                                <div>
-                                    <span class="tile-title">Profil Desa</span>
-                                    <span class="tile-count">Sejarah &amp; pemerintahan</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
-                    <?php
+                            <?php
                             break;
                     }
                     ?>
@@ -1495,66 +1495,66 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
         crossorigin="anonymous"></script>
     <script src="js/datatables-simple-demo.js"></script>
     <script>
-    function setTheme(theme) {
-        if (theme === "dark") {
-            document.body.classList.add("dark-mode");
-        } else if (theme === "light") {
-            document.body.classList.remove("dark-mode");
-        } else {
-            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        function setTheme(theme) {
+            if (theme === "dark") {
                 document.body.classList.add("dark-mode");
-            } else {
+            } else if (theme === "light") {
                 document.body.classList.remove("dark-mode");
+            } else {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add("dark-mode");
+                } else {
+                    document.body.classList.remove("dark-mode");
+                }
+            }
+            localStorage.setItem("theme", theme);
+        }
+
+        const appSearchItems = <?= json_encode($appSearchItems, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS) ?>;
+
+        function normalizeSearchText(value) {
+            return (value || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function getMatchingSearchItems(query) {
+            const searchQuery = normalizeSearchText(query || '');
+            if (!searchQuery) {
+                return [];
+            }
+
+            return appSearchItems.filter((item) => {
+                const haystack = normalizeSearchText(`${item.label} ${item.description} ${item.keywords}`);
+                return haystack.includes(searchQuery);
+            }).slice(0, 6);
+        }
+
+        function hideSearchDropdown() {
+            const dropdown = document.getElementById('navbar-search-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+                dropdown.style.display = 'none';
             }
         }
-        localStorage.setItem("theme", theme);
-    }
 
-    const appSearchItems = <?= json_encode($appSearchItems, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS) ?>;
+        function showSearchDropdown(query, results) {
+            const dropdown = document.getElementById('navbar-search-dropdown');
+            if (!dropdown) {
+                return;
+            }
 
-    function normalizeSearchText(value) {
-        return (value || '')
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-    }
+            if (!query) {
+                hideSearchDropdown();
+                return;
+            }
 
-    function getMatchingSearchItems(query) {
-        const searchQuery = normalizeSearchText(query || '');
-        if (!searchQuery) {
-            return [];
-        }
-
-        return appSearchItems.filter((item) => {
-            const haystack = normalizeSearchText(`${item.label} ${item.description} ${item.keywords}`);
-            return haystack.includes(searchQuery);
-        }).slice(0, 6);
-    }
-
-    function hideSearchDropdown() {
-        const dropdown = document.getElementById('navbar-search-dropdown');
-        if (dropdown) {
-            dropdown.classList.remove('show');
-            dropdown.style.display = 'none';
-        }
-    }
-
-    function showSearchDropdown(query, results) {
-        const dropdown = document.getElementById('navbar-search-dropdown');
-        if (!dropdown) {
-            return;
-        }
-
-        if (!query) {
-            hideSearchDropdown();
-            return;
-        }
-
-        let body = '';
-        if (results.length > 0) {
-            body = `
+            let body = '';
+            if (results.length > 0) {
+                body = `
                 <div class="search-dropdown-body">
                     <div>Temukan modul atau halaman yang paling relevan untuk pencarian <strong>${query}</strong>.</div>
                     <div class="search-dropdown-list">
@@ -1566,89 +1566,89 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
                         `).join('')}
                     </div>
                 </div>`;
-        } else {
-            body = `
+            } else {
+                body = `
                 <div class="search-dropdown-body">
                     <div>Tidak ada hasil untuk <strong>${query}</strong>. Coba kata kunci lain seperti nama surat, modul, atau halaman.</div>
                 </div>`;
-        }
+            }
 
-        dropdown.innerHTML = `
+            dropdown.innerHTML = `
             <div class="search-dropdown-header">
                 <span>${results.length > 0 ? `${results.length} hasil ditemukan` : 'Tidak ada hasil'}</span>
                 <button class="search-dropdown-close" type="button" aria-label="Tutup pencarian">×</button>
             </div>
             ${body}
         `;
-        dropdown.style.display = 'block';
-        dropdown.classList.add('show');
+            dropdown.style.display = 'block';
+            dropdown.classList.add('show');
 
-        const closeButton = dropdown.querySelector('.search-dropdown-close');
-        if (closeButton) {
-            closeButton.addEventListener('click', function() {
-                hideSearchDropdown();
-            });
-        }
-
-        clearTimeout(window.searchDropdownTimer);
-        window.searchDropdownTimer = setTimeout(hideSearchDropdown, 5000);
-    }
-
-    function applyNavbarSearch(query) {
-        const searchQuery = (query || '').trim();
-        const results = getMatchingSearchItems(searchQuery);
-        showSearchDropdown(searchQuery, results);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.querySelector('#navbarSearchForm input[name="q"]');
-        const form = document.getElementById('navbarSearchForm');
-        const searchGroup = document.querySelector('#navbarSearchForm .search-navbar-group');
-        const dropdown = document.createElement('div');
-        dropdown.id = 'navbar-search-dropdown';
-        dropdown.className = 'search-dropdown';
-        if (searchGroup) {
-            searchGroup.appendChild(dropdown);
-        }
-
-        const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
-        if (searchInput) {
-            searchInput.value = initialQuery;
-        }
-        applyNavbarSearch(initialQuery);
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                applyNavbarSearch(this.value);
-            });
-        }
-
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const query = (searchInput ? searchInput.value : '').trim();
-                const results = getMatchingSearchItems(query);
-                showSearchDropdown(query, results);
-            });
-        }
-
-        document.addEventListener('click', function(event) {
-            if (!form || !form.contains(event.target)) {
-                hideSearchDropdown();
+            const closeButton = dropdown.querySelector('.search-dropdown-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', function () {
+                    hideSearchDropdown();
+                });
             }
+
+            clearTimeout(window.searchDropdownTimer);
+            window.searchDropdownTimer = setTimeout(hideSearchDropdown, 5000);
+        }
+
+        function applyNavbarSearch(query) {
+            const searchQuery = (query || '').trim();
+            const results = getMatchingSearchItems(searchQuery);
+            showSearchDropdown(searchQuery, results);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.querySelector('#navbarSearchForm input[name="q"]');
+            const form = document.getElementById('navbarSearchForm');
+            const searchGroup = document.querySelector('#navbarSearchForm .search-navbar-group');
+            const dropdown = document.createElement('div');
+            dropdown.id = 'navbar-search-dropdown';
+            dropdown.className = 'search-dropdown';
+            if (searchGroup) {
+                searchGroup.appendChild(dropdown);
+            }
+
+            const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
+            if (searchInput) {
+                searchInput.value = initialQuery;
+            }
+            applyNavbarSearch(initialQuery);
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    applyNavbarSearch(this.value);
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const query = (searchInput ? searchInput.value : '').trim();
+                    const results = getMatchingSearchItems(query);
+                    showSearchDropdown(query, results);
+                });
+            }
+
+            document.addEventListener('click', function (event) {
+                if (!form || !form.contains(event.target)) {
+                    hideSearchDropdown();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    hideSearchDropdown();
+                }
+            });
         });
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                hideSearchDropdown();
-            }
-        });
-    });
-
-    window.onload = function() {
-        let theme = localStorage.getItem("theme") || "light";
-        setTheme(theme);
-    }
+        window.onload = function () {
+            let theme = localStorage.getItem("theme") || "light";
+            setTheme(theme);
+        }
     </script>
 </body>
 

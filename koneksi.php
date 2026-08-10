@@ -1,18 +1,18 @@
 <?php
 // Konfigurasi Database
-$host     = "localhost";
-$username = "root";
-$password = "";
-$database = "db_balaidesa";
+$host = 'localhost';
+$username = 'simdesid_admin';
+$password = '+!IF?PeAd1V[{7C$'; // Petik tunggal agar karakter $ tidak terbaca variabel
+$database = 'simdesid_db_balaidesa';
 
 // Membuat koneksi ke MySQL
 $koneksi = mysqli_connect($host, $username, $password, $database);
 
 // Memeriksa apakah koneksi berhasil
-if (mysqli_connect_errno()) {
+if (!$koneksi) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
-// Mengatur timezone ke Asia/Jakarta agar tanggal surat selalu akurat
+// Mengatur timezone ke Asia/Jakarta
 date_default_timezone_set('Asia/Jakarta');
 ?>
