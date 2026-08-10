@@ -1,15 +1,25 @@
 <?php
 // Pastikan kamu sudah menginstal phpspreadsheet via composer: composer require phpoffice/phpspreadsheet
-require_once __DIR__ . '/vendor/autoload.php';
+$autoloadPath = __DIR__ . '/vendor/autoload.php';
+if (!is_file($autoloadPath)) {
+    echo "<script>alert('Composer autoload tidak ditemukan. Jalankan composer install terlebih dahulu.'); window.location='import_penduduk.php';</script>";
+    exit;
+}
+
+require_once $autoloadPath;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+
+if (!class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory')) {
+    echo "<script>alert('PhpSpreadsheet tidak terpasang. Jalankan composer require phpoffice/phpspreadsheet.'); window.location='import_penduduk.php';</script>";
+    exit;
+}
 
 require_once __DIR__ . '/koneksi.php';
 
 if (isset($_POST['import'])) {
     $fileName = $_FILES['file_excel']['name'] ?? '';
     $fileTmp = $_FILES['file_excel']['tmp_name'] ?? null;
-    $fileType = $_FILES['file_excel']['type'] ?? '';
     $allowedExtensions = ['xlsx', 'xls'];
     $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
@@ -34,35 +44,74 @@ if (isset($_POST['import'])) {
     $inserted = 0;
     $rowCount = count($sheetData);
 
-    for ($i = 2; $i <= $rowCount; $i++) {
-        $alamat = mysqli_real_escape_string($koneksi, $sheetData[$i]['A'] ?? '');
-        $rt = mysqli_real_escape_string($koneksi, $sheetData[$i]['B'] ?? '');
-        $rw = mysqli_real_escape_string($koneksi, $sheetData[$i]['C'] ?? '');
-        $nama = mysqli_real_escape_string($koneksi, $sheetData[$i]['D'] ?? '');
-        $no_kk = mysqli_real_escape_string($koneksi, $sheetData[$i]['E'] ?? '');
-        $nik = mysqli_real_escape_string($koneksi, $sheetData[$i]['F'] ?? '');
-        $jenis_kelamin = mysqli_real_escape_string($koneksi, $sheetData[$i]['G'] ?? '');
-        $tempat_tgl_lahir = mysqli_real_escape_string($koneksi, $sheetData[$i]['H'] ?? '');
-        $umur = isset($sheetData[$i]['I']) ? (int) $sheetData[$i]['I'] : null;
-        $agama = mysqli_real_escape_string($koneksi, $sheetData[$i]['J'] ?? '');
-        $pekerjaan = mysqli_real_escape_string($koneksi, $sheetData[$i]['K'] ?? '');
+    $stmt = mysqli_prepare(
+        $koneksi,
+        "INSERT INTO tb_penduduk (nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, umur, agama, pekerjaan, alamat, rt, rw)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            nama = VALUES(nama),
+            no_kk = VALUES(no_kk),
+            jenis_kelamin = VALUES(jenis_kelamin),
+            tempat_tgl_lahir = VALUES(tempat_tgl_lahir),
+            umur = VALUES(umur),
+            agama = VALUES(agama),
+            pekerjaan = VALUES(pekerjaan),
+            alamat = VALUES(alamat),
+            rt = VALUES(rt),
+            rw = VALUES(rw)"
+    );
 
-        if ($nik === '') {
+    if ($stmt === false) {
+        $error = mysqli_error($koneksi);
+        echo "<script>alert('Gagal menyiapkan query import: " . addslashes($error) . "'); window.location='import_penduduk.php';</script>";
+        exit;
+    }
+
+    for ($i = 2; $i <= $rowCount; $i++) {
+        $alamat = trim($sheetData[$i]['A'] ?? '');
+        $rt = trim($sheetData[$i]['B'] ?? '');
+        $rw = trim($sheetData[$i]['C'] ?? '');
+        $nama = trim($sheetData[$i]['D'] ?? '');
+        $no_kk = trim($sheetData[$i]['E'] ?? '');
+        $nik = trim($sheetData[$i]['F'] ?? '');
+        $jenis_kelamin = trim($sheetData[$i]['G'] ?? '');
+        $tempat_tgl_lahir = trim($sheetData[$i]['H'] ?? '');
+        $umurValue = trim($sheetData[$i]['I'] ?? '');
+        $umur = $umurValue === '' ? null : (int) $umurValue;
+        $agama = trim($sheetData[$i]['J'] ?? '');
+        $pekerjaan = trim($sheetData[$i]['K'] ?? '');
+
+        if ($nik === '' || $nama === '') {
             continue;
         }
 
-        $query = "INSERT INTO tb_penduduk \
-            (nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, umur, agama, pekerjaan, alamat, rt, rw)\
-            VALUES \
-            ('$nik', '$no_kk', '$nama', '$jenis_kelamin', '$tempat_tgl_lahir', " . ($umur !== null ? $umur : 'NULL') . ", '$agama', '$pekerjaan', '$alamat', '$rt', '$rw')\
-            ON DUPLICATE KEY UPDATE \
-            nama='$nama', no_kk='$no_kk', jenis_kelamin='$jenis_kelamin', tempat_tgl_lahir='$tempat_tgl_lahir', pekerjaan='$pekerjaan', alamat='$alamat', rt='$rt', rw='$rw'";
+        mysqli_stmt_bind_param(
+            $stmt,
+            'ssssissssss',
+            $nik,
+            $no_kk,
+            $nama,
+            $jenis_kelamin,
+            $tempat_tgl_lahir,
+            $umur,
+            $agama,
+            $pekerjaan,
+            $alamat,
+            $rt,
+            $rw
+        );
 
-        if (mysqli_query($koneksi, $query)) {
+        if (mysqli_stmt_execute($stmt)) {
             $inserted++;
+        } else {
+            $error = mysqli_stmt_error($stmt);
+            echo "<script>alert('Gagal mengimpor baris $i: " . addslashes($error) . "'); window.location='import_penduduk.php';</script>";
+            mysqli_stmt_close($stmt);
+            exit;
         }
     }
 
+    mysqli_stmt_close($stmt);
     echo "<script>alert('Berhasil mengimpor $inserted data penduduk!'); window.location='index.php?page=penduduk';</script>";
 }
 ?>

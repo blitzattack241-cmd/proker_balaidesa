@@ -135,7 +135,9 @@ function buatQrDataUriLokal($data, $size = 110)
         }
     }
 
-    return '';
+    // Fallback: jika generator lokal gagal (dependency hilang), gunakan layanan QR eksternal.
+    // Ini memastikan halaman cetak tetap menampilkan QR di deployment tanpa composer library.
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=' . (int) $size . 'x' . (int) $size . '&data=' . urlencode($data);
 }
 
 // Mendeteksi otomatis alamat dasar website (bekerja di localhost maupun domain asli)
