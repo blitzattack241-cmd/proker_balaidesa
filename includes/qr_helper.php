@@ -164,6 +164,10 @@ function getBaseUrlSimdes()
     $docRoot = str_replace('\\', '/', rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/'));
     $folderProject = trim(str_replace($docRoot, '', str_replace('\\', '/', dirname(__DIR__))), '/');
 
+    if ($folderProject === '') {
+        return $protocol . $host;
+    }
+
     return $protocol . $host . '/' . $folderProject;
 }
 
@@ -259,7 +263,8 @@ function dapatkanTokenVerifikasi($koneksi, $jenis_surat, $id_surat, $nomor_surat
  */
 function tampilkanQR($jenis_surat, $id_surat, $token)
 {
-    $url = getBaseUrlSimdes() . '/verifikasi.php'
+    $baseUrl = rtrim(getBaseUrlSimdes(), '/');
+    $url = $baseUrl . '/verifikasi.php'
         . '?jenis=' . urlencode($jenis_surat)
         . '&id=' . (int) $id_surat
         . '&token=' . urlencode($token);

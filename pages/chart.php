@@ -249,30 +249,30 @@ if (empty($label_tempat_lahir)) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-.chart-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 1.25rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    height: 100%;
-}
+    .chart-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
 
-.chart-title {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #1e293b;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .chart-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.chart-container {
-    position: relative;
-    height: 280px;
-    width: 100%;
-}
+    .chart-container {
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
 </style>
 
 <div class="container-fluid px-4 py-4">
@@ -362,261 +362,282 @@ if (empty($label_tempat_lahir)) {
 </div>
 
 <script>
-const yAxisConfig = {
-    beginAtZero: true,
-    ticks: {
-        precision: 0
-    },
-    grid: {
-        color: '#f1f5f9'
-    }
-};
-
-const labelRT = <?= json_encode($label_rt) ?>;
-const dataRT = <?= json_encode($data_rt) ?>;
-
-const labelKerja = <?= json_encode($label_kerja) ?>;
-const dataKerja = <?= json_encode($data_kerja) ?>;
-
-const labelJK = <?= json_encode($label_jk) ?>;
-const dataJK = <?= json_encode($data_jk) ?>;
-const colorJK = labelJK.map(label => {
-    const key = String(label).toLowerCase();
-    if (key.includes('laki')) return '#0284c7';
-    if (key.includes('perempuan')) return '#ec4899';
-    return '#94a3b8';
-});
-
-const labelAgama = <?= json_encode($label_agama) ?>;
-const dataAgama = <?= json_encode($data_agama) ?>;
-
-const labelUsia = <?= json_encode($label_usia) ?>;
-const dataUsia = <?= json_encode($data_usia) ?>;
-
-const labelBulanLahir = <?= json_encode($label_bulan_lahir) ?>;
-const dataBulanLahir = <?= json_encode($data_bulan_lahir) ?>;
-
-const labelTempatLahir = <?= json_encode($label_tempat_lahir) ?>;
-const dataTempatLahir = <?= json_encode($data_tempat_lahir) ?>;
-
-// 1. Chart RT (Diubah Rotasi Label agar pas saat dibaca)
-new Chart(document.getElementById('chartRT'), {
-    type: 'line',
-    data: {
-        labels: labelRT,
-        datasets: [{
-            label: 'Jumlah Jiwa',
-            data: dataRT,
-            borderColor: '#0284c7',
-            backgroundColor: 'rgba(56, 189, 248, 0.15)',
-            fill: true,
-            tension: 0.35,
-            pointRadius: 5,
-            pointBackgroundColor: '#0284c7',
-            borderWidth: 3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
+    const yAxisConfig = {
+        beginAtZero: true,
+        ticks: {
+            precision: 0
         },
-        scales: {
-            y: yAxisConfig,
-            x: {
-                grid: {
-                    color: '#f1f5f9'
+        grid: {
+            color: '#f1f5f9'
+        }
+    };
+
+    const labelRT = <?= json_encode($label_rt) ?>;
+    const dataRT = <?= json_encode($data_rt) ?>;
+
+    const labelKerja = <?= json_encode($label_kerja) ?>;
+    const dataKerja = <?= json_encode($data_kerja) ?>;
+
+    const labelJK = <?= json_encode($label_jk) ?>;
+    const dataJK = <?= json_encode($data_jk) ?>;
+    const colorJK = labelJK.map(label => {
+        const key = String(label).toLowerCase();
+        if (key.includes('laki')) return '#0284c7';
+        if (key.includes('perempuan')) return '#ec4899';
+        return '#94a3b8';
+    });
+
+    const labelAgama = <?= json_encode($label_agama) ?>;
+    const dataAgama = <?= json_encode($data_agama) ?>;
+
+    const labelUsia = <?= json_encode($label_usia) ?>;
+    const dataUsia = <?= json_encode($data_usia) ?>;
+
+    const labelBulanLahir = <?= json_encode($label_bulan_lahir) ?>;
+    const dataBulanLahir = <?= json_encode($data_bulan_lahir) ?>;
+
+    const labelTempatLahir = <?= json_encode($label_tempat_lahir) ?>;
+    const dataTempatLahir = <?= json_encode($data_tempat_lahir) ?>;
+
+    // 1. Chart RT (Diubah Rotasi Label agar pas saat dibaca)
+    var el_chartRT = document.getElementById('chartRT');
+    if (el_chartRT) {
+        new Chart(el_chartRT, {
+            type: 'line',
+            data: {
+                labels: labelRT,
+                datasets: [{
+                    label: 'Jumlah Jiwa',
+                    data: dataRT,
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#0284c7',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                ticks: {
-                    maxRotation: 45,
-                    minRotation: 45
+                scales: {
+                    y: yAxisConfig,
+                    x: {
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
                 }
             }
-        }
+        });
     }
-});
 
-// 2. Chart Pekerjaan
-new Chart(document.getElementById('chartPekerjaan'), {
-    type: 'bar',
-    data: {
-        labels: labelKerja,
-        datasets: [{
-            label: 'Jumlah',
-            data: dataKerja,
-            backgroundColor: '#10b981',
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: yAxisConfig,
-            x: {
-                grid: {
-                    display: false
+    // 2. Chart Pekerjaan
+    var el_chartPekerjaan = document.getElementById('chartPekerjaan');
+    if (el_chartPekerjaan) {
+        new Chart(el_chartPekerjaan, {
+            type: 'bar',
+            data: {
+                labels: labelKerja,
+                datasets: [{
+                    label: 'Jumlah',
+                    data: dataKerja,
+                    backgroundColor: '#10b981',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                ticks: {
-                    maxRotation: 45,
-                    minRotation: 45
+                scales: {
+                    y: yAxisConfig,
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
                 }
             }
-        }
+        });
     }
-});
 
-// 3. Chart Jenis Kelamin
-new Chart(document.getElementById('chartJK'), {
-    type: 'doughnut',
-    data: {
-        labels: labelJK,
-        datasets: [{
-            data: dataJK,
-            backgroundColor: colorJK,
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
-
-// 4. Chart Agama
-new Chart(document.getElementById('chartAgama'), {
-    type: 'pie',
-    data: {
-        labels: labelAgama,
-        datasets: [{
-            data: dataAgama,
-            backgroundColor: ['#0284c7', '#16a34a', '#eab308', '#a855f7', '#f97316', '#06b6d4',
-                '#6366f1'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
-
-// 5. Chart Kelompok Usia
-new Chart(document.getElementById('chartUsia'), {
-    type: 'bar',
-    data: {
-        labels: labelUsia,
-        datasets: [{
-            label: 'Jumlah Penduduk',
-            data: dataUsia,
-            backgroundColor: ['#38bdf8', '#4ade80', '#facc15', '#f87171'],
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: yAxisConfig,
-            x: {
-                grid: {
-                    display: false
+    // 3. Chart Jenis Kelamin
+    var el_chartJK = document.getElementById('chartJK');
+    if (el_chartJK) {
+        new Chart(el_chartJK, {
+            type: 'doughnut',
+            data: {
+                labels: labelJK,
+                datasets: [{
+                    data: dataJK,
+                    backgroundColor: colorJK,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
             }
-        }
+        });
     }
-});
 
-// 6. Chart Bulan Lahir
-new Chart(document.getElementById('chartBulanLahir'), {
-    type: 'bar',
-    data: {
-        labels: labelBulanLahir,
-        datasets: [{
-            label: 'Jumlah Penduduk',
-            data: dataBulanLahir,
-            backgroundColor: '#6366f1',
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
+    // 4. Chart Agama
+    var el_chartAgama = document.getElementById('chartAgama');
+    if (el_chartAgama) {
+        new Chart(el_chartAgama, {
+            type: 'pie',
+            data: {
+                labels: labelAgama,
+                datasets: [{
+                    data: dataAgama,
+                    backgroundColor: ['#0284c7', '#16a34a', '#eab308', '#a855f7', '#f97316', '#06b6d4',
+                        '#6366f1'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
-        },
-        scales: {
-            y: yAxisConfig,
-            x: {
-                grid: {
-                    display: false
+        });
+    }
+
+    // 5. Chart Kelompok Usia
+    var el_chartUsia = document.getElementById('chartUsia');
+    if (el_chartUsia) {
+        new Chart(el_chartUsia, {
+            type: 'bar',
+            data: {
+                labels: labelUsia,
+                datasets: [{
+                    label: 'Jumlah Penduduk',
+                    data: dataUsia,
+                    backgroundColor: ['#38bdf8', '#4ade80', '#facc15', '#f87171'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                ticks: {
-                    maxRotation: 45,
-                    minRotation: 0
+                scales: {
+                    y: yAxisConfig,
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
                 }
             }
-        }
+        });
     }
-});
 
-// 7. Chart Tempat Lahir
-new Chart(document.getElementById('chartTempatLahir'), {
-    type: 'bar',
-    data: {
-        labels: labelTempatLahir,
-        datasets: [{
-            label: 'Jumlah Penduduk',
-            data: dataTempatLahir,
-            backgroundColor: '#0f766e',
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: yAxisConfig,
-            x: {
-                grid: {
-                    display: false
+    // 6. Chart Bulan Lahir
+    var el_chartBulanLahir = document.getElementById('chartBulanLahir');
+    if (el_chartBulanLahir) {
+        new Chart(el_chartBulanLahir, {
+            type: 'bar',
+            data: {
+                labels: labelBulanLahir,
+                datasets: [{
+                    label: 'Jumlah Penduduk',
+                    data: dataBulanLahir,
+                    backgroundColor: '#6366f1',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                ticks: {
-                    maxRotation: 45,
-                    minRotation: 45
+                scales: {
+                    y: yAxisConfig,
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
                 }
             }
-        }
+        });
     }
-});
+
+    // 7. Chart Tempat Lahir
+    var el_chartTempatLahir = document.getElementById('chartTempatLahir');
+    if (el_chartTempatLahir) {
+        new Chart(el_chartTempatLahir, {
+            type: 'bar',
+            data: {
+                labels: labelTempatLahir,
+                datasets: [{
+                    label: 'Jumlah Penduduk',
+                    data: dataTempatLahir,
+                    backgroundColor: '#0f766e',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: yAxisConfig,
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
 </script>
