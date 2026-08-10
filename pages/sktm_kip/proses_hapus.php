@@ -15,12 +15,12 @@ if (!$isAdmin) {
 }
 
 // Membuka Koneksi ke Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<script>
-            alert('Koneksi database gagal: " . mysqli_connect_error() . "');
-            window.location.href = '../../index.php?page=sktm-kip';
-          </script>";
+                        alert('Koneksi database gagal: " . mysqli_connect_error() . "');
+                        window.location.href = '../../index.php?page=sktm-kip';
+                    </script>";
     exit;
 }
 
@@ -30,7 +30,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     // Cek terlebih dahulu apakah data dengan ID tersebut memang ada di database
     $check_query = mysqli_query($koneksi, "SELECT id_sktm FROM tb_sktm_kip WHERE id_sktm = '$id_sktm'");
-    
+
     if (mysqli_num_rows($check_query) > 0) {
         // Lakukan proses penghapusan data
         $delete = mysqli_query($koneksi, "DELETE FROM tb_sktm_kip WHERE id_sktm = '$id_sktm'");

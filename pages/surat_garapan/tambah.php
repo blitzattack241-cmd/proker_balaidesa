@@ -1,6 +1,6 @@
 <?php
 // Koneksi database (sesuaikan dengan config Anda jika ada file koneksi global)
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
@@ -80,16 +80,16 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.form-label {
-    font-weight: 600;
-    color: #495057;
-}
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -266,9 +266,9 @@ if (isset($_POST['simpan'])) {
 
 <!-- JavaScript Penambah & Penghapus Baris Sawah -->
 <script>
-document.getElementById('add_row_sawah').addEventListener('click', function() {
-    var tbody = document.getElementById('sawah_body');
-    var barisBaru = `
+    document.getElementById('add_row_sawah').addEventListener('click', function () {
+        var tbody = document.getElementById('sawah_body');
+        var barisBaru = `
             <tr>
                 <td><input type="text" name="sawah_atas_nama[]" class="form-control" placeholder="Sawah atas nama siapa?" required></td>
                 <td><input type="text" name="terletak_di_desa[]" value="Berugenjang" class="form-control" required></td>
@@ -279,17 +279,17 @@ document.getElementById('add_row_sawah').addEventListener('click', function() {
                     <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
-    tbody.insertAdjacentHTML('beforeend', barisBaru);
-});
+        tbody.insertAdjacentHTML('beforeend', barisBaru);
+    });
 
-document.getElementById('sawah_body').addEventListener('click', function(e) {
-    if (e.target.closest('.remove-row-sawah')) {
-        var totalBaris = document.querySelectorAll('#sawah_body tr').length;
-        if (totalBaris > 1) {
-            e.target.closest('tr').remove();
-        } else {
-            alert('Gagal! Minimal harus ada 1 rincian sawah yang dicatat.');
+    document.getElementById('sawah_body').addEventListener('click', function (e) {
+        if (e.target.closest('.remove-row-sawah')) {
+            var totalBaris = document.querySelectorAll('#sawah_body tr').length;
+            if (totalBaris > 1) {
+                e.target.closest('tr').remove();
+            } else {
+                alert('Gagal! Minimal harus ada 1 rincian sawah yang dicatat.');
+            }
         }
-    }
-});
+    });
 </script>

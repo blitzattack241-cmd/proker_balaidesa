@@ -11,7 +11,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Ambil ID Data yang akan diedit
 $id_waris = isset($_GET['id']) ? intval($_GET['id']) : 0;

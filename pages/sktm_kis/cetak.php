@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     echo "<script>
@@ -500,7 +500,7 @@ if (!is_dir($base_upload_dir)) {
                                         <td style="width: 3%;">:</td>
                                         <td><?= htmlspecialchars($part_nik); ?></td>
                                     </tr>
-                                <?php
+                                    <?php
                                 endforeach;
                             else:
                                 ?>
@@ -552,8 +552,8 @@ if (!is_dir($base_upload_dir)) {
                         <div class="spasi-ttd"></div>
                         <?= tampilkanQR('sktm_kis', $id_sktm, $qr_token); ?>
                         <!-- Diubah manual / dinamis sesuai Pejabat penandatangan -->
-                        <strong
-                            style="text-decoration: underline;"> <?= htmlspecialchars($data['nama_pejabat'] ?? 'K I S W O, S.E'); ?></strong>
+                        <strong style="text-decoration: underline;">
+                            <?= htmlspecialchars($data['nama_pejabat'] ?? 'K I S W O, S.E'); ?></strong>
                     </div>
                 </div>
 

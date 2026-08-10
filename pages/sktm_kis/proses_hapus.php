@@ -1,5 +1,5 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Pastikan parameter ID ada dan merupakan angka untuk mencegah SQL Injection basic
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {

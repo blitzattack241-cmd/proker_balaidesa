@@ -12,7 +12,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;

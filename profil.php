@@ -8,7 +8,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/koneksi.php';
 if (mysqli_connect_errno()) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
@@ -76,7 +76,7 @@ if (isset($_GET['status'])) {
     </ol>
 
     <?php if ($message): ?>
-    <div class="alert alert-<?= htmlspecialchars($message_type) ?>"><?= htmlspecialchars($message) ?></div>
+        <div class="alert alert-<?= htmlspecialchars($message_type) ?>"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
 
     <div class="row">
@@ -136,10 +136,10 @@ if (isset($_GET['status'])) {
                                 <div class="col-md-8 text-dark"><?= htmlspecialchars($role_label) ?></div>
                             </div>
                             <?php if ($extra_field_name): ?>
-                            <div class="row mb-3">
-                                <div class="col-md-4 text-muted"><?= htmlspecialchars($extra_field_label) ?></div>
-                                <div class="col-md-8 text-dark"><?= htmlspecialchars($extra_field_value) ?></div>
-                            </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 text-muted"><?= htmlspecialchars($extra_field_label) ?></div>
+                                    <div class="col-md-8 text-dark"><?= htmlspecialchars($extra_field_value) ?></div>
+                                </div>
                             <?php endif; ?>
                             <div class="row mb-3">
                                 <div class="col-md-4 text-muted">Alamat</div>
@@ -176,14 +176,14 @@ if (isset($_GET['status'])) {
                                     </div>
                                 </div>
                                 <?php if ($extra_field_name): ?>
-                                <div class="row mb-3">
-                                    <label
-                                        class="col-md-4 col-form-label text-muted"><?= htmlspecialchars($extra_field_label) ?></label>
-                                    <div class="col-md-8">
-                                        <input type="text" name="<?= htmlspecialchars($extra_field_name) ?>"
-                                            class="form-control" value="<?= htmlspecialchars($extra_field_value) ?>">
+                                    <div class="row mb-3">
+                                        <label
+                                            class="col-md-4 col-form-label text-muted"><?= htmlspecialchars($extra_field_label) ?></label>
+                                        <div class="col-md-8">
+                                            <input type="text" name="<?= htmlspecialchars($extra_field_name) ?>"
+                                                class="form-control" value="<?= htmlspecialchars($extra_field_value) ?>">
+                                        </div>
                                     </div>
-                                </div>
                                 <?php endif; ?>
                                 <div class="row mb-3">
                                     <label class="col-md-4 col-form-label text-muted">Alamat</label>
@@ -245,28 +245,28 @@ if (isset($_GET['status'])) {
 </div>
 
 <style>
-.nav-tabs .nav-link {
-    border: none;
-    background: none;
-    font-size: 15px;
-    transition: all 0.2s ease;
-}
+    .nav-tabs .nav-link {
+        border: none;
+        background: none;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
 
-.nav-tabs .nav-link.active {
-    border-bottom: 2px solid #007f3e !important;
-    background: none !important;
-    font-weight: 700;
-}
+    .nav-tabs .nav-link.active {
+        border-bottom: 2px solid #007f3e !important;
+        background: none !important;
+        font-weight: 700;
+    }
 
-.font-weight-bold {
-    font-weight: 600 !important;
-}
+    .font-weight-bold {
+        font-weight: 600 !important;
+    }
 
-.font-weight-600 {
-    font-weight: 600;
-}
+    .font-weight-600 {
+        font-weight: 600;
+    }
 
-.text-dark {
-    color: #2b303a !important;
-}
+    .text-dark {
+        color: #2b303a !important;
+    }
 </style>

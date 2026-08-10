@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 if (isset($_POST['simpan'])) {
-    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+    require_once __DIR__ . '/../../koneksi.php';
     if (!$koneksi) {
         die("Koneksi gagal: " . mysqli_connect_error());
     }
@@ -23,28 +23,28 @@ if (isset($_POST['simpan'])) {
     require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
     // Reservasi nomor surat definitif di sini (saat benar-benar disimpan)
-    $nomor_surat      = generateNomorSuratGlobal($koneksi, true);
-    $tanggal_surat    = $_POST['tanggal_surat'] ?? '';
-    $nama_warga       = $_POST['nama_warga'] ?? '';
-    $jenis_kelamin    = $_POST['jenis_kelamin'] ?? '';
-    $no_ktp           = $_POST['no_ktp'] ?? '';
-    $no_kk            = $_POST['no_kk'] ?? '';
-    $tempat_lahir     = $_POST['tempat_lahir'] ?? '';
-    $tanggal_lahir    = $_POST['tanggal_lahir'] ?? '';
-    $agama            = $_POST['agama'] ?? '';
-    $pekerjaan        = $_POST['pekerjaan'] ?? '';
-    $kewarganegaraan  = $_POST['kewarganegaraan'] ?? '';
-    $alamat_tinggal   = $_POST['alamat_tinggal'] ?? '';
-    $keperluan        = $_POST['keperluan'] ?? '';
-    $berlaku_mulai    = $_POST['berlaku_mulai'] ?? '';
-    $berlaku_selesai  = $_POST['berlaku_selesai'] ?? '';
-    $keterangan_lain  = $_POST['keterangan_lain'] ?? '';
-    $id_pejabat       = $_POST['id_pejabat'] ?? '';
-    $nama_camat       = $_POST['nama_camat'] ?? '';
+    $nomor_surat = generateNomorSuratGlobal($koneksi, true);
+    $tanggal_surat = $_POST['tanggal_surat'] ?? '';
+    $nama_warga = $_POST['nama_warga'] ?? '';
+    $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+    $no_ktp = $_POST['no_ktp'] ?? '';
+    $no_kk = $_POST['no_kk'] ?? '';
+    $tempat_lahir = $_POST['tempat_lahir'] ?? '';
+    $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+    $agama = $_POST['agama'] ?? '';
+    $pekerjaan = $_POST['pekerjaan'] ?? '';
+    $kewarganegaraan = $_POST['kewarganegaraan'] ?? '';
+    $alamat_tinggal = $_POST['alamat_tinggal'] ?? '';
+    $keperluan = $_POST['keperluan'] ?? '';
+    $berlaku_mulai = $_POST['berlaku_mulai'] ?? '';
+    $berlaku_selesai = $_POST['berlaku_selesai'] ?? '';
+    $keterangan_lain = $_POST['keterangan_lain'] ?? '';
+    $id_pejabat = $_POST['id_pejabat'] ?? '';
+    $nama_camat = $_POST['nama_camat'] ?? '';
 
     // Pengaturan Upload Foto Rumah
     $target_dir = "../../assets/img/sktm_bumil/";
-    
+
     // Buat folder otomatis jika belum ada di server
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0755, true);
@@ -55,10 +55,10 @@ if (isset($_POST['simpan'])) {
 
     foreach ($daftar_foto as $key_foto) {
         if (isset($_FILES[$key_foto]) && $_FILES[$key_foto]['error'] === UPLOAD_ERR_OK) {
-            $file_tmp  = $_FILES[$key_foto]['tmp_name'];
+            $file_tmp = $_FILES[$key_foto]['tmp_name'];
             $file_name = $_FILES[$key_foto]['name'];
-            $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-            
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
             // Validasi Ekstensi Gambar
             $ekstensi_diperbolehkan = ['jpg', 'jpeg', 'png'];
             if (!in_array($file_ext, $ekstensi_diperbolehkan)) {
@@ -96,16 +96,30 @@ if (isset($_POST['simpan'])) {
 
     if ($stmt) {
         mysqli_stmt_bind_param(
-            $stmt, 
-            "ssssssssssssssssissssss", 
-            $nomor_surat, $tanggal_surat, $nama_warga, $jenis_kelamin, $no_ktp, $no_kk,
-            $tempat_lahir, $tanggal_lahir, $agama, $pekerjaan, $kewarganegaraan,
-            $alamat_tinggal, $keperluan, $berlaku_mulai, $berlaku_selesai, $keterangan_lain,
-            $id_pejabat, $nama_camat, 
-            $nama_file_baru['foto_depan'], 
-            $nama_file_baru['foto_ruang_tamu'], 
-            $nama_file_baru['foto_kamar'], 
-            $nama_file_baru['foto_dapur'], 
+            $stmt,
+            "ssssssssssssssssissssss",
+            $nomor_surat,
+            $tanggal_surat,
+            $nama_warga,
+            $jenis_kelamin,
+            $no_ktp,
+            $no_kk,
+            $tempat_lahir,
+            $tanggal_lahir,
+            $agama,
+            $pekerjaan,
+            $kewarganegaraan,
+            $alamat_tinggal,
+            $keperluan,
+            $berlaku_mulai,
+            $berlaku_selesai,
+            $keterangan_lain,
+            $id_pejabat,
+            $nama_camat,
+            $nama_file_baru['foto_depan'],
+            $nama_file_baru['foto_ruang_tamu'],
+            $nama_file_baru['foto_kamar'],
+            $nama_file_baru['foto_dapur'],
             $nama_file_baru['foto_toilet']
         );
 

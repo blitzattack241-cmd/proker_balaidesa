@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<script>
             alert('Koneksi database gagal: " . mysqli_connect_error() . "'); 
@@ -31,8 +31,8 @@ if (isset($_GET['id']) && !empty(trim($_GET['id']))) {
     // Target nama tabel dinamis (Cek apakah menggunakan tb_surat_kematian atau surat_kematian)
     $tableTarget = 'tb_surat_kematian';
     $checkTable = mysqli_query($koneksi, "SHOW TABLES LIKE 'surat_kematian'");
-    if ($checkTable && mysqli_num_rows($checkTable) > 0) { 
-        $tableTarget = 'surat_kematian'; 
+    if ($checkTable && mysqli_num_rows($checkTable) > 0) {
+        $tableTarget = 'surat_kematian';
     }
 
     // Menggunakan Prepared Statement untuk keamanan dari SQL Injection
@@ -42,7 +42,7 @@ if (isset($_GET['id']) && !empty(trim($_GET['id']))) {
     if ($stmt) {
         // Bind parameter id ke statement
         mysqli_stmt_bind_param($stmt, "i", $id_surat);
-        
+
         // Eksekusi query
         if (mysqli_stmt_execute($stmt)) {
             require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
@@ -57,7 +57,7 @@ if (isset($_GET['id']) && !empty(trim($_GET['id']))) {
                     window.location.href = '../../index.php?page=surat-kematian';
                   </script>";
         }
-        
+
         // Tutup statement
         mysqli_stmt_close($stmt);
     } else {

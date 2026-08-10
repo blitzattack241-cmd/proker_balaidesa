@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $id_waris = mysqli_real_escape_string($koneksi, $_GET['id']);
@@ -25,7 +25,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     try {
         // 1. Hapus data detail anak yang berelasi dengan id_waris
         $query_hapus_anak = mysqli_query($koneksi, "DELETE FROM tb_waris_detail_anak WHERE id_waris = '$id_waris'");
-        
+
         // 2. Hapus data detail saksi yang berelasi dengan id_waris
         $query_hapus_saksi = mysqli_query($koneksi, "DELETE FROM tb_waris_detail_saksi WHERE id_waris = '$id_waris'");
 

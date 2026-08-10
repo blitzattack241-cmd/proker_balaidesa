@@ -1,5 +1,5 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // 1. Ambil ID yang akan diedit
 if (!isset($_GET['id'])) {
@@ -10,7 +10,7 @@ $id_garapan = mysqli_real_escape_string($koneksi, $_GET['id']);
 
 // 2. Query data utama
 $query_utama = mysqli_query($koneksi, "SELECT * FROM tb_surat_garapan WHERE id_garapan = '$id_garapan'");
-$data_utama  = mysqli_fetch_assoc($query_utama);
+$data_utama = mysqli_fetch_assoc($query_utama);
 
 if (!$data_utama) {
     echo "<script>alert('Data tidak ditemukan!'); window.location.href = 'index.php?page=surat-garapan-sawah';</script>";
@@ -22,18 +22,18 @@ $query_detail = mysqli_query($koneksi, "SELECT * FROM tb_surat_garapan_detail WH
 
 // 4. Proses Update saat tombol Simpan ditekan
 if (isset($_POST['update'])) {
-    $nomor_surat         = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $tanggal_surat       = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $nama_penggarap      = mysqli_real_escape_string($koneksi, $_POST['nama_penggarap']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $nama_penggarap = mysqli_real_escape_string($koneksi, $_POST['nama_penggarap']);
     $bin_binti_penggarap = mysqli_real_escape_string($koneksi, $_POST['bin_binti_penggarap']);
-    $nama_pasangan       = mysqli_real_escape_string($koneksi, $_POST['nama_pasangan']);
-    $bin_binti_pasangan  = mysqli_real_escape_string($koneksi, $_POST['bin_binti_pasangan']);
-    $tempat_lahir        = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir       = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $agama               = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $pekerjaan           = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $alamat_tinggal      = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $keperluan           = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    $nama_pasangan = mysqli_real_escape_string($koneksi, $_POST['nama_pasangan']);
+    $bin_binti_pasangan = mysqli_real_escape_string($koneksi, $_POST['bin_binti_pasangan']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
 
     // Update Tabel Utama
     $sql_update_utama = "UPDATE tb_surat_garapan SET 
@@ -56,11 +56,11 @@ if (isset($_POST['update'])) {
         mysqli_query($koneksi, "DELETE FROM tb_surat_garapan_detail WHERE id_garapan = '$id_garapan'");
 
         // Ambil data dari form dinamis
-        $atas_nama   = $_POST['sawah_atas_nama'];
-        $desa        = $_POST['terletak_di_desa'];
-        $blok        = $_POST['blok'];
-        $persil      = $_POST['persil'];
-        $luas        = $_POST['luas_m2'];
+        $atas_nama = $_POST['sawah_atas_nama'];
+        $desa = $_POST['terletak_di_desa'];
+        $blok = $_POST['blok'];
+        $persil = $_POST['persil'];
+        $luas = $_POST['luas_m2'];
 
         // Masukkan kembali data sawah yang baru/diperbarui
         $sukses_detail = true;
@@ -70,7 +70,7 @@ if (isset($_POST['update'])) {
                 $ds = mysqli_real_escape_string($koneksi, $desa[$i]);
                 $bk = mysqli_real_escape_string($koneksi, $blok[$i]);
                 $pr = mysqli_real_escape_string($koneksi, $persil[$i]);
-                $ls = (int)$luas[$i];
+                $ls = (int) $luas[$i];
 
                 $sql_detail = "INSERT INTO tb_surat_garapan_detail 
                                (id_garapan, sawah_atas_nama, terletak_di_desa, blok, persil, luas_m2) 
@@ -97,16 +97,16 @@ if (isset($_POST['update'])) {
 ?>
 
 <style>
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.form-label {
-    font-weight: 600;
-    color: #495057;
-}
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -204,8 +204,7 @@ if (isset($_POST['update'])) {
                                         Hindu</option>
                                     <option value="Buddha" <?= $data_utama['agama'] == 'Buddha' ? 'selected' : ''; ?>>
                                         Buddha</option>
-                                    <option value="Khonghucu"
-                                        <?= $data_utama['agama'] == 'Khonghucu' ? 'selected' : ''; ?>>Khonghucu
+                                    <option value="Khonghucu" <?= $data_utama['agama'] == 'Khonghucu' ? 'selected' : ''; ?>>Khonghucu
                                     </option>
                                 </select>
                             </div>
@@ -255,44 +254,44 @@ if (isset($_POST['update'])) {
                             </tr>
                         </thead>
                         <tbody id="sawah_body">
-                            <?php 
+                            <?php
                             if (mysqli_num_rows($query_detail) > 0) {
-                                while($detail = mysqli_fetch_assoc($query_detail)) {
-                            ?>
-                            <tr>
-                                <td><input type="text" name="sawah_atas_nama[]" class="form-control"
-                                        value="<?= htmlspecialchars($detail['sawah_atas_nama']); ?>" required></td>
-                                <td><input type="text" name="terletak_di_desa[]"
-                                        value="<?= htmlspecialchars($detail['terletak_di_desa']); ?>"
-                                        class="form-control" required></td>
-                                <td><input type="text" name="blok[]" class="form-control"
-                                        value="<?= htmlspecialchars($detail['blok']); ?>" required></td>
-                                <td><input type="text" name="persil[]" class="form-control"
-                                        value="<?= htmlspecialchars($detail['persil']); ?>" required></td>
-                                <td><input type="number" name="luas_m2[]" class="form-control"
-                                        value="<?= $detail['luas_m2']; ?>" required></td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i
-                                            class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <?php 
+                                while ($detail = mysqli_fetch_assoc($query_detail)) {
+                                    ?>
+                                    <tr>
+                                        <td><input type="text" name="sawah_atas_nama[]" class="form-control"
+                                                value="<?= htmlspecialchars($detail['sawah_atas_nama']); ?>" required></td>
+                                        <td><input type="text" name="terletak_di_desa[]"
+                                                value="<?= htmlspecialchars($detail['terletak_di_desa']); ?>"
+                                                class="form-control" required></td>
+                                        <td><input type="text" name="blok[]" class="form-control"
+                                                value="<?= htmlspecialchars($detail['blok']); ?>" required></td>
+                                        <td><input type="text" name="persil[]" class="form-control"
+                                                value="<?= htmlspecialchars($detail['persil']); ?>" required></td>
+                                        <td><input type="number" name="luas_m2[]" class="form-control"
+                                                value="<?= $detail['luas_m2']; ?>" required></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i
+                                                    class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                <?php
                                 }
-                            } else { 
-                            ?>
-                            <!-- Jika data detail kosong secara tidak terduga -->
-                            <tr>
-                                <td><input type="text" name="sawah_atas_nama[]" class="form-control" required></td>
-                                <td><input type="text" name="terletak_di_desa[]" value="Berugenjang"
-                                        class="form-control" required></td>
-                                <td><input type="text" name="blok[]" class="form-control" required></td>
-                                <td><input type="text" name="persil[]" class="form-control" required></td>
-                                <td><input type="number" name="luas_m2[]" class="form-control" required></td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i
-                                            class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
+                            } else {
+                                ?>
+                                <!-- Jika data detail kosong secara tidak terduga -->
+                                <tr>
+                                    <td><input type="text" name="sawah_atas_nama[]" class="form-control" required></td>
+                                    <td><input type="text" name="terletak_di_desa[]" value="Berugenjang"
+                                            class="form-control" required></td>
+                                    <td><input type="text" name="blok[]" class="form-control" required></td>
+                                    <td><input type="text" name="persil[]" class="form-control" required></td>
+                                    <td><input type="number" name="luas_m2[]" class="form-control" required></td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i
+                                                class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
                             <?php } ?>
                         </tbody>
                     </table>
@@ -309,9 +308,9 @@ if (isset($_POST['update'])) {
 </div>
 
 <script>
-document.getElementById('add_row_sawah').addEventListener('click', function() {
-    var tbody = document.getElementById('sawah_body');
-    var barisBaru = `
+    document.getElementById('add_row_sawah').addEventListener('click', function () {
+        var tbody = document.getElementById('sawah_body');
+        var barisBaru = `
             <tr>
                 <td><input type="text" name="sawah_atas_nama[]" class="form-control" placeholder="Sawah atas nama siapa?" required></td>
                 <td><input type="text" name="terletak_di_desa[]" value="Berugenjang" class="form-control" required></td>
@@ -322,17 +321,17 @@ document.getElementById('add_row_sawah').addEventListener('click', function() {
                     <button type="button" class="btn btn-danger btn-sm remove-row-sawah"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
-    tbody.insertAdjacentHTML('beforeend', barisBaru);
-});
+        tbody.insertAdjacentHTML('beforeend', barisBaru);
+    });
 
-document.getElementById('sawah_body').addEventListener('click', function(e) {
-    if (e.target.closest('.remove-row-sawah')) {
-        var totalBaris = document.querySelectorAll('#sawah_body tr').length;
-        if (totalBaris > 1) {
-            e.target.closest('tr').remove();
-        } else {
-            alert('Gagal! Minimal harus ada 1 rincian sawah.');
+    document.getElementById('sawah_body').addEventListener('click', function (e) {
+        if (e.target.closest('.remove-row-sawah')) {
+            var totalBaris = document.querySelectorAll('#sawah_body tr').length;
+            if (totalBaris > 1) {
+                e.target.closest('tr').remove();
+            } else {
+                alert('Gagal! Minimal harus ada 1 rincian sawah.');
+            }
         }
-    }
-});
+    });
 </script>

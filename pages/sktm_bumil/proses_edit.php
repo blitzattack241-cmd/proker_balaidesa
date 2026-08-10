@@ -15,32 +15,32 @@ if (!$isAdmin) {
 }
 
 if (isset($_POST['update'])) {
-    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+    require_once __DIR__ . '/../../koneksi.php';
 
     // Ambil data input
-    $id_sktm          = mysqli_real_escape_string($koneksi, $_POST['id_sktm']);
-    $nomor_surat      = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $no_ktp           = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
-    $no_kk            = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
-    $tempat_lahir     = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $agama            = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $pekerjaan        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $kewarganegaraan  = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
-    $alamat_tinggal   = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $keperluan        = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    $berlaku_mulai    = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $berlaku_selesai  = mysqli_real_escape_string($koneksi, $_POST['berlaku_selesai']);
-    $keterangan_lain  = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
-    $id_pejabat       = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
-    $nama_camat       = mysqli_real_escape_string($koneksi, $_POST['nama_camat']);
+    $id_sktm = mysqli_real_escape_string($koneksi, $_POST['id_sktm']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $no_ktp = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
+    $no_kk = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $kewarganegaraan = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    $berlaku_mulai = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
+    $berlaku_selesai = mysqli_real_escape_string($koneksi, $_POST['berlaku_selesai']);
+    $keterangan_lain = mysqli_real_escape_string($koneksi, $_POST['keterangan_lain']);
+    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
+    $nama_camat = mysqli_real_escape_string($koneksi, $_POST['nama_camat']);
 
     // Ambil data foto lama dari database untuk referensi ganti file
     $query_lama = mysqli_query($koneksi, "SELECT foto_depan, foto_ruang_tamu, foto_kamar, foto_dapur, foto_toilet FROM tb_sktm_bumil WHERE id_sktm = '$id_sktm'");
-    $data_lama  = mysqli_fetch_assoc($query_lama);
+    $data_lama = mysqli_fetch_assoc($query_lama);
 
     $target_dir = "../../assets/img/sktm_bumil/";
     $daftar_foto = ['foto_depan', 'foto_ruang_tamu', 'foto_kamar', 'foto_dapur', 'foto_toilet'];
@@ -49,10 +49,10 @@ if (isset($_POST['update'])) {
     foreach ($daftar_foto as $key_foto) {
         // Jika ada file baru yang diunggah
         if (isset($_FILES[$key_foto]) && $_FILES[$key_foto]['error'] === UPLOAD_ERR_OK) {
-            $file_tmp  = $_FILES[$key_foto]['tmp_name'];
+            $file_tmp = $_FILES[$key_foto]['tmp_name'];
             $file_name = $_FILES[$key_foto]['name'];
-            $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-            
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
             // Validasi Ekstensi
             $ekstensi_diperbolehkan = ['jpg', 'jpeg', 'png'];
             if (!in_array($file_ext, $ekstensi_diperbolehkan)) {
@@ -102,11 +102,11 @@ if (isset($_POST['update'])) {
         keterangan_lain = '$keterangan_lain', 
         id_pejabat = '$id_pejabat', 
         nama_camat = '$nama_camat',
-        foto_depan = '".$nama_file_final['foto_depan']."',
-        foto_ruang_tamu = '".$nama_file_final['foto_ruang_tamu']."',
-        foto_kamar = '".$nama_file_final['foto_kamar']."',
-        foto_dapur = '".$nama_file_final['foto_dapur']."',
-        foto_toilet = '".$nama_file_final['foto_toilet']."'
+        foto_depan = '" . $nama_file_final['foto_depan'] . "',
+        foto_ruang_tamu = '" . $nama_file_final['foto_ruang_tamu'] . "',
+        foto_kamar = '" . $nama_file_final['foto_kamar'] . "',
+        foto_dapur = '" . $nama_file_final['foto_dapur'] . "',
+        foto_toilet = '" . $nama_file_final['foto_toilet'] . "'
         WHERE id_sktm = '$id_sktm'";
 
     $eksekusi = mysqli_query($koneksi, $query_update);

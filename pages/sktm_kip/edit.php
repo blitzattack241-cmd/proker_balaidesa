@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Pastikan ada parameter ID yang dikirim
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -37,21 +37,21 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 
 // Proses Update Data
 if (isset($_POST['update'])) {
-    $nomor_surat       = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $nama_warga        = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $tempat_lahir      = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir     = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $jenis_kelamin     = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $agama             = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $kewarganegaraan   = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $kewarganegaraan = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
     $status_perkawinan = mysqli_real_escape_string($koneksi, $_POST['status_perkawinan']);
-    $pekerjaan         = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $alamat_tinggal    = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $no_ktp            = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
-    $no_kk             = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
-    $keperluan         = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
-    $tanggal_surat     = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $id_pejabat        = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $no_ktp = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
+    $no_kk = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
 
     $update_query = "UPDATE tb_sktm_kip SET 
                         nomor_surat = '$nomor_surat',
@@ -87,70 +87,70 @@ if (isset($_POST['update'])) {
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.5px;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+    }
 
-.breadcrumb-modern a {
-    color: #17a2b8;
-    font-weight: 500;
-}
+    .breadcrumb-modern a {
+        color: #17a2b8;
+        font-weight: 500;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.card-header-modern {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.25rem 1.5rem !important;
-}
+    .card-header-modern {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.25rem 1.5rem !important;
+    }
 
-.form-label {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-}
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
 
-.form-control,
-.form-select {
-    border-radius: 8px !important;
-    padding: 0.6rem 1rem;
-    border: 1px solid #ced4da;
-}
+    .form-control,
+    .form-select {
+        border-radius: 8px !important;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ced4da;
+    }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #ffc107;
-    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.2);
-}
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.2);
+    }
 
-.btn-custom-update {
-    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    color: #212529;
-    font-weight: 600;
-    padding: 10px 24px;
-    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
-    transition: all 0.2s ease;
-}
+    .btn-custom-update {
+        background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #212529;
+        font-weight: 600;
+        padding: 10px 24px;
+        box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        transition: all 0.2s ease;
+    }
 
-.btn-custom-update:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
-    color: #212529;
-}
+    .btn-custom-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
+        color: #212529;
+    }
 
-.btn-custom-back {
-    border-radius: 8px !important;
-    font-weight: 600;
-    padding: 10px 20px;
-}
+    .btn-custom-back {
+        border-radius: 8px !important;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -251,9 +251,9 @@ if (isset($_POST['update'])) {
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Agama</label>
                         <select name="agama" class="form-select" required>
-                            <?php 
+                            <?php
                             $list_agama = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
-                            foreach($list_agama as $agm) {
+                            foreach ($list_agama as $agm) {
                                 $selected = ($data['agama'] == $agm) ? 'selected' : '';
                                 echo "<option value='$agm' $selected>$agm</option>";
                             }
@@ -272,9 +272,9 @@ if (isset($_POST['update'])) {
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Status Pernikahan</label>
                         <select name="status_perkawinan" class="form-select" required>
-                            <?php 
+                            <?php
                             $list_status = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
-                            foreach($list_status as $stts) {
+                            foreach ($list_status as $stts) {
                                 $selected = ($data['status_perkawinan'] == $stts) ? 'selected' : '';
                                 echo "<option value='$stts' $selected>$stts</option>";
                             }
@@ -312,11 +312,11 @@ if (isset($_POST['update'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Penandatangan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>"
-                                <?= ($data['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>"
+                                    <?= ($data['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

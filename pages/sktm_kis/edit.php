@@ -1,5 +1,5 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Cek apakah parameter ID ada di URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -22,22 +22,22 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 
 // Proses Penyimpanan Data ketika Form Disubmit
 if (isset($_POST['submit'])) {
-    $nomor_surat      = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $nama_warga       = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
-    $tempat_lahir     = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
-    $tanggal_lahir    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
-    $jenis_kelamin    = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
-    $pekerjaan        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
-    $agama            = mysqli_real_escape_string($koneksi, $_POST['agama']);
-    $kewarganegaraan  = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
-    $alamat_tinggal   = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
-    $no_kk            = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
-    $no_ktp           = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
-    $keperluan        = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $nama_warga = mysqli_real_escape_string($koneksi, $_POST['nama_warga']);
+    $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $pekerjaan = mysqli_real_escape_string($koneksi, $_POST['pekerjaan']);
+    $agama = mysqli_real_escape_string($koneksi, $_POST['agama']);
+    $kewarganegaraan = mysqli_real_escape_string($koneksi, $_POST['kewarganegaraan']);
+    $alamat_tinggal = mysqli_real_escape_string($koneksi, $_POST['alamat_tinggal']);
+    $no_kk = mysqli_real_escape_string($koneksi, $_POST['no_kk']);
+    $no_ktp = mysqli_real_escape_string($koneksi, $_POST['no_ktp']);
+    $keperluan = mysqli_real_escape_string($koneksi, $_POST['keperluan']);
     $anggota_keluarga = mysqli_real_escape_string($koneksi, $_POST['anggota_keluarga']);
-    $berlaku_mulai    = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
-    $tanggal_surat    = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $id_pejabat       = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
+    $berlaku_mulai = mysqli_real_escape_string($koneksi, $_POST['berlaku_mulai']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $id_pejabat = mysqli_real_escape_string($koneksi, $_POST['id_pejabat']);
 
     $foto_fields = ['foto_depan', 'foto_ruang_tamu', 'foto_kamar_tidur', 'foto_dapur', 'foto_kamar_mandi'];
     $uploaded_filenames = [];
@@ -49,14 +49,14 @@ if (isset($_POST['submit'])) {
         // Jika user mengunggah berkas foto baru
         if (!empty($_FILES[$field]['name'])) {
             $file_extension = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
-            
+
             if (in_array($file_extension, $allowed_extensions)) {
                 $new_filename = $field . "_" . $no_ktp . "_" . time() . "." . $file_extension;
                 $target_file = $target_dir . $new_filename;
 
                 if (move_uploaded_file($_FILES[$field]['tmp_name'], $target_file)) {
                     $uploaded_filenames[$field] = $new_filename;
-                    
+
                     // Hapus foto lama dari server agar folder uploads tidak penuh berkas sampah
                     if (!empty($data_lama[$field]) && file_exists($target_dir . $data_lama[$field])) {
                         unlink($target_dir . $data_lama[$field]);
@@ -116,41 +116,41 @@ if (isset($_POST['submit'])) {
 ?>
 
 <style>
-.form-section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #0d6efd;
-    padding-bottom: 5px;
-    margin-bottom: 20px;
-}
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.btn-save-modern {
-    background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
-    border: none !important;
-    font-weight: 600;
-    padding: 10px 24px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-}
+    .btn-save-modern {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+        border: none !important;
+        font-weight: 600;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    }
 
-.btn-save-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-}
+    .btn-save-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    }
 
-.img-preview-sm {
-    max-height: 50px;
-    border-radius: 5px;
-    object-fit: cover;
-    border: 1px solid #dee2e6;
-}
+    .img-preview-sm {
+        max-height: 50px;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #dee2e6;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -204,11 +204,9 @@ if (isset($_POST['submit'])) {
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Jenis Kelamin</label>
                         <select name="jenis_kelamin" class="form-select" required>
-                            <option value="Laki-Laki"
-                                <?= ($data_lama['jenis_kelamin'] == 'Laki-Laki') ? 'selected' : ''; ?>>Laki-Laki
+                            <option value="Laki-Laki" <?= ($data_lama['jenis_kelamin'] == 'Laki-Laki') ? 'selected' : ''; ?>>Laki-Laki
                             </option>
-                            <option value="Perempuan"
-                                <?= ($data_lama['jenis_kelamin'] == 'Perempuan') ? 'selected' : ''; ?>>Perempuan
+                            <option value="Perempuan" <?= ($data_lama['jenis_kelamin'] == 'Perempuan') ? 'selected' : ''; ?>>Perempuan
                             </option>
                         </select>
                     </div>
@@ -285,11 +283,11 @@ if (isset($_POST['submit'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)) { ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>"
-                                <?= ($data_lama['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>"
+                                    <?= ($data_lama['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -305,50 +303,50 @@ if (isset($_POST['submit'])) {
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-secondary">Foto Depan Rumah</label>
                         <input type="file" name="foto_depan" class="form-control mb-1" accept="image/*">
-                        <?php if(!empty($data_lama['foto_depan'])): ?>
-                        <div class="d-flex align-items-center gap-2"><img
-                                src="uploads/sktm_kis/<?= $data_lama['foto_depan']; ?>" class="img-preview-sm"><span
-                                class="small text-muted">Ada berkas lama</span></div>
+                        <?php if (!empty($data_lama['foto_depan'])): ?>
+                            <div class="d-flex align-items-center gap-2"><img
+                                    src="uploads/sktm_kis/<?= $data_lama['foto_depan']; ?>" class="img-preview-sm"><span
+                                    class="small text-muted">Ada berkas lama</span></div>
                         <?php endif; ?>
                     </div>
                     <!-- Foto Ruang Tamu -->
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-secondary">Foto Ruang Tamu</label>
                         <input type="file" name="foto_ruang_tamu" class="form-control mb-1" accept="image/*">
-                        <?php if(!empty($data_lama['foto_ruang_tamu'])): ?>
-                        <div class="d-flex align-items-center gap-2"><img
-                                src="uploads/sktm_kis/<?= $data_lama['foto_ruang_tamu']; ?>"
-                                class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
+                        <?php if (!empty($data_lama['foto_ruang_tamu'])): ?>
+                            <div class="d-flex align-items-center gap-2"><img
+                                    src="uploads/sktm_kis/<?= $data_lama['foto_ruang_tamu']; ?>"
+                                    class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
                         <?php endif; ?>
                     </div>
                     <!-- Foto Kamar Tidur -->
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-secondary">Foto Kamar Tidur</label>
                         <input type="file" name="foto_kamar_tidur" class="form-control mb-1" accept="image/*">
-                        <?php if(!empty($data_lama['foto_kamar_tidur'])): ?>
-                        <div class="d-flex align-items-center gap-2"><img
-                                src="uploads/sktm_kis/<?= $data_lama['foto_kamar_tidur']; ?>"
-                                class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
+                        <?php if (!empty($data_lama['foto_kamar_tidur'])): ?>
+                            <div class="d-flex align-items-center gap-2"><img
+                                    src="uploads/sktm_kis/<?= $data_lama['foto_kamar_tidur']; ?>"
+                                    class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
                         <?php endif; ?>
                     </div>
                     <!-- Foto Dapur -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-secondary">Foto Dapur</label>
                         <input type="file" name="foto_dapur" class="form-control mb-1" accept="image/*">
-                        <?php if(!empty($data_lama['foto_dapur'])): ?>
-                        <div class="d-flex align-items-center gap-2"><img
-                                src="uploads/sktm_kis/<?= $data_lama['foto_dapur']; ?>" class="img-preview-sm"><span
-                                class="small text-muted">Ada berkas lama</span></div>
+                        <?php if (!empty($data_lama['foto_dapur'])): ?>
+                            <div class="d-flex align-items-center gap-2"><img
+                                    src="uploads/sktm_kis/<?= $data_lama['foto_dapur']; ?>" class="img-preview-sm"><span
+                                    class="small text-muted">Ada berkas lama</span></div>
                         <?php endif; ?>
                     </div>
                     <!-- Foto Kamar Mandi -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-secondary">Foto Kamar Mandi</label>
                         <input type="file" name="foto_kamar_mandi" class="form-control mb-1" accept="image/*">
-                        <?php if(!empty($data_lama['foto_kamar_mandi'])): ?>
-                        <div class="d-flex align-items-center gap-2"><img
-                                src="uploads/sktm_kis/<?= $data_lama['foto_kamar_mandi']; ?>"
-                                class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
+                        <?php if (!empty($data_lama['foto_kamar_mandi'])): ?>
+                            <div class="d-flex align-items-center gap-2"><img
+                                    src="uploads/sktm_kis/<?= $data_lama['foto_kamar_mandi']; ?>"
+                                    class="img-preview-sm"><span class="small text-muted">Ada berkas lama</span></div>
                         <?php endif; ?>
                     </div>
                 </div>

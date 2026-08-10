@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 // 2. Koneksi ke Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<script>
             alert('Koneksi database gagal: " . mysqli_connect_error() . "');
@@ -31,7 +31,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     // Cek apakah data memang ada di database sebelum dihapus
     $cek_data = mysqli_query($koneksi, "SELECT id_sktm FROM tb_sktm_stunting WHERE id_sktm = '$id_sktm'");
-    
+
     if (mysqli_num_rows($cek_data) > 0) {
         // 4. Jalankan Query Hapus Data
         $query_hapus = "DELETE FROM tb_sktm_stunting WHERE id_sktm = '$id_sktm'";

@@ -1,5 +1,5 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Ambil data SKTM KIS terbaru dari database
 $query = mysqli_query($koneksi, "
@@ -9,109 +9,109 @@ $query = mysqli_query($koneksi, "
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.5px;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+    }
 
-.breadcrumb-modern a {
-    color: #17a2b8;
-    font-weight: 500;
-}
+    .breadcrumb-modern a {
+        color: #17a2b8;
+        font-weight: 500;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    overflow: hidden;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden;
+    }
 
-.card-header-modern {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.25rem 1.5rem !important;
-}
+    .card-header-modern {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.25rem 1.5rem !important;
+    }
 
-.card-header-title {
-    font-weight: 600;
-    color: #495057;
-    font-size: 1.1rem;
-}
+    .card-header-title {
+        font-weight: 600;
+        color: #495057;
+        font-size: 1.1rem;
+    }
 
-.btn-tambah-modern {
-    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 8px 16px !important;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-    transition: all 0.25s ease;
-}
+    .btn-tambah-modern {
+        background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+        transition: all 0.25s ease;
+    }
 
-.btn-tambah-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-}
+    .btn-tambah-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    }
 
-.action-btn {
-    width: 68px;
-    height: 52px;
-    border-radius: 10px !important;
-    border: none !important;
-    font-weight: 600;
-    font-size: 11px !important;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    color: #ffffff !important;
-    text-decoration: none;
-}
+    .action-btn {
+        width: 68px;
+        height: 52px;
+        border-radius: 10px !important;
+        border: none !important;
+        font-weight: 600;
+        font-size: 11px !important;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        color: #ffffff !important;
+        text-decoration: none;
+    }
 
-.action-btn i {
-    font-size: 16px;
-    margin-bottom: 3px;
-}
+    .action-btn i {
+        font-size: 16px;
+        margin-bottom: 3px;
+    }
 
-.action-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    color: #ffffff !important;
-}
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        color: #ffffff !important;
+    }
 
-.btn-cetak-modern {
-    background-color: #17a2b8 !important;
-}
+    .btn-cetak-modern {
+        background-color: #17a2b8 !important;
+    }
 
-.btn-cetak-modern:hover {
-    background-color: #138496 !important;
-}
+    .btn-cetak-modern:hover {
+        background-color: #138496 !important;
+    }
 
-.btn-update-modern {
-    background-color: #ffc107 !important;
-}
+    .btn-update-modern {
+        background-color: #ffc107 !important;
+    }
 
-.btn-update-modern:hover {
-    background-color: #e0a800 !important;
-}
+    .btn-update-modern:hover {
+        background-color: #e0a800 !important;
+    }
 
-.btn-delete-modern {
-    background-color: #dc3545 !important;
-}
+    .btn-delete-modern {
+        background-color: #dc3545 !important;
+    }
 
-.btn-delete-modern:hover {
-    background-color: #bd2130 !important;
-}
+    .btn-delete-modern:hover {
+        background-color: #bd2130 !important;
+    }
 
-#dataTable td {
-    vertical-align: middle !important;
-}
+    #dataTable td {
+        vertical-align: middle !important;
+    }
 
-#dataTable th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
+    #dataTable th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -159,68 +159,68 @@ $query = mysqli_query($koneksi, "
                                 // Logika pengecekan kelengkapan upload foto rumah
                                 $foto_lengkap = (!empty($data['foto_depan']) && !empty($data['foto_ruang_tamu']) && !empty($data['foto_kamar_tidur']) && !empty($data['foto_dapur']) && !empty($data['foto_kamar_mandi']));
                                 ?>
-                        <tr>
-                            <td class="text-center fw-bold text-secondary"><?= $no++; ?></td>
-                            <td class="fw-semibold text-dark"><?= htmlspecialchars($data['nomor_surat']); ?></td>
-                            <td>
-                                <span class="fw-bold"><?= htmlspecialchars($data['nama_warga']); ?></span>
-                                <small class="text-muted d-block">NIK: <?= htmlspecialchars($data['no_ktp']); ?></small>
-                                <small class="text-muted d-block">KK: <?= htmlspecialchars($data['no_kk']); ?></small>
-                            </td>
-                            <td>
-                                <span class="text-wrap d-inline-block" style="max-width: 250px; font-size: 0.85rem;">
-                                    <?= htmlspecialchars($data['keperluan']); ?>
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <span class="text-secondary" style="font-size: 0.9rem;">
-                                    <?= date('d-m-Y', strtotime($data['tanggal_surat'])); ?>
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <?php if($foto_lengkap): ?>
-                                <span class="badge bg-success p-2" title="Semua dokumentasi lengkap"><i
-                                        class="fas fa-check-circle me-1"></i>Lengkap</span>
-                                <?php else: ?>
-                                <span class="badge bg-warning text-dark p-2" title="Beberapa foto belum diunggah"><i
-                                        class="fas fa-exclamation-triangle me-1"></i>Belum Lengkap</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center align-items-center gap-2">
-                                    <!-- Cetak -->
-                                    <a href="pages/sktm_kis/cetak.php?id=<?= $data['id_sktm']; ?>" target="_blank"
-                                        class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-cetak-modern"
-                                        title="Cetak Surat">
-                                        <i class="fas fa-print"></i>
-                                        <span>Cetak</span>
-                                    </a>
-                                    <!-- Edit -->
-                                    <a href="index.php?page=sktm-kis-edit&id=<?= $data['id_sktm']; ?>"
-                                        class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-update-modern"
-                                        title="Edit Data">
-                                        <i class="fas fa-edit"></i>
-                                        <span>Edit</span>
-                                    </a>
-                                    <!-- Delete -->
-                                    <a href="pages/sktm_kis/proses_hapus.php?id=<?= $data['id_sktm']; ?>"
-                                        class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-delete-modern"
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus data SKTM ini beserta arsip foto dokumentasinya?');"
-                                        title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                        <span>Hapus</span>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php
+                                <tr>
+                                    <td class="text-center fw-bold text-secondary"><?= $no++; ?></td>
+                                    <td class="fw-semibold text-dark"><?= htmlspecialchars($data['nomor_surat']); ?></td>
+                                    <td>
+                                        <span class="fw-bold"><?= htmlspecialchars($data['nama_warga']); ?></span>
+                                        <small class="text-muted d-block">NIK: <?= htmlspecialchars($data['no_ktp']); ?></small>
+                                        <small class="text-muted d-block">KK: <?= htmlspecialchars($data['no_kk']); ?></small>
+                                    </td>
+                                    <td>
+                                        <span class="text-wrap d-inline-block" style="max-width: 250px; font-size: 0.85rem;">
+                                            <?= htmlspecialchars($data['keperluan']); ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="text-secondary" style="font-size: 0.9rem;">
+                                            <?= date('d-m-Y', strtotime($data['tanggal_surat'])); ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if ($foto_lengkap): ?>
+                                            <span class="badge bg-success p-2" title="Semua dokumentasi lengkap"><i
+                                                    class="fas fa-check-circle me-1"></i>Lengkap</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning text-dark p-2" title="Beberapa foto belum diunggah"><i
+                                                    class="fas fa-exclamation-triangle me-1"></i>Belum Lengkap</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <!-- Cetak -->
+                                            <a href="pages/sktm_kis/cetak.php?id=<?= $data['id_sktm']; ?>" target="_blank"
+                                                class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-cetak-modern"
+                                                title="Cetak Surat">
+                                                <i class="fas fa-print"></i>
+                                                <span>Cetak</span>
+                                            </a>
+                                            <!-- Edit -->
+                                            <a href="index.php?page=sktm-kis-edit&id=<?= $data['id_sktm']; ?>"
+                                                class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-update-modern"
+                                                title="Edit Data">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Edit</span>
+                                            </a>
+                                            <!-- Delete -->
+                                            <a href="pages/sktm_kis/proses_hapus.php?id=<?= $data['id_sktm']; ?>"
+                                                class="btn btn-sm d-flex flex-column align-items-center justify-content-center action-btn btn-delete-modern"
+                                                onclick="return confirm('Apakah Anda yakin ingin menghapus data SKTM ini beserta arsip foto dokumentasinya?');"
+                                                title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Hapus</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
                             }
                         } else {
                             ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Belum ada data surat keterangan tidak
-                                mampu (SKTM KIS).</td>
-                        </tr>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Belum ada data surat keterangan tidak
+                                    mampu (SKTM KIS).</td>
+                            </tr>
                         <?php } ?>
                     </tbody>
                 </table>

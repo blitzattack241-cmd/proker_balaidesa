@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -75,81 +75,81 @@ if (isset($_POST['simpan'])) {
     rel="stylesheet" />
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-    letter-spacing: -0.5px;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+    }
 
-.breadcrumb-modern a {
-    color: #17a2b8;
-    font-weight: 500;
-}
+    .breadcrumb-modern a {
+        color: #17a2b8;
+        font-weight: 500;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.card-header-modern {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.25rem 1.5rem !important;
-}
+    .card-header-modern {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.25rem 1.5rem !important;
+    }
 
-.form-label {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-}
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
 
-.form-control,
-.form-select {
-    border-radius: 8px !important;
-    padding: 0.6rem 1rem;
-    border: 1px solid #ced4da;
-}
+    .form-control,
+    .form-select {
+        border-radius: 8px !important;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ced4da;
+    }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-}
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
 
-.btn-custom-save {
-    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600;
-    padding: 10px 24px;
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
-    transition: all 0.2s ease;
-}
+    .btn-custom-save {
+        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600;
+        padding: 10px 24px;
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+        transition: all 0.2s ease;
+    }
 
-.btn-custom-save:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
-}
+    .btn-custom-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+    }
 
-.btn-custom-back {
-    border-radius: 8px !important;
-    font-weight: 600;
-    padding: 10px 20px;
-}
+    .btn-custom-back {
+        border-radius: 8px !important;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
 
-/* Styling Box Pencarian Penduduk */
-.box-pencarian-container {
-    background-color: #f8faff;
-    border: 1px dashed #0d6efd;
-    border-radius: 10px;
-    padding: 15px;
-}
+    /* Styling Box Pencarian Penduduk */
+    .box-pencarian-container {
+        background-color: #f8faff;
+        border: 1px dashed #0d6efd;
+        border-radius: 10px;
+        padding: 15px;
+    }
 
-.select2-container--bootstrap-5 .select2-selection--single .select2-selection__clear {
-    cursor: pointer;
-    margin-right: 10px;
-}
+    .select2-container--bootstrap-5 .select2-selection--single .select2-selection__clear {
+        cursor: pointer;
+        margin-right: 10px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -322,10 +322,10 @@ if (isset($_POST['simpan'])) {
                         <select name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Penandatangan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -349,123 +349,123 @@ if (isset($_POST['simpan'])) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Inisialisasi Select2 AJAX
-    $('#cari_penduduk').select2({
-        theme: 'bootstrap-5',
-        placeholder: '-- Ketik No. KK, NIK, atau Nama Penduduk... --',
-        allowClear: true,
-        minimumInputLength: 2,
-        ajax: {
-            url: 'api/get_penduduk.php',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term
-                };
-            },
-            processResults: function(data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
-        }
-    });
+    $(document).ready(function () {
+        // Inisialisasi Select2 AJAX
+        $('#cari_penduduk').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Ketik No. KK, NIK, atau Nama Penduduk... --',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: 'api/get_penduduk.php',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
 
-    // Auto-fill saat item dipilih
-    $('#cari_penduduk').on('select2:select', function(e) {
-        var data = e.params.data;
+        // Auto-fill saat item dipilih
+        $('#cari_penduduk').on('select2:select', function (e) {
+            var data = e.params.data;
 
-        $('#input_nama').val(data.nama || '');
-        $('#input_nik').val(data.nik || '');
-        $('#input_no_kk').val(data.no_kk || data.kk || '331904');
+            $('#input_nama').val(data.nama || '');
+            $('#input_nik').val(data.nik || '');
+            $('#input_no_kk').val(data.no_kk || data.kk || '331904');
 
-        // Pembedaan data tempat & tanggal lahir
-        if (data.tgl_lahir) {
-            $('#input_tanggal_lahir').val(data.tgl_lahir);
-        } else if (data.tanggal_lahir) {
-            $('#input_tanggal_lahir').val(data.tanggal_lahir);
-        }
+            // Pembedaan data tempat & tanggal lahir
+            if (data.tgl_lahir) {
+                $('#input_tanggal_lahir').val(data.tgl_lahir);
+            } else if (data.tanggal_lahir) {
+                $('#input_tanggal_lahir').val(data.tanggal_lahir);
+            }
 
-        if (data.tempat_lahir) {
-            $('#input_tempat_lahir').val(data.tempat_lahir);
-        } else if (data.tempat_tgl_lahir) {
-            var ttl = data.tempat_tgl_lahir.split(',');
-            $('#input_tempat_lahir').val(ttl[0].trim());
+            if (data.tempat_lahir) {
+                $('#input_tempat_lahir').val(data.tempat_lahir);
+            } else if (data.tempat_tgl_lahir) {
+                var ttl = data.tempat_tgl_lahir.split(',');
+                $('#input_tempat_lahir').val(ttl[0].trim());
 
-            if (ttl.length > 1 && !$('#input_tanggal_lahir').val()) {
-                var rawDate = ttl[1].trim();
-                if (rawDate.includes('-') || rawDate.includes('/')) {
-                    var delimiter = rawDate.includes('-') ? '-' : '/';
-                    var parts = rawDate.split(delimiter);
-                    if (parts[0].length === 2 && parts[2].length === 4) {
-                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
-                            2, '0');
+                if (ttl.length > 1 && !$('#input_tanggal_lahir').val()) {
+                    var rawDate = ttl[1].trim();
+                    if (rawDate.includes('-') || rawDate.includes('/')) {
+                        var delimiter = rawDate.includes('-') ? '-' : '/';
+                        var parts = rawDate.split(delimiter);
+                        if (parts[0].length === 2 && parts[2].length === 4) {
+                            rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                                2, '0');
+                        }
                     }
+                    $('#input_tanggal_lahir').val(rawDate);
                 }
-                $('#input_tanggal_lahir').val(rawDate);
             }
-        }
 
-        // Auto select jenis kelamin
-        if (data.jenis_kelamin) {
-            var jk = data.jenis_kelamin.toString().toLowerCase();
-            if (jk.includes('l')) {
-                $('#input_jenis_kelamin').val('Laki-laki');
-            } else if (jk.includes('p')) {
-                $('#input_jenis_kelamin').val('Perempuan');
+            // Auto select jenis kelamin
+            if (data.jenis_kelamin) {
+                var jk = data.jenis_kelamin.toString().toLowerCase();
+                if (jk.includes('l')) {
+                    $('#input_jenis_kelamin').val('Laki-laki');
+                } else if (jk.includes('p')) {
+                    $('#input_jenis_kelamin').val('Perempuan');
+                }
             }
-        }
 
-        // Auto select Agama
-        if (data.agama) {
-            $('#input_agama').val(data.agama);
-        }
-
-        // Auto select Status Perkawinan (LOGIKA DIPERBAIKI)
-        var rawStatus = data.status_pernikahan || data.status_perkawinan || '';
-        if (rawStatus) {
-            var val = rawStatus.toString().trim().toUpperCase();
-
-            if (val.includes('BELUM') || val === 'BK' || val === '1') {
-                $('#input_status_perkawinan').val('Belum Kawin');
-            } else if (val.includes('CERAI HIDUP') || val === 'CH' || val === '3') {
-                $('#input_status_perkawinan').val('Cerai Hidup');
-            } else if (val.includes('CERAI MATI') || val === 'CM' || val === '4') {
-                $('#input_status_perkawinan').val('Cerai Mati');
-            } else if (val.includes('KAWIN') || val === 'K' || val === '2') {
-                $('#input_status_perkawinan').val('Kawin');
-            } else {
-                $('#input_status_perkawinan').val(rawStatus);
+            // Auto select Agama
+            if (data.agama) {
+                $('#input_agama').val(data.agama);
             }
-        }
 
-        if (data.pekerjaan) {
-            $('#input_pekerjaan').val(data.pekerjaan);
-        }
+            // Auto select Status Perkawinan (LOGIKA DIPERBAIKI)
+            var rawStatus = data.status_pernikahan || data.status_perkawinan || '';
+            if (rawStatus) {
+                var val = rawStatus.toString().trim().toUpperCase();
 
-        if (data.alamat_lengkap) {
-            $('#input_alamat').val(data.alamat_lengkap);
-        } else if (data.alamat) {
-            $('#input_alamat').val(data.alamat);
-        }
+                if (val.includes('BELUM') || val === 'BK' || val === '1') {
+                    $('#input_status_perkawinan').val('Belum Kawin');
+                } else if (val.includes('CERAI HIDUP') || val === 'CH' || val === '3') {
+                    $('#input_status_perkawinan').val('Cerai Hidup');
+                } else if (val.includes('CERAI MATI') || val === 'CM' || val === '4') {
+                    $('#input_status_perkawinan').val('Cerai Mati');
+                } else if (val.includes('KAWIN') || val === 'K' || val === '2') {
+                    $('#input_status_perkawinan').val('Kawin');
+                } else {
+                    $('#input_status_perkawinan').val(rawStatus);
+                }
+            }
+
+            if (data.pekerjaan) {
+                $('#input_pekerjaan').val(data.pekerjaan);
+            }
+
+            if (data.alamat_lengkap) {
+                $('#input_alamat').val(data.alamat_lengkap);
+            } else if (data.alamat) {
+                $('#input_alamat').val(data.alamat);
+            }
+        });
+
+        // Reset/Clear seluruh form identitas ketika tombol silang (X) diklik
+        $('#cari_penduduk').on('select2:clear', function (e) {
+            $('#input_nama').val('');
+            $('#input_nik').val('');
+            $('#input_no_kk').val('331904');
+            $('#input_tempat_lahir').val('');
+            $('#input_tanggal_lahir').val('');
+            $('#input_jenis_kelamin').val('');
+            $('#input_agama').val('Islam');
+            $('#input_kewarganegaraan').val('Indonesia');
+            $('#input_status_perkawinan').val('Belum Kawin');
+            $('#input_pekerjaan').val('Pelajar/Mahasiswa');
+            $('#input_alamat').val('');
+        });
     });
-
-    // Reset/Clear seluruh form identitas ketika tombol silang (X) diklik
-    $('#cari_penduduk').on('select2:clear', function(e) {
-        $('#input_nama').val('');
-        $('#input_nik').val('');
-        $('#input_no_kk').val('331904');
-        $('#input_tempat_lahir').val('');
-        $('#input_tanggal_lahir').val('');
-        $('#input_jenis_kelamin').val('');
-        $('#input_agama').val('Islam');
-        $('#input_kewarganegaraan').val('Indonesia');
-        $('#input_status_perkawinan').val('Belum Kawin');
-        $('#input_pekerjaan').val('Pelajar/Mahasiswa');
-        $('#input_alamat').val('');
-    });
-});
 </script>

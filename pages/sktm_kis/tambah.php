@@ -1,5 +1,5 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
@@ -105,44 +105,44 @@ if (isset($_POST['submit'])) {
     rel="stylesheet" />
 
 <style>
-.form-section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #0d6efd;
-    padding-bottom: 5px;
-    margin-bottom: 20px;
-}
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.btn-save-modern {
-    background: linear-gradient(135deg, #198754, #157347) !important;
-    border: none !important;
-    font-weight: 600;
-    padding: 10px 24px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
-    color: white !important;
-}
+    .btn-save-modern {
+        background: linear-gradient(135deg, #198754, #157347) !important;
+        border: none !important;
+        font-weight: 600;
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+        color: white !important;
+    }
 
-.btn-save-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
-    color: white !important;
-}
+    .btn-save-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
+        color: white !important;
+    }
 
-/* Style tambahan untuk Box Auto-fill Pencarian */
-.box-pencarian-container {
-    background-color: #f8faff;
-    border: 1px dashed #0d6efd;
-    border-radius: 10px;
-    padding: 15px;
-}
+    /* Style tambahan untuk Box Auto-fill Pencarian */
+    .box-pencarian-container {
+        background-color: #f8faff;
+        border: 1px dashed #0d6efd;
+        border-radius: 10px;
+        padding: 15px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -299,10 +299,10 @@ if (isset($_POST['submit'])) {
                         <select id="id_pejabat" name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)) { ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
@@ -354,104 +354,104 @@ if (isset($_POST['submit'])) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Inisialisasi Select2 pencarian pemohon via AJAX
-    $('#cari_penduduk').select2({
-        theme: 'bootstrap-5',
-        placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
-        allowClear: true,
-        minimumInputLength: 2,
-        ajax: {
-            url: 'api/get_penduduk.php',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term
-                };
-            },
-            processResults: function(data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
-        }
-    });
+    $(document).ready(function () {
+        // Inisialisasi Select2 pencarian pemohon via AJAX
+        $('#cari_penduduk').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: 'api/get_penduduk.php',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
 
-    // Auto-fill form saat data pemohon dipilih
-    $('#cari_penduduk').on('select2:select', function(e) {
-        var data = e.params.data;
+        // Auto-fill form saat data pemohon dipilih
+        $('#cari_penduduk').on('select2:select', function (e) {
+            var data = e.params.data;
 
-        $('#nama_warga').val(data.nama || '');
-        $('#no_ktp').val(data.nik || '');
-        $('#no_kk').val(data.no_kk || data.kk || '331904');
+            $('#nama_warga').val(data.nama || '');
+            $('#no_ktp').val(data.nik || '');
+            $('#no_kk').val(data.no_kk || data.kk || '331904');
 
-        // Handling Tempat & Tanggal Lahir
-        if (data.tgl_lahir) {
-            $('#tanggal_lahir').val(data.tgl_lahir);
-        } else if (data.tanggal_lahir) {
-            $('#tanggal_lahir').val(data.tanggal_lahir);
-        }
+            // Handling Tempat & Tanggal Lahir
+            if (data.tgl_lahir) {
+                $('#tanggal_lahir').val(data.tgl_lahir);
+            } else if (data.tanggal_lahir) {
+                $('#tanggal_lahir').val(data.tanggal_lahir);
+            }
 
-        if (data.tempat_lahir) {
-            $('#tempat_lahir').val(data.tempat_lahir);
-        } else if (data.tempat_tgl_lahir) {
-            var ttl = data.tempat_tgl_lahir.split(',');
-            $('#tempat_lahir').val(ttl[0].trim());
+            if (data.tempat_lahir) {
+                $('#tempat_lahir').val(data.tempat_lahir);
+            } else if (data.tempat_tgl_lahir) {
+                var ttl = data.tempat_tgl_lahir.split(',');
+                $('#tempat_lahir').val(ttl[0].trim());
 
-            if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
-                var rawDate = ttl[1].trim();
-                if (rawDate.includes('-') || rawDate.includes('/')) {
-                    var delimiter = rawDate.includes('-') ? '-' : '/';
-                    var parts = rawDate.split(delimiter);
-                    if (parts[0].length === 2 && parts[2].length === 4) {
-                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
-                            2, '0');
+                if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
+                    var rawDate = ttl[1].trim();
+                    if (rawDate.includes('-') || rawDate.includes('/')) {
+                        var delimiter = rawDate.includes('-') ? '-' : '/';
+                        var parts = rawDate.split(delimiter);
+                        if (parts[0].length === 2 && parts[2].length === 4) {
+                            rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                                2, '0');
+                        }
                     }
+                    $('#tanggal_lahir').val(rawDate);
                 }
-                $('#tanggal_lahir').val(rawDate);
             }
-        }
 
-        // Auto Select Jenis Kelamin
-        if (data.jenis_kelamin) {
-            var jk = data.jenis_kelamin.toString().toLowerCase();
-            if (jk.includes('l')) {
-                $('#jenis_kelamin').val('Laki-Laki');
-            } else if (jk.includes('p')) {
-                $('#jenis_kelamin').val('Perempuan');
+            // Auto Select Jenis Kelamin
+            if (data.jenis_kelamin) {
+                var jk = data.jenis_kelamin.toString().toLowerCase();
+                if (jk.includes('l')) {
+                    $('#jenis_kelamin').val('Laki-Laki');
+                } else if (jk.includes('p')) {
+                    $('#jenis_kelamin').val('Perempuan');
+                }
             }
-        }
 
-        // Auto Select Agama
-        if (data.agama) {
-            $('#agama').val(data.agama);
-        }
+            // Auto Select Agama
+            if (data.agama) {
+                $('#agama').val(data.agama);
+            }
 
-        // Pekerjaan & Alamat
-        if (data.pekerjaan) {
-            $('#pekerjaan').val(data.pekerjaan);
-        }
+            // Pekerjaan & Alamat
+            if (data.pekerjaan) {
+                $('#pekerjaan').val(data.pekerjaan);
+            }
 
-        if (data.alamat_lengkap) {
-            $('#alamat_tinggal').val(data.alamat_lengkap);
-        } else if (data.alamat) {
-            $('#alamat_tinggal').val(data.alamat);
-        }
+            if (data.alamat_lengkap) {
+                $('#alamat_tinggal').val(data.alamat_lengkap);
+            } else if (data.alamat) {
+                $('#alamat_tinggal').val(data.alamat);
+            }
+        });
+
+        // Reset isi form saat pilihan dihapus
+        $('#cari_penduduk').on('select2:clear', function (e) {
+            $('#nama_warga').val('');
+            $('#no_ktp').val('');
+            $('#no_kk').val('331904');
+            $('#tempat_lahir').val('');
+            $('#tanggal_lahir').val('');
+            $('#jenis_kelamin').val('');
+            $('#agama').val('Islam');
+            $('#pekerjaan').val('');
+            $('#alamat_tinggal').val('');
+        });
     });
-
-    // Reset isi form saat pilihan dihapus
-    $('#cari_penduduk').on('select2:clear', function(e) {
-        $('#nama_warga').val('');
-        $('#no_ktp').val('');
-        $('#no_kk').val('331904');
-        $('#tempat_lahir').val('');
-        $('#tanggal_lahir').val('');
-        $('#jenis_kelamin').val('');
-        $('#agama').val('Islam');
-        $('#pekerjaan').val('');
-        $('#alamat_tinggal').val('');
-    });
-});
 </script>

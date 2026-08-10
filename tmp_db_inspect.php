@@ -1,11 +1,11 @@
 <?php
-$mysqli = new mysqli('localhost', 'root', '', 'db_balaidesa');
-if ($mysqli->connect_errno) {
-    echo "CONNECT_ERROR: " . $mysqli->connect_error . PHP_EOL;
+require_once __DIR__ . '/koneksi.php';
+if (!$koneksi) {
+    echo "CONNECT_ERROR: " . mysqli_connect_error() . PHP_EOL;
     exit(1);
 }
-$res = $mysqli->query('SHOW TABLES');
-while ($row = $res->fetch_row()) {
+$res = mysqli_query($koneksi, 'SHOW TABLES');
+while ($row = mysqli_fetch_row($res)) {
     echo $row[0] . PHP_EOL;
 }
-$mysqli->close();
+mysqli_close($koneksi);

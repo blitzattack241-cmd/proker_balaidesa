@@ -3,40 +3,47 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 if (mysqli_connect_errno()) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
 if ($koneksi) {
-    mysqli_set_charset($koneksi, 'utf8mb4');
+    // charset handled centrally in koneksi.php
 }
 
-function tableExists(mysqli $koneksi, string $namaTable): bool {
+function tableExists(mysqli $koneksi, string $namaTable): bool
+{
     $check = mysqli_query($koneksi, "SHOW TABLES LIKE '" . mysqli_real_escape_string($koneksi, $namaTable) . "'");
     return $check && mysqli_num_rows($check) > 0;
 }
 
-function columnExists(mysqli $koneksi, string $namaTable, string $namaKolom): bool {
+function columnExists(mysqli $koneksi, string $namaTable, string $namaKolom): bool
+{
     $check = mysqli_query($koneksi, "SHOW COLUMNS FROM `" . mysqli_real_escape_string($koneksi, $namaTable) . "` LIKE '" . mysqli_real_escape_string($koneksi, $namaKolom) . "'");
     return $check && mysqli_num_rows($check) > 0;
 }
 
-function findExistingTable(mysqli $koneksi, array $candidates): ?string {
+function findExistingTable(mysqli $koneksi, array $candidates): ?string
+{
     foreach ($candidates as $table) {
-        if (tableExists($koneksi, $table)) return $table;
+        if (tableExists($koneksi, $table))
+            return $table;
     }
     return null;
 }
 
-function chooseColumnExpr(mysqli $koneksi, string $table, array $candidates, string $default = ''): string {
+function chooseColumnExpr(mysqli $koneksi, string $table, array $candidates, string $default = ''): string
+{
     foreach ($candidates as $column) {
-        if (columnExists($koneksi, $table, $column)) return "`$column`";
+        if (columnExists($koneksi, $table, $column))
+            return "`$column`";
     }
     return "'" . mysqli_real_escape_string($koneksi, $default) . "'";
 }
 
-function chooseNomorSuratExpr(mysqli $koneksi, string $table): string {
+function chooseNomorSuratExpr(mysqli $koneksi, string $table): string
+{
     $candidates = ['nomor_surat', 'kode_surat', 'no_surat', 'surat_nomor', 'nomor'];
     $parts = [];
 
@@ -53,7 +60,8 @@ function chooseNomorSuratExpr(mysqli $koneksi, string $table): string {
     return "TRIM(COALESCE(" . implode(', ', $parts) . ", ''))";
 }
 
-function normalizeNomorSuratValue($value): string {
+function normalizeNomorSuratValue($value): string
+{
     if ($value === null) {
         return '';
     }
@@ -70,15 +78,19 @@ function normalizeNomorSuratValue($value): string {
     return $trimmed;
 }
 
-function chooseColumnName(mysqli $koneksi, string $table, array $candidates): string {
+function chooseColumnName(mysqli $koneksi, string $table, array $candidates): string
+{
     foreach ($candidates as $column) {
-        if (columnExists($koneksi, $table, $column)) return $column;
+        if (columnExists($koneksi, $table, $column))
+            return $column;
     }
     return '';
 }
 
-function cleanUtf8(?string $string): string {
-    if (empty($string)) return '';
+function cleanUtf8(?string $string): string
+{
+    if (empty($string))
+        return '';
     if (mb_detect_encoding($string, 'UTF-8', true) && strpos($string, 'â') !== false) {
         return utf8_encode(utf8_decode($string));
     }
@@ -189,7 +201,8 @@ $sourceTables = [
 $suratRows = [];
 foreach ($sourceTables as $config) {
     $table = findExistingTable($koneksi, $config['candidates']);
-    if (!$table) continue;
+    if (!$table)
+        continue;
 
     $jenis = mysqli_real_escape_string($koneksi, $config['label']);
     $nomor = chooseNomorSuratExpr($koneksi, $table);
@@ -245,10 +258,18 @@ foreach ($suratRows as $row) {
 }
 
 $namaBulanList = [
-    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
-    '04' => 'April', '05' => 'Mei', '06' => 'Juni',
-    '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
-    '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+    '01' => 'Januari',
+    '02' => 'Februari',
+    '03' => 'Maret',
+    '04' => 'April',
+    '05' => 'Mei',
+    '06' => 'Juni',
+    '07' => 'Juli',
+    '08' => 'Agustus',
+    '09' => 'September',
+    '10' => 'Oktober',
+    '11' => 'November',
+    '12' => 'Desember'
 ];
 $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
 ?>
@@ -260,174 +281,174 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
     <meta charset="UTF-8">
     <title>Cetak Agenda Surat Keluar - <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></title>
     <style>
-    /* CSS MURNI DOKUMEN CETAK LANDSCAPE */
-    @page {
-        size: A4 landscape;
-        margin: 10mm 12mm 10mm 12mm;
-    }
+        /* CSS MURNI DOKUMEN CETAK LANDSCAPE */
+        @page {
+            size: A4 landscape;
+            margin: 10mm 12mm 10mm 12mm;
+        }
 
-    body {
-        font-family: 'Times New Roman', Times, serif;
-        color: #000;
-        background: #fff;
-        margin: 0;
-        padding: 0;
-        font-size: 10pt;
-    }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+            font-size: 10pt;
+        }
 
-    /* TOMBOL CETAK & NAVIGASI */
-    .btn-bar {
-        background: #222;
-        padding: 10px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .btn-bar button {
-        background: #28a745;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        font-size: 14px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-bar button:hover {
-        background: #218838;
-    }
-
-    /* CONTAINER KOP HEADER DOKUMEN */
-    .header-container {
-        position: relative;
-        margin-bottom: 10px;
-    }
-
-    .header {
-        text-align: center;
-    }
-
-    .header h2 {
-        margin: 0;
-        font-size: 14pt;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    .header h3 {
-        margin: 4px 0;
-        font-size: 12pt;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    .header p {
-        margin: 2px 0 0 0;
-        font-style: italic;
-        font-size: 10pt;
-    }
-
-    /* TABEL AGENDA */
-    table.data-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-    }
-
-    table.data-table th,
-    table.data-table td {
-        border: 1px solid #000;
-        padding: 4px 5px;
-        vertical-align: middle;
-        word-wrap: break-word;
-    }
-
-    table.data-table th {
-        background-color: #f2f2f2;
-        text-align: center;
-        font-weight: bold;
-        font-size: 9.5pt;
-        text-transform: uppercase;
-    }
-
-    /* STYLE INPUT KETIKAN / EDITABLE */
-    .input-editable {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px dashed #ccc;
-        background: #fff8dc;
-        font-family: inherit;
-        font-size: 9pt;
-        padding: 2px 4px;
-        outline: none;
-        border-radius: 2px;
-    }
-
-    .input-editable:focus {
-        background: #fff;
-        border: 1px solid #007bff;
-    }
-
-    .text-center {
-        text-align: center;
-    }
-
-    .font-bold {
-        font-weight: bold;
-    }
-
-    .input-tanggal-ttd {
-        border: none;
-        background: transparent;
-        font-family: inherit;
-        font-size: 10pt;
-        text-align: center;
-        width: 100%;
-        outline: none;
-    }
-
-    /* MATIKAN HEAD REPEAT DI HALAMAN BARU */
-    table.data-table thead {
-        display: table-row-group;
-    }
-
-    /* TANDA TANGAN */
-    .footer-ttd {
-        width: 100%;
-        margin-top: 25px;
-        page-break-inside: avoid;
-    }
-
-    .footer-ttd table {
-        width: 100%;
-        border: none;
-    }
-
-    .footer-ttd td {
-        border: none !important;
-        text-align: center;
-        vertical-align: top;
-        font-size: 10pt;
-    }
-
-    /* SEMBUNYIKAN UI LAYAR SAAT DIPRINT */
-    @media print {
+        /* TOMBOL CETAK & NAVIGASI */
         .btn-bar {
-            display: none !important;
+            background: #222;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        /* UBAH INPUT MENJADI TEKS POLOS SAAT CETAK */
+        .btn-bar button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-bar button:hover {
+            background: #218838;
+        }
+
+        /* CONTAINER KOP HEADER DOKUMEN */
+        .header-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 14pt;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .header h3 {
+            margin: 4px 0;
+            font-size: 12pt;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .header p {
+            margin: 2px 0 0 0;
+            font-style: italic;
+            font-size: 10pt;
+        }
+
+        /* TABEL AGENDA */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        table.data-table th,
+        table.data-table td {
+            border: 1px solid #000;
+            padding: 4px 5px;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+        }
+
+        /* STYLE INPUT KETIKAN / EDITABLE */
         .input-editable {
-            border: none !important;
-            background: transparent !important;
-            padding: 0 !important;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px dashed #ccc;
+            background: #fff8dc;
+            font-family: inherit;
+            font-size: 9pt;
+            padding: 2px 4px;
+            outline: none;
+            border-radius: 2px;
         }
 
-        .input-editable:placeholder-shown {
-            display: none;
+        .input-editable:focus {
+            background: #fff;
+            border: 1px solid #007bff;
         }
-    }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .input-tanggal-ttd {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 10pt;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+
+        /* MATIKAN HEAD REPEAT DI HALAMAN BARU */
+        table.data-table thead {
+            display: table-row-group;
+        }
+
+        /* TANDA TANGAN */
+        .footer-ttd {
+            width: 100%;
+            margin-top: 25px;
+            page-break-inside: avoid;
+        }
+
+        .footer-ttd table {
+            width: 100%;
+            border: none;
+        }
+
+        .footer-ttd td {
+            border: none !important;
+            text-align: center;
+            vertical-align: top;
+            font-size: 10pt;
+        }
+
+        /* SEMBUNYIKAN UI LAYAR SAAT DIPRINT */
+        @media print {
+            .btn-bar {
+                display: none !important;
+            }
+
+            /* UBAH INPUT MENJADI TEKS POLOS SAAT CETAK */
+            .input-editable {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+            }
+
+            .input-editable:placeholder-shown {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -483,59 +504,60 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
         </thead>
         <tbody>
             <?php if (!empty($filteredRows)): ?>
-            <?php $no = 1; ?>
-            <?php foreach ($filteredRows as $row): ?>
-            <?php
+                <?php $no = 1; ?>
+                <?php foreach ($filteredRows as $row): ?>
+                    <?php
                     $tanggal = '-';
                     if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
                         $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
                     }
                     ?>
-            <tr>
-                <td style="text-align: center; font-weight: bold;"><?php echo $no++; ?></td>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;"><?php echo $no++; ?></td>
 
-                <!-- ISI SINGKAT (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable font-bold"
-                        value="<?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?>">
-                </td>
+                        <!-- ISI SINGKAT (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable font-bold"
+                                value="<?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?>">
+                        </td>
 
-                <!-- NAMA PEMOHON (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable"
-                        value="<?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '')); ?>" placeholder="-">
-                </td>
+                        <!-- NAMA PEMOHON (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable"
+                                value="<?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '')); ?>" placeholder="-">
+                        </td>
 
-                <!-- TANGGAL SURAT (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable text-center"
-                        value="<?php echo htmlspecialchars($tanggal); ?>">
-                </td>
+                        <!-- TANGGAL SURAT (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable text-center"
+                                value="<?php echo htmlspecialchars($tanggal); ?>">
+                        </td>
 
-                <!-- NOMOR SURAT (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable"
-                        value="<?php echo htmlspecialchars(cleanUtf8(normalizeNomorSuratValue($row['nomor_surat'] ?? '') ?: '')); ?>" placeholder="-">
-                </td>
+                        <!-- NOMOR SURAT (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable"
+                                value="<?php echo htmlspecialchars(cleanUtf8(normalizeNomorSuratValue($row['nomor_surat'] ?? '') ?: '')); ?>"
+                                placeholder="-">
+                        </td>
 
-                <!-- TUJUAN (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable"
-                        value="<?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '')); ?>" placeholder="-">
-                </td>
+                        <!-- TUJUAN (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable"
+                                value="<?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '')); ?>" placeholder="-">
+                        </td>
 
-                <!-- KETERANGAN (EDITABLE) -->
-                <td>
-                    <input type="text" class="input-editable" value="" placeholder="Ketik keterangan...">
-                </td>
-            </tr>
-            <?php endforeach; ?>
+                        <!-- KETERANGAN (EDITABLE) -->
+                        <td>
+                            <input type="text" class="input-editable" value="" placeholder="Ketik keterangan...">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             <?php else: ?>
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 15px;">
-                    Tidak ada data surat keluar pada bulan <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?>.
-                </td>
-            </tr>
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 15px;">
+                        Tidak ada data surat keluar pada bulan <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?>.
+                    </td>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>

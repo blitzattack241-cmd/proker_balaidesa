@@ -1,6 +1,6 @@
 <?php
 // 1. Koneksi ke Database (Sesuaikan dengan config Anda jika ada)
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // 2. Cek apakah ada parameter 'id' yang dikirim melalui URL
 if (isset($_GET['id'])) {

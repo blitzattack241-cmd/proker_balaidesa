@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     echo "<script>
@@ -82,325 +82,325 @@ function tgl_indo($tanggal)
     <meta charset="UTF-8">
     <title>Sistem Balai Desa - Pratinjau Cetak SKTM Rawat</title>
     <style>
-    /* CSS RESET & BASE STYLES */
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #3e3e3e;
-        font-family: "Times New Roman", Times, serif;
-        color: #000;
-    }
-
-    /* 1. TOP BAR HITAM */
-    .preview-header {
-        background-color: #1a1a1a;
-        color: #ffffff;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50px;
-        box-sizing: border-box;
-        z-index: 1000;
-        font-family: Arial, sans-serif;
-        font-size: 10pt;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    }
-
-    .preview-title {
-        font-weight: bold;
-    }
-
-    .btn-print {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 6px 15px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 9pt;
-        transition: background-color 0.2s;
-    }
-
-    .btn-print:hover {
-        background-color: #0b5ed7;
-    }
-
-    /* 2. CONTAINER PREVIEW */
-    .print-container {
-        margin-top: 70px;
-        margin-bottom: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    /* Desain Kertas A4 */
-    .page {
-        background-color: #ffffff;
-        width: 210mm;
-        height: 296mm;
-        padding: 12mm 20mm;
-        box-sizing: border-box;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* 3. FORMAT DOKUMEN */
-    .kop-surat {
-        border-bottom: 4px solid #000;
-        padding-bottom: 3px;
-        margin-bottom: 2px;
-        text-align: center;
-        position: relative;
-    }
-
-    .kop-logo {
-        position: absolute;
-        left: 15px;
-        top: 5px;
-        width: 60px;
-        height: auto;
-    }
-
-    .kop-teks {
-        text-align: center;
-        margin-left: 75px;
-        margin-right: 75px;
-    }
-
-    .kop-teks h4 {
-        margin: 0;
-        font-size: 13pt;
-        text-transform: uppercase;
-        font-weight: normal;
-    }
-
-    .kop-teks h3 {
-        margin: 0;
-        font-size: 15pt;
-        text-transform: uppercase;
-        font-weight: normal;
-    }
-
-    .kop-teks h4:first-child {
-        font-weight: bold;
-    }
-
-    .kop-teks p {
-        margin: 3px 0 0 0;
-        font-size: 9pt;
-        font-style: italic;
-    }
-
-    .kode-desa-row {
-        width: 100%;
-        font-size: 10pt;
-        margin-bottom: 12px;
-        margin-top: 2px;
-        font-weight: bold;
-    }
-
-    .judul-surat {
-        text-align: center;
-        margin-bottom: 12px;
-    }
-
-    .judul-surat h5 {
-        margin: 0;
-        font-size: 12pt;
-        text-decoration: underline;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    .judul-surat p {
-        margin: 2px 0 0 0;
-        font-size: 10pt;
-    }
-
-    .paragraf-pengantar {
-        text-align: justify;
-        margin-bottom: 8px;
-        font-size: 10.5pt;
-        line-height: 1.3;
-    }
-
-    .tabel-data {
-        width: 100%;
-        margin-bottom: 12px;
-        border-collapse: collapse;
-        font-size: 10.5pt;
-    }
-
-    .tabel-data td {
-        padding: 1.5px 0;
-        vertical-align: top;
-    }
-
-    /* Sub-Tabel List Pasien */
-    .tabel-pasien {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 4px;
-        margin-left: 15px;
-    }
-
-    .tabel-pasien td {
-        padding: 1.5px 0;
-        font-size: 10.5pt;
-    }
-
-    .col-p-no {
-        width: 6%;
-    }
-
-    .col-p-nama {
-        width: 50%;
-    }
-
-    .col-p-titik {
-        width: 4%;
-        text-align: center;
-    }
-
-    .col-p-nik {
-        width: 40%;
-    }
-
-    /* Gaya Sub-Tabel untuk Surat Bukti Diri */
-    .sub-tabel-bukti {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: inherit;
-        font-family: inherit;
-    }
-
-    .sub-tabel-bukti td {
-        padding: 0px 0px 2px 0px !important;
-        border: none !important;
-    }
-
-    /* Bagian Tanda Tangan */
-    .container-ttd {
-        width: 100%;
-        margin-top: 15px;
-        font-size: 10.5pt;
-    }
-
-    .row-ttd-atas {
-        width: 100%;
-        display: table;
-        table-layout: fixed;
-        margin-bottom: 12px;
-    }
-
-    .col-ttd {
-        display: table-cell;
-        width: 50%;
-        text-align: center;
-        vertical-align: top;
-    }
-
-    .spasi-ttd {
-        height: 45px;
-    }
-
-    .row-ttd-bawah {
-        width: 100%;
-        text-align: center;
-        margin-top: 5px;
-    }
-
-    /* Desain Halaman Lampiran Foto */
-    .lampiran-judul {
-        text-align: center;
-        font-weight: bold;
-        text-decoration: underline;
-        margin-bottom: 15px;
-        text-transform: uppercase;
-        font-size: 11pt;
-    }
-
-    .grid-foto {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .box-foto {
-        border: 1px solid #000;
-        padding: 5px;
-        text-align: center;
-        background: #fafafa;
-    }
-
-    .box-foto img {
-        width: 100%;
-        height: 95px;
-        object-fit: cover;
-        border: 1px solid #ccc;
-    }
-
-    .box-foto p {
-        margin: 3px 0 0 0;
-        font-size: 8pt;
-        font-weight: bold;
-    }
-
-    .foto-full {
-        grid-column: span 2;
-    }
-
-    .foto-full img {
-        height: 115px;
-    }
-
-    /* 4. CSS KHUSUS PRINT FISIK */
-    @media print {
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        .preview-header {
-            display: none !important;
-        }
-
+        /* CSS RESET & BASE STYLES */
         html,
         body {
-            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            background-color: #3e3e3e;
+            font-family: "Times New Roman", Times, serif;
+            color: #000;
         }
 
+        /* 1. TOP BAR HITAM */
+        .preview-header {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            box-sizing: border-box;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .preview-title {
+            font-weight: bold;
+        }
+
+        .btn-print {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 9pt;
+            transition: background-color 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* 2. CONTAINER PREVIEW */
         .print-container {
-            margin: 0 !important;
-            padding: 0 !important;
-            gap: 0 !important;
+            margin-top: 70px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
+        /* Desain Kertas A4 */
         .page {
+            background-color: #ffffff;
             width: 210mm;
-            height: 297mm;
+            height: 296mm;
             padding: 12mm 20mm;
-            box-shadow: none !important;
-            page-break-after: always;
-            page-break-inside: avoid;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
         }
 
-        .page:last-child {
-            page-break-after: avoid;
+        /* 3. FORMAT DOKUMEN */
+        .kop-surat {
+            border-bottom: 4px solid #000;
+            padding-bottom: 3px;
+            margin-bottom: 2px;
+            text-align: center;
+            position: relative;
         }
-    }
+
+        .kop-logo {
+            position: absolute;
+            left: 15px;
+            top: 5px;
+            width: 60px;
+            height: auto;
+        }
+
+        .kop-teks {
+            text-align: center;
+            margin-left: 75px;
+            margin-right: 75px;
+        }
+
+        .kop-teks h4 {
+            margin: 0;
+            font-size: 13pt;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        .kop-teks h3 {
+            margin: 0;
+            font-size: 15pt;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        .kop-teks h4:first-child {
+            font-weight: bold;
+        }
+
+        .kop-teks p {
+            margin: 3px 0 0 0;
+            font-size: 9pt;
+            font-style: italic;
+        }
+
+        .kode-desa-row {
+            width: 100%;
+            font-size: 10pt;
+            margin-bottom: 12px;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+
+        .judul-surat {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .judul-surat h5 {
+            margin: 0;
+            font-size: 12pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .judul-surat p {
+            margin: 2px 0 0 0;
+            font-size: 10pt;
+        }
+
+        .paragraf-pengantar {
+            text-align: justify;
+            margin-bottom: 8px;
+            font-size: 10.5pt;
+            line-height: 1.3;
+        }
+
+        .tabel-data {
+            width: 100%;
+            margin-bottom: 12px;
+            border-collapse: collapse;
+            font-size: 10.5pt;
+        }
+
+        .tabel-data td {
+            padding: 1.5px 0;
+            vertical-align: top;
+        }
+
+        /* Sub-Tabel List Pasien */
+        .tabel-pasien {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+            margin-left: 15px;
+        }
+
+        .tabel-pasien td {
+            padding: 1.5px 0;
+            font-size: 10.5pt;
+        }
+
+        .col-p-no {
+            width: 6%;
+        }
+
+        .col-p-nama {
+            width: 50%;
+        }
+
+        .col-p-titik {
+            width: 4%;
+            text-align: center;
+        }
+
+        .col-p-nik {
+            width: 40%;
+        }
+
+        /* Gaya Sub-Tabel untuk Surat Bukti Diri */
+        .sub-tabel-bukti {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: inherit;
+            font-family: inherit;
+        }
+
+        .sub-tabel-bukti td {
+            padding: 0px 0px 2px 0px !important;
+            border: none !important;
+        }
+
+        /* Bagian Tanda Tangan */
+        .container-ttd {
+            width: 100%;
+            margin-top: 15px;
+            font-size: 10.5pt;
+        }
+
+        .row-ttd-atas {
+            width: 100%;
+            display: table;
+            table-layout: fixed;
+            margin-bottom: 12px;
+        }
+
+        .col-ttd {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .spasi-ttd {
+            height: 45px;
+        }
+
+        .row-ttd-bawah {
+            width: 100%;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Desain Halaman Lampiran Foto */
+        .lampiran-judul {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 11pt;
+        }
+
+        .grid-foto {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .box-foto {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .box-foto img {
+            width: 100%;
+            height: 95px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+
+        .box-foto p {
+            margin: 3px 0 0 0;
+            font-size: 8pt;
+            font-weight: bold;
+        }
+
+        .foto-full {
+            grid-column: span 2;
+        }
+
+        .foto-full img {
+            height: 115px;
+        }
+
+        /* 4. CSS KHUSUS PRINT FISIK */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            .preview-header {
+                display: none !important;
+            }
+
+            html,
+            body {
+                background-color: #ffffff;
+            }
+
+            .print-container {
+                margin: 0 !important;
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+
+            .page {
+                width: 210mm;
+                height: 297mm;
+                padding: 12mm 20mm;
+                box-shadow: none !important;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+
+            .page:last-child {
+                page-break-after: avoid;
+            }
+        }
     </style>
 </head>
 
@@ -524,27 +524,27 @@ function tgl_indo($tanggal)
                             if (mysqli_num_rows($query_pasien) > 0) {
                                 while ($pasien = mysqli_fetch_assoc($query_pasien)) {
                                     ?>
-                            <tr>
-                                <td class="col-p-no"><?= $no_p++; ?>.</td>
-                                <td class="col-p-nama" style="text-transform: uppercase;">
-                                    <?= htmlspecialchars($pasien['nama_pasien']); ?>
-                                </td>
-                                <td class="col-p-titik">:</td>
-                                <td class="col-p-nik"><?= htmlspecialchars($pasien['nik_pasien']); ?></td>
-                            </tr>
-                            <?php
+                                    <tr>
+                                        <td class="col-p-no"><?= $no_p++; ?>.</td>
+                                        <td class="col-p-nama" style="text-transform: uppercase;">
+                                            <?= htmlspecialchars($pasien['nama_pasien']); ?>
+                                        </td>
+                                        <td class="col-p-titik">:</td>
+                                        <td class="col-p-nik"><?= htmlspecialchars($pasien['nik_pasien']); ?></td>
+                                    </tr>
+                                    <?php
                                 }
                             } else {
                                 // Fallback jika relasi tabel rawat_pasien kosong
                                 ?>
-                            <tr>
-                                <td class="col-p-no">1.</td>
-                                <td class="col-p-nama" style="text-transform: uppercase;">
-                                    <?= htmlspecialchars($data['nama_pemohon']); ?>
-                                </td>
-                                <td class="col-p-titik">:</td>
-                                <td class="col-p-nik"><?= htmlspecialchars($data['no_ktp']); ?></td>
-                            </tr>
+                                <tr>
+                                    <td class="col-p-no">1.</td>
+                                    <td class="col-p-nama" style="text-transform: uppercase;">
+                                        <?= htmlspecialchars($data['nama_pemohon']); ?>
+                                    </td>
+                                    <td class="col-p-titik">:</td>
+                                    <td class="col-p-nik"><?= htmlspecialchars($data['no_ktp']); ?></td>
+                                </tr>
                             <?php } ?>
                         </table>
                     </td>
@@ -608,50 +608,50 @@ function tgl_indo($tanggal)
             <div class="grid-foto">
                 <div class="box-foto">
                     <?php if (!empty($data['foto_depan']) && file_exists("../../assets/img/sktm_rawat/" . $data['foto_depan'])): ?>
-                    <img src="../../assets/img/sktm_rawat/<?= $data['foto_depan']; ?>" alt="Tampak Depan">
+                        <img src="../../assets/img/sktm_rawat/<?= $data['foto_depan']; ?>" alt="Tampak Depan">
                     <?php else: ?>
-                    <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
-                        Ada Foto</div>
+                        <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
+                            Ada Foto</div>
                     <?php endif; ?>
                     <p>1. TAMPAK DEPAN RUMAH</p>
                 </div>
 
                 <div class="box-foto">
                     <?php if (!empty($data['foto_ruang_tamu']) && file_exists("../../assets/img/sktm_rawat/" . $data['foto_ruang_tamu'])): ?>
-                    <img src="../../assets/img/sktm_rawat/<?= $data['foto_ruang_tamu']; ?>" alt="Ruang Tamu">
+                        <img src="../../assets/img/sktm_rawat/<?= $data['foto_ruang_tamu']; ?>" alt="Ruang Tamu">
                     <?php else: ?>
-                    <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
-                        Ada Foto</div>
+                        <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
+                            Ada Foto</div>
                     <?php endif; ?>
                     <p>2. RUANG TAMU</p>
                 </div>
 
                 <div class="box-foto">
                     <?php if (!empty($data['foto_kamar']) && file_exists("../../assets/img/sktm_rawat/" . $data['foto_kamar'])): ?>
-                    <img src="../../assets/img/sktm_rawat/<?= $data['foto_kamar']; ?>" alt="Kamar Tidur">
+                        <img src="../../assets/img/sktm_rawat/<?= $data['foto_kamar']; ?>" alt="Kamar Tidur">
                     <?php else: ?>
-                    <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
-                        Ada Foto</div>
+                        <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
+                            Ada Foto</div>
                     <?php endif; ?>
                     <p>3. KAMAR TIDUR</p>
                 </div>
 
                 <div class="box-foto">
                     <?php if (!empty($data['foto_dapur']) && file_exists("../../assets/img/sktm_rawat/" . $data['foto_dapur'])): ?>
-                    <img src="../../assets/img/sktm_rawat/<?= $data['foto_dapur']; ?>" alt="Dapur">
+                        <img src="../../assets/img/sktm_rawat/<?= $data['foto_dapur']; ?>" alt="Dapur">
                     <?php else: ?>
-                    <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
-                        Ada Foto</div>
+                        <div style="height: 95px; line-height: 95px; background: #eee; color: #888; font-size: 9pt;">Tidak
+                            Ada Foto</div>
                     <?php endif; ?>
                     <p>4. BAGIAN DAPUR</p>
                 </div>
 
                 <div class="box-foto foto-full">
                     <?php if (!empty($data['foto_toilet']) && file_exists("../../assets/img/sktm_rawat/" . $data['foto_toilet'])): ?>
-                    <img src="../../assets/img/sktm_rawat/<?= $data['foto_toilet']; ?>" alt="Kamar Mandi / Toilet">
+                        <img src="../../assets/img/sktm_rawat/<?= $data['foto_toilet']; ?>" alt="Kamar Mandi / Toilet">
                     <?php else: ?>
-                    <div style="height: 115px; line-height: 115px; background: #eee; color: #888; font-size: 9pt;">Tidak
-                        Ada Foto</div>
+                        <div style="height: 115px; line-height: 115px; background: #eee; color: #888; font-size: 9pt;">Tidak
+                            Ada Foto</div>
                     <?php endif; ?>
                     <p>5. KAMAR MANDI / TOILET</p>
                 </div>

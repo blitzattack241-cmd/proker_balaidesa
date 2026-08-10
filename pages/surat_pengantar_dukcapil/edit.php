@@ -1,7 +1,7 @@
 <?php
 // Pastikan koneksi database tersedia.
 if (!isset($koneksi)) {
-    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+    require_once __DIR__ . '/../../koneksi.php';
 }
 
 // Ambil ID Surat dari parameter URL
@@ -10,10 +10,10 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
     exit;
 }
 
-$id_surat = (int)$_GET['id'];
+$id_surat = (int) $_GET['id'];
 
 // Cari nama tabel yang aktif di database
-$tableActive = 'tb_surat_dukcapil'; 
+$tableActive = 'tb_surat_dukcapil';
 $tableCandidates = ['tb_surat_pengantar_dukcapil', 'tb_surat_dukcapil', 'surat_pengantar_dukcapil', 'surat_dukcapil'];
 foreach ($tableCandidates as $tableCandidate) {
     $check = mysqli_query($koneksi, "SHOW TABLES LIKE '$tableCandidate'");
@@ -25,7 +25,7 @@ foreach ($tableCandidates as $tableCandidate) {
 
 // Query mengambil data surat lama
 $query = mysqli_query($koneksi, "SELECT * FROM `$tableActive` WHERE id_surat = $id_surat");
-$data  = mysqli_fetch_assoc($query);
+$data = mysqli_fetch_assoc($query);
 
 if (!$data) {
     echo "<script>alert('Data surat tidak ditemukan di database!'); window.location.href='index.php?page=surat-pengantar-dukcapil';</script>";
@@ -34,11 +34,11 @@ if (!$data) {
 
 // Proses Eksekusi Update saat Tombol Simpan diklik
 if (isset($_POST['update_surat'])) {
-    $nomor_surat   = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
     $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
     $jenis_dikirim = mysqli_real_escape_string($koneksi, $_POST['jenis_dikirim']);
-    $banyaknya     = mysqli_real_escape_string($koneksi, $_POST['banyaknya']);
-    $keterangan    = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
+    $banyaknya = mysqli_real_escape_string($koneksi, $_POST['banyaknya']);
+    $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
 
     $update = mysqli_query($koneksi, "UPDATE `$tableActive` SET 
         nomor_surat = '$nomor_surat', 

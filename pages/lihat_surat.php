@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     return;
@@ -81,10 +81,10 @@ $row = mysqli_fetch_assoc($res);
                 <table class="table table-striped table-bordered">
                     <tbody>
                         <?php foreach ($row as $col => $val): ?>
-                        <tr>
-                            <th style="width:30%;"><?php echo htmlspecialchars($col); ?></th>
-                            <td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td>
-                        </tr>
+                            <tr>
+                                <th style="width:30%;"><?php echo htmlspecialchars($col); ?></th>
+                                <td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>

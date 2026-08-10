@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 
 if (!$koneksi) {
     echo json_encode(['status' => 'error', 'message' => 'Database error']);
@@ -10,8 +10,9 @@ if (!$koneksi) {
 // Helper: Format Normalisasi Status Perkawinan (Diperbarui)
 function formatStatusPerkawinan($status)
 {
-    $val = strtolower(trim((string)$status));
-    if (empty($val)) return 'Belum Kawin';
+    $val = strtolower(trim((string) $status));
+    if (empty($val))
+        return 'Belum Kawin';
 
     if (strpos($val, 'janda') !== false || strpos($val, 'duda') !== false) {
         return 'Janda / Duda';

@@ -12,7 +12,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -25,7 +25,8 @@ if ($checkTable && mysqli_num_rows($checkTable) > 0) {
     $tableTarget = 'surat_kematian';
 }
 
-function getFormValue(array $data, string $key): string {
+function getFormValue(array $data, string $key): string
+{
     return array_key_exists($key, $data) && $data[$key] !== null ? (string) $data[$key] : '';
 }
 
@@ -42,26 +43,79 @@ if ($columnResult) {
 // PENTING: daftar field ini HARUS SAMA PERSIS dengan nama kolom di database
 // (lihat tb_surat_kematian.sql / migrasi_surat_kematian.sql).
 $fieldMap = [
-    'nomor_surat', 'tanggal_surat',
-    'nama_kepala_keluarga', 'no_kk',
-    'nik_jenazah', 'nama_jenazah', 'jenis_kelamin',
-    'tanggal_lahir_jenazah', 'umur', 'tempat_lahir_jenazah',
-    'agama_jenazah', 'pekerjaan_jenazah',
-    'alamat_jenazah', 'desa_jenazah', 'kecamatan_jenazah', 'kabupaten_jenazah', 'provinsi_jenazah',
+    'nomor_surat',
+    'tanggal_surat',
+    'nama_kepala_keluarga',
+    'no_kk',
+    'nik_jenazah',
+    'nama_jenazah',
+    'jenis_kelamin',
+    'tanggal_lahir_jenazah',
+    'umur',
+    'tempat_lahir_jenazah',
+    'agama_jenazah',
+    'pekerjaan_jenazah',
+    'alamat_jenazah',
+    'desa_jenazah',
+    'kecamatan_jenazah',
+    'kabupaten_jenazah',
+    'provinsi_jenazah',
     'anak_ke',
-    'hari_kematian', 'tanggal_kematian', 'jam_kematian',
-    'sebab_kematian', 'tempat_kematian', 'penolong_kematian',
-    'nik_ayah', 'nama_ayah', 'tanggal_lahir_ayah', 'umur_ayah', 'pekerjaan_ayah',
-    'alamat_ayah', 'desa_ayah', 'kecamatan_ayah', 'kabupaten_ayah', 'provinsi_ayah',
-    'nik_ibu', 'nama_ibu', 'tanggal_lahir_ibu', 'umur_ibu', 'pekerjaan_ibu',
-    'alamat_ibu', 'desa_ibu', 'kecamatan_ibu', 'kabupaten_ibu', 'provinsi_ibu',
-    'nik_pelapor', 'nama_pelapor', 'hubungan_pelapor',
-    'tanggal_lahir_pelapor', 'umur_pelapor', 'pekerjaan_pelapor',
-    'alamat_pelapor', 'desa_pelapor', 'kecamatan_pelapor', 'kabupaten_pelapor', 'provinsi_pelapor',
-    'nik_saksi1', 'nama_saksi1', 'umur_saksi1', 'pekerjaan_saksi1',
-    'alamat_saksi1', 'desa_saksi1', 'kecamatan_saksi1', 'kabupaten_saksi1', 'provinsi_saksi1',
-    'nik_saksi2', 'nama_saksi2', 'umur_saksi2', 'pekerjaan_saksi2',
-    'alamat_saksi2', 'desa_saksi2', 'kecamatan_saksi2', 'kabupaten_saksi2', 'provinsi_saksi2',
+    'hari_kematian',
+    'tanggal_kematian',
+    'jam_kematian',
+    'sebab_kematian',
+    'tempat_kematian',
+    'penolong_kematian',
+    'nik_ayah',
+    'nama_ayah',
+    'tanggal_lahir_ayah',
+    'umur_ayah',
+    'pekerjaan_ayah',
+    'alamat_ayah',
+    'desa_ayah',
+    'kecamatan_ayah',
+    'kabupaten_ayah',
+    'provinsi_ayah',
+    'nik_ibu',
+    'nama_ibu',
+    'tanggal_lahir_ibu',
+    'umur_ibu',
+    'pekerjaan_ibu',
+    'alamat_ibu',
+    'desa_ibu',
+    'kecamatan_ibu',
+    'kabupaten_ibu',
+    'provinsi_ibu',
+    'nik_pelapor',
+    'nama_pelapor',
+    'hubungan_pelapor',
+    'tanggal_lahir_pelapor',
+    'umur_pelapor',
+    'pekerjaan_pelapor',
+    'alamat_pelapor',
+    'desa_pelapor',
+    'kecamatan_pelapor',
+    'kabupaten_pelapor',
+    'provinsi_pelapor',
+    'nik_saksi1',
+    'nama_saksi1',
+    'umur_saksi1',
+    'pekerjaan_saksi1',
+    'alamat_saksi1',
+    'desa_saksi1',
+    'kecamatan_saksi1',
+    'kabupaten_saksi1',
+    'provinsi_saksi1',
+    'nik_saksi2',
+    'nama_saksi2',
+    'umur_saksi2',
+    'pekerjaan_saksi2',
+    'alamat_saksi2',
+    'desa_saksi2',
+    'kecamatan_saksi2',
+    'kabupaten_saksi2',
+    'provinsi_saksi2',
 ];
 
 // ========================================================
@@ -122,37 +176,37 @@ $penolongValue = getFormValue($data, 'penolong_kematian');
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -620,18 +674,18 @@ $penolongValue = getFormValue($data, 'penolong_kematian');
 </div>
 
 <script>
-// Validasi Interaktif Bootstrap Browser
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    // Validasi Interaktif Bootstrap Browser
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>

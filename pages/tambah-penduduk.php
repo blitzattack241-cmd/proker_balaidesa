@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     return;
@@ -12,22 +12,22 @@ if (mysqli_connect_errno()) {
 
 // Proses Simpan Data Penduduk
 if (isset($_POST['simpan'])) {
-    $nik               = mysqli_real_escape_string($koneksi, trim($_POST['nik']));
-    $no_kk             = mysqli_real_escape_string($koneksi, trim($_POST['no_kk']));
-    $kepala_kk         = mysqli_real_escape_string($koneksi, trim($_POST['kepala_kk']));
-    $nama              = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
-    $jenis_kelamin     = mysqli_real_escape_string($koneksi, trim($_POST['jenis_kelamin']));
-    $status_keluarga   = mysqli_real_escape_string($koneksi, trim($_POST['status_keluarga']));
-    $tempat_lahir      = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir']));
-    $tgl_lahir         = mysqli_real_escape_string($koneksi, trim($_POST['tgl_lahir']));
+    $nik = mysqli_real_escape_string($koneksi, trim($_POST['nik']));
+    $no_kk = mysqli_real_escape_string($koneksi, trim($_POST['no_kk']));
+    $kepala_kk = mysqli_real_escape_string($koneksi, trim($_POST['kepala_kk']));
+    $nama = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, trim($_POST['jenis_kelamin']));
+    $status_keluarga = mysqli_real_escape_string($koneksi, trim($_POST['status_keluarga']));
+    $tempat_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir']));
+    $tgl_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tgl_lahir']));
     $status_pernikahan = mysqli_real_escape_string($koneksi, trim($_POST['status_pernikahan']));
-    $agama             = mysqli_real_escape_string($koneksi, trim($_POST['agama']));
-    $kewarganegaraan   = mysqli_real_escape_string($koneksi, trim($_POST['kewarganegaraan']));
-    $suku              = mysqli_real_escape_string($koneksi, trim($_POST['suku']));
-    $pendidikan        = mysqli_real_escape_string($koneksi, trim($_POST['pendidikan']));
-    $pekerjaan         = mysqli_real_escape_string($koneksi, trim($_POST['pekerjaan']));
-    $rt                = mysqli_real_escape_string($koneksi, trim($_POST['rt']));
-    $rw                = mysqli_real_escape_string($koneksi, trim($_POST['rw']));
+    $agama = mysqli_real_escape_string($koneksi, trim($_POST['agama']));
+    $kewarganegaraan = mysqli_real_escape_string($koneksi, trim($_POST['kewarganegaraan']));
+    $suku = mysqli_real_escape_string($koneksi, trim($_POST['suku']));
+    $pendidikan = mysqli_real_escape_string($koneksi, trim($_POST['pendidikan']));
+    $pekerjaan = mysqli_real_escape_string($koneksi, trim($_POST['pekerjaan']));
+    $rt = mysqli_real_escape_string($koneksi, trim($_POST['rt']));
+    $rw = mysqli_real_escape_string($koneksi, trim($_POST['rw']));
 
     // Format nilai tanggal untuk Query
     $tgl_lahir_val = !empty($tgl_lahir) ? "'$tgl_lahir'" : "NULL";
@@ -53,21 +53,21 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-.form-card {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    padding: 2rem;
-}
+    .form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 2rem;
+    }
 
-.section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #0f172a;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.25rem;
-}
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">

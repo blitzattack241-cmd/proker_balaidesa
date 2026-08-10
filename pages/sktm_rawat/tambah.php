@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
 // Nomor surat global otomatis untuk semua jenis surat
@@ -144,12 +144,12 @@ if (isset($_POST['simpan'])) {
     rel="stylesheet" />
 
 <style>
-.box-pencarian-container {
-    background-color: #f8faff;
-    border: 1px dashed #0d6efd;
-    border-radius: 10px;
-    padding: 15px;
-}
+    .box-pencarian-container {
+        background-color: #f8faff;
+        border: 1px dashed #0d6efd;
+        border-radius: 10px;
+        padding: 15px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -329,10 +329,10 @@ if (isset($_POST['simpan'])) {
                             <select class="form-select" name="id_pejabat" required>
                                 <option value="" disabled selected>-- Pilih Pejabat --</option>
                                 <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>">
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?> -
-                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                                </option>
+                                    <option value="<?= $pejabat['id_pejabat']; ?>">
+                                        <?= htmlspecialchars($pejabat['nama_pejabat']); ?> -
+                                        (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                    </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -420,114 +420,114 @@ if (isset($_POST['simpan'])) {
 
 <!-- JAVASCRIPT VALIDASI, AUTOFILL, & DINAMISASI FORM -->
 <script>
-$(document).ready(function() {
-    // 1. Inisialisasi Select2 Pencarian Pemohon via AJAX
-    $('#cari_penduduk').select2({
-        theme: 'bootstrap-5',
-        placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
-        allowClear: true,
-        minimumInputLength: 2,
-        ajax: {
-            url: 'api/get_penduduk.php',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term
-                };
-            },
-            processResults: function(data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
-        }
-    });
+    $(document).ready(function () {
+        // 1. Inisialisasi Select2 Pencarian Pemohon via AJAX
+        $('#cari_penduduk').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: 'api/get_penduduk.php',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
 
-    // 2. Event Listener Auto-fill Data Pemohon Saat Pilih Hasil Pencarian
-    $('#cari_penduduk').on('select2:select', function(e) {
-        var data = e.params.data;
+        // 2. Event Listener Auto-fill Data Pemohon Saat Pilih Hasil Pencarian
+        $('#cari_penduduk').on('select2:select', function (e) {
+            var data = e.params.data;
 
-        $('#nama_pemohon').val(data.nama || '');
-        $('#no_ktp').val(data.nik || '');
-        $('#no_kk').val(data.no_kk || data.kk || '331904');
+            $('#nama_pemohon').val(data.nama || '');
+            $('#no_ktp').val(data.nik || '');
+            $('#no_kk').val(data.no_kk || data.kk || '331904');
 
-        // Parsing Tempat & Tanggal Lahir
-        if (data.tgl_lahir) {
-            $('#tanggal_lahir').val(data.tgl_lahir);
-        } else if (data.tanggal_lahir) {
-            $('#tanggal_lahir').val(data.tanggal_lahir);
-        }
+            // Parsing Tempat & Tanggal Lahir
+            if (data.tgl_lahir) {
+                $('#tanggal_lahir').val(data.tgl_lahir);
+            } else if (data.tanggal_lahir) {
+                $('#tanggal_lahir').val(data.tanggal_lahir);
+            }
 
-        if (data.tempat_lahir) {
-            $('#tempat_lahir').val(data.tempat_lahir);
-        } else if (data.tempat_tgl_lahir) {
-            var ttl = data.tempat_tgl_lahir.split(',');
-            $('#tempat_lahir').val(ttl[0].trim());
+            if (data.tempat_lahir) {
+                $('#tempat_lahir').val(data.tempat_lahir);
+            } else if (data.tempat_tgl_lahir) {
+                var ttl = data.tempat_tgl_lahir.split(',');
+                $('#tempat_lahir').val(ttl[0].trim());
 
-            if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
-                var rawDate = ttl[1].trim();
-                if (rawDate.includes('-') || rawDate.includes('/')) {
-                    var delimiter = rawDate.includes('-') ? '-' : '/';
-                    var parts = rawDate.split(delimiter);
-                    if (parts[0].length === 2 && parts[2].length === 4) {
-                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
-                            2, '0');
+                if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
+                    var rawDate = ttl[1].trim();
+                    if (rawDate.includes('-') || rawDate.includes('/')) {
+                        var delimiter = rawDate.includes('-') ? '-' : '/';
+                        var parts = rawDate.split(delimiter);
+                        if (parts[0].length === 2 && parts[2].length === 4) {
+                            rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                                2, '0');
+                        }
                     }
+                    $('#tanggal_lahir').val(rawDate);
                 }
-                $('#tanggal_lahir').val(rawDate);
             }
-        }
 
-        // Auto Select Jenis Kelamin
-        if (data.jenis_kelamin) {
-            var jk = data.jenis_kelamin.toString().toLowerCase();
-            if (jk.includes('l')) {
-                $('#jenis_kelamin').val('Laki-Laki');
-            } else if (jk.includes('p')) {
-                $('#jenis_kelamin').val('Perempuan');
+            // Auto Select Jenis Kelamin
+            if (data.jenis_kelamin) {
+                var jk = data.jenis_kelamin.toString().toLowerCase();
+                if (jk.includes('l')) {
+                    $('#jenis_kelamin').val('Laki-Laki');
+                } else if (jk.includes('p')) {
+                    $('#jenis_kelamin').val('Perempuan');
+                }
             }
-        }
 
-        // Agama
-        if (data.agama) {
-            $('#agama').val(data.agama);
-        }
+            // Agama
+            if (data.agama) {
+                $('#agama').val(data.agama);
+            }
 
-        // Pekerjaan & Alamat
-        if (data.pekerjaan) {
-            $('#pekerjaan').val(data.pekerjaan);
-        }
+            // Pekerjaan & Alamat
+            if (data.pekerjaan) {
+                $('#pekerjaan').val(data.pekerjaan);
+            }
 
-        if (data.alamat_lengkap) {
-            $('#alamat_tinggal').val(data.alamat_lengkap);
-        } else if (data.alamat) {
-            $('#alamat_tinggal').val(data.alamat);
-        }
-    });
+            if (data.alamat_lengkap) {
+                $('#alamat_tinggal').val(data.alamat_lengkap);
+            } else if (data.alamat) {
+                $('#alamat_tinggal').val(data.alamat);
+            }
+        });
 
-    // 3. Reset Isi Form Pemohon Saat Pilihan Dihapus
-    $('#cari_penduduk').on('select2:clear', function(e) {
-        $('#nama_pemohon').val('');
-        $('#no_ktp').val('');
-        $('#no_kk').val('331904');
-        $('#tempat_lahir').val('');
-        $('#tanggal_lahir').val('');
-        $('#jenis_kelamin').val('');
-        $('#agama').val('Islam');
-        $('#pekerjaan').val('');
-        $('#alamat_tinggal').val('');
-    });
+        // 3. Reset Isi Form Pemohon Saat Pilihan Dihapus
+        $('#cari_penduduk').on('select2:clear', function (e) {
+            $('#nama_pemohon').val('');
+            $('#no_ktp').val('');
+            $('#no_kk').val('331904');
+            $('#tempat_lahir').val('');
+            $('#tanggal_lahir').val('');
+            $('#jenis_kelamin').val('');
+            $('#agama').val('Islam');
+            $('#pekerjaan').val('');
+            $('#alamat_tinggal').val('');
+        });
 
-    // 4. Pengelolaan Baris Dinamis Pasien
-    const containerPasien = document.getElementById("container-pasien");
-    const btnAddPasien = document.getElementById("add-pasien-row");
+        // 4. Pengelolaan Baris Dinamis Pasien
+        const containerPasien = document.getElementById("container-pasien");
+        const btnAddPasien = document.getElementById("add-pasien-row");
 
-    btnAddPasien.addEventListener("click", function() {
-        const newRow = document.createElement("div");
-        newRow.className = "row g-2 mb-3 pasien-row";
-        newRow.innerHTML = `
+        btnAddPasien.addEventListener("click", function () {
+            const newRow = document.createElement("div");
+            newRow.className = "row g-2 mb-3 pasien-row";
+            newRow.innerHTML = `
             <div class="col-md-6">
                 <input type="text" name="nama_pasien[]" class="form-control" placeholder="Masukkan Nama Pasien" required>
             </div>
@@ -541,48 +541,48 @@ $(document).ready(function() {
             </div>
         `;
 
-        containerPasien.appendChild(newRow);
-        toggleRemoveButtons();
-    });
-
-    containerPasien.addEventListener("click", function(e) {
-        if (e.target.closest(".btn-remove-pasien")) {
-            const row = e.target.closest(".pasien-row");
-            row.remove();
+            containerPasien.appendChild(newRow);
             toggleRemoveButtons();
+        });
+
+        containerPasien.addEventListener("click", function (e) {
+            if (e.target.closest(".btn-remove-pasien")) {
+                const row = e.target.closest(".pasien-row");
+                row.remove();
+                toggleRemoveButtons();
+            }
+        });
+
+        function toggleRemoveButtons() {
+            const rows = containerPasien.querySelectorAll(".pasien-row");
+            rows.forEach((row) => {
+                const btnRemove = row.querySelector(".btn-remove-pasien");
+                if (rows.length === 1) {
+                    btnRemove.setAttribute("disabled", "true");
+                } else {
+                    btnRemove.removeAttribute("disabled");
+                }
+            });
         }
-    });
 
-    function toggleRemoveButtons() {
-        const rows = containerPasien.querySelectorAll(".pasien-row");
-        rows.forEach((row) => {
-            const btnRemove = row.querySelector(".btn-remove-pasien");
-            if (rows.length === 1) {
-                btnRemove.setAttribute("disabled", "true");
-            } else {
-                btnRemove.removeAttribute("disabled");
-            }
-        });
-    }
+        // 5. Fitur Live Preview Image
+        const imgInputs = document.querySelectorAll(".img-input");
+        imgInputs.forEach(input => {
+            input.addEventListener("change", function () {
+                const targetId = this.getAttribute("data-target");
+                const previewImg = document.getElementById(targetId);
 
-    // 5. Fitur Live Preview Image
-    const imgInputs = document.querySelectorAll(".img-input");
-    imgInputs.forEach(input => {
-        input.addEventListener("change", function() {
-            const targetId = this.getAttribute("data-target");
-            const previewImg = document.getElementById(targetId);
-
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.setAttribute("src", e.target.result);
-                    previewImg.style.display = "block";
-                };
-                reader.readAsDataURL(this.files[0]);
-            } else {
-                previewImg.style.display = "none";
-            }
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImg.setAttribute("src", e.target.result);
+                        previewImg.style.display = "block";
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    previewImg.style.display = "none";
+                }
+            });
         });
     });
-});
 </script>

@@ -12,7 +12,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -20,12 +20,14 @@ if (mysqli_connect_errno()) {
 
 // Cek parameter ID
 $id = $_GET['id'] ?? 0;
-$id = (int)$id;
+$id = (int) $id;
 
 // Cari tahu nama tabel yang digunakan
 $tableTarget = 'tb_surat_kelahiran';
 $checkTable = mysqli_query($koneksi, "SHOW TABLES LIKE 'surat_kelahiran'");
-if ($checkTable && mysqli_num_rows($checkTable) > 0) { $tableTarget = 'surat_kelahiran'; }
+if ($checkTable && mysqli_num_rows($checkTable) > 0) {
+    $tableTarget = 'surat_kelahiran';
+}
 
 // Ambil data lama untuk di-load ke form
 $queryData = mysqli_query($koneksi, "SELECT * FROM `$tableTarget` WHERE id_surat = $id");
@@ -39,51 +41,51 @@ if (!$data) {
 // Proses Update Data Form
 if (isset($_POST['update'])) {
     // 1. Data Umum & KK
-    $nomor_surat          = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $tanggal_surat        = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
     $nama_kepala_keluarga = mysqli_real_escape_string($koneksi, $_POST['nama_kepala_keluarga']);
-    $nomor_kk             = mysqli_real_escape_string($koneksi, $_POST['nomor_kk']);
+    $nomor_kk = mysqli_real_escape_string($koneksi, $_POST['nomor_kk']);
 
     // 2. Data Bayi
-    $nama_bayi            = mysqli_real_escape_string($koneksi, $_POST['nama_bayi']);
-    $jenis_kelamin_bayi   = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin_bayi']);
-    $tempat_dilahirkan    = mysqli_real_escape_string($koneksi, $_POST['tempat_dilahirkan']);
+    $nama_bayi = mysqli_real_escape_string($koneksi, $_POST['nama_bayi']);
+    $jenis_kelamin_bayi = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin_bayi']);
+    $tempat_dilahirkan = mysqli_real_escape_string($koneksi, $_POST['tempat_dilahirkan']);
     $tempat_kelahiran_kab = mysqli_real_escape_string($koneksi, $_POST['tempat_kelahiran_kab']);
-    $hari_lahir_bayi      = mysqli_real_escape_string($koneksi, $_POST['hari_lahir_bayi']);
-    $tanggal_lahir_bayi   = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_bayi']);
-    $pukul_lahir_bayi     = mysqli_real_escape_string($koneksi, $_POST['pukul_lahir_bayi']);
-    $jenis_kelahiran      = mysqli_real_escape_string($koneksi, $_POST['jenis_kelahiran']);
-    $kelahiran_ke         = mysqli_real_escape_string($koneksi, $_POST['kelahiran_ke']);
-    $penolong_kelahiran   = mysqli_real_escape_string($koneksi, $_POST['penolong_kelahiran']);
-    $berat_bayi_gram      = mysqli_real_escape_string($koneksi, $_POST['berat_bayi_gram']);
-    $panjang_bayi_cm      = mysqli_real_escape_string($koneksi, $_POST['panjang_bayi_cm']);
+    $hari_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['hari_lahir_bayi']);
+    $tanggal_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_bayi']);
+    $pukul_lahir_bayi = mysqli_real_escape_string($koneksi, $_POST['pukul_lahir_bayi']);
+    $jenis_kelahiran = mysqli_real_escape_string($koneksi, $_POST['jenis_kelahiran']);
+    $kelahiran_ke = mysqli_real_escape_string($koneksi, $_POST['kelahiran_ke']);
+    $penolong_kelahiran = mysqli_real_escape_string($koneksi, $_POST['penolong_kelahiran']);
+    $berat_bayi_gram = mysqli_real_escape_string($koneksi, $_POST['berat_bayi_gram']);
+    $panjang_bayi_cm = mysqli_real_escape_string($koneksi, $_POST['panjang_bayi_cm']);
 
     // 3. Data Ibu
-    $nik_ibu              = mysqli_real_escape_string($koneksi, $_POST['nik_ibu']);
-    $nama_ibu             = mysqli_real_escape_string($koneksi, $_POST['nama_ibu']);
-    $tanggal_lahir_ibu    = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ibu']);
-    $umur_ibu             = mysqli_real_escape_string($koneksi, $_POST['umur_ibu']);
-    $pekerjaan_ibu        = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ibu']);
-    $alamat_ibu           = mysqli_real_escape_string($koneksi, $_POST['alamat_ibu']);
-    $desa_ibu             = mysqli_real_escape_string($koneksi, $_POST['desa_ibu']);
-    $kecamatan_ibu        = mysqli_real_escape_string($koneksi, $_POST['kecamatan_ibu']);
-    $kabupaten_ibu        = mysqli_real_escape_string($koneksi, $_POST['kabupaten_ibu']);
+    $nik_ibu = mysqli_real_escape_string($koneksi, $_POST['nik_ibu']);
+    $nama_ibu = mysqli_real_escape_string($koneksi, $_POST['nama_ibu']);
+    $tanggal_lahir_ibu = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ibu']);
+    $umur_ibu = mysqli_real_escape_string($koneksi, $_POST['umur_ibu']);
+    $pekerjaan_ibu = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ibu']);
+    $alamat_ibu = mysqli_real_escape_string($koneksi, $_POST['alamat_ibu']);
+    $desa_ibu = mysqli_real_escape_string($koneksi, $_POST['desa_ibu']);
+    $kecamatan_ibu = mysqli_real_escape_string($koneksi, $_POST['kecamatan_ibu']);
+    $kabupaten_ibu = mysqli_real_escape_string($koneksi, $_POST['kabupaten_ibu']);
 
     // 4. Data Ayah
-    $nik_ayah             = mysqli_real_escape_string($koneksi, $_POST['nik_ayah']);
-    $nama_ayah            = mysqli_real_escape_string($koneksi, $_POST['nama_ayah']);
-    $tanggal_lahir_ayah   = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ayah']);
-    $umur_ayah            = mysqli_real_escape_string($koneksi, $_POST['umur_ayah']);
-    $pekerjaan_ayah       = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ayah']);
-    $alamat_ayah          = mysqli_real_escape_string($koneksi, $_POST['alamat_ayah']);
+    $nik_ayah = mysqli_real_escape_string($koneksi, $_POST['nik_ayah']);
+    $nama_ayah = mysqli_real_escape_string($koneksi, $_POST['nama_ayah']);
+    $tanggal_lahir_ayah = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir_ayah']);
+    $umur_ayah = mysqli_real_escape_string($koneksi, $_POST['umur_ayah']);
+    $pekerjaan_ayah = mysqli_real_escape_string($koneksi, $_POST['pekerjaan_ayah']);
+    $alamat_ayah = mysqli_real_escape_string($koneksi, $_POST['alamat_ayah']);
 
     // 5. Data Pelapor & Saksi
-    $nik_pelapor          = mysqli_real_escape_string($koneksi, $_POST['nik_pelapor']);
-    $nama_pelapor         = mysqli_real_escape_string($koneksi, $_POST['nama_pelapor']);
-    $nik_saksi1           = mysqli_real_escape_string($koneksi, $_POST['nik_saksi1']);
-    $nama_saksi1          = mysqli_real_escape_string($koneksi, $_POST['nama_saksi1']);
-    $nik_saksi2           = mysqli_real_escape_string($koneksi, $_POST['nik_saksi2']);
-    $nama_saksi2          = mysqli_real_escape_string($koneksi, $_POST['nama_saksi2']);
+    $nik_pelapor = mysqli_real_escape_string($koneksi, $_POST['nik_pelapor']);
+    $nama_pelapor = mysqli_real_escape_string($koneksi, $_POST['nama_pelapor']);
+    $nik_saksi1 = mysqli_real_escape_string($koneksi, $_POST['nik_saksi1']);
+    $nama_saksi1 = mysqli_real_escape_string($koneksi, $_POST['nama_saksi1']);
+    $nik_saksi2 = mysqli_real_escape_string($koneksi, $_POST['nik_saksi2']);
+    $nama_saksi2 = mysqli_real_escape_string($koneksi, $_POST['nama_saksi2']);
 
     // Query UPDATE masal
     $sqlUpdate = "UPDATE `$tableTarget` SET 
@@ -93,7 +95,7 @@ if (isset($_POST['update'])) {
         nik_ayah = '$nik_ayah', nama_ayah = '$nama_ayah', tanggal_lahir_ayah = '$tanggal_lahir_ayah', umur_ayah = '$umur_ayah', pekerjaan_ayah = '$pekerjaan_ayah', alamat_ayah = '$alamat_ayah',
         nik_pelapor = '$nik_pelapor', nama_pelapor = '$nama_pelapor', nik_saksi1 = '$nik_saksi1', nama_saksi1 = '$nama_saksi1', nik_saksi2 = '$nik_saksi2', nama_saksi2 = '$nama_saksi2'
         WHERE id_surat = $id";
-    
+
     if (mysqli_query($koneksi, $sqlUpdate)) {
         echo "<script>alert('Data Formulir F-2.01 Berhasil Diperbarui!'); window.location.href = 'index.php?page=surat-kelahiran';</script>";
     } else {
@@ -103,38 +105,38 @@ if (isset($_POST['update'])) {
 ?>
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #0d6efd;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #0d6efd;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -379,18 +381,18 @@ if (isset($_POST['update'])) {
 </div>
 
 <script>
-// Validasi Form
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+    // Validasi Form
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>

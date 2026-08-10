@@ -12,6 +12,8 @@ $koneksi = mysqli_connect($host, $username, $password, $database);
 if (!$koneksi) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
+// Mengatur charset koneksi ke utf8mb4
+mysqli_set_charset($koneksi, 'utf8mb4');
 
 // Mengatur timezone ke Asia/Jakarta
 date_default_timezone_set('Asia/Jakarta');

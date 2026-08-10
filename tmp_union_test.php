@@ -1,24 +1,27 @@
 <?php
-$koneksi = new mysqli('localhost', 'root', '', 'db_balaidesa');
-if ($koneksi->connect_errno) {
-    echo 'CONNECT_ERROR: ' . $koneksi->connect_error . PHP_EOL;
+require_once __DIR__ . '/koneksi.php';
+if (!$koneksi) {
+    echo 'CONNECT_ERROR: ' . mysqli_connect_error() . PHP_EOL;
     exit(1);
 }
-$koneksi->set_charset('utf8mb4');
 
-function tableExists($koneksi, $namaTable) {
+function tableExists($koneksi, $namaTable)
+{
     $check = mysqli_query($koneksi, "SHOW TABLES LIKE '" . mysqli_real_escape_string($koneksi, $namaTable) . "'");
     return $check && mysqli_num_rows($check) > 0;
 }
 
-function columnExists($koneksi, $namaTable, $namaKolom) {
+function columnExists($koneksi, $namaTable, $namaKolom)
+{
     $check = mysqli_query($koneksi, "SHOW COLUMNS FROM `" . mysqli_real_escape_string($koneksi, $namaTable) . "` LIKE '" . mysqli_real_escape_string($koneksi, $namaKolom) . "'");
     return $check && mysqli_num_rows($check) > 0;
 }
 
-function chooseColumnExpr($koneksi, $table, $candidates, $default = '') {
+function chooseColumnExpr($koneksi, $table, $candidates, $default = '')
+{
     foreach ($candidates as $column) {
-        if (columnExists($koneksi, $table, $column)) return "`$column`";
+        if (columnExists($koneksi, $table, $column))
+            return "`$column`";
     }
     return "'" . mysqli_real_escape_string($koneksi, $default) . "'";
 }
@@ -41,4 +44,4 @@ if ($result) {
 } else {
     echo 'ERROR: ' . mysqli_error($koneksi) . PHP_EOL;
 }
-$koneksi->close();
+mysqli_close($koneksi);

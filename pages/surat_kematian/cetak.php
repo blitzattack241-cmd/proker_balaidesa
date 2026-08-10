@@ -12,14 +12,14 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
 // Ambil ID Surat
 $id = $_GET['id'] ?? 0;
-$id = (int)$id;
+$id = (int) $id;
 
 // Cari tahu nama tabel yang tersedia (Dinamis antara tb_surat_kematian atau surat_kematian)
 $tableTarget = 'tb_surat_kematian';
@@ -44,8 +44,9 @@ $qr_token = dapatkanTokenVerifikasi($koneksi, 'surat_kematian', $id, $data['nomo
  * Fungsi untuk me-render kotak karakter khas formulir Capil
  * Ditambahkan atribut contenteditable="true" agar bisa diklik dan diedit langsung di layar browser
  */
-function renderBoxes($text, $length) {
-    $text = strtoupper((string)$text);
+function renderBoxes($text, $length)
+{
+    $text = strtoupper((string) $text);
     $html = '<span class="box-container">';
     for ($i = 0; $i < $length; $i++) {
         $char = isset($text[$i]) ? $text[$i] : '';
@@ -56,8 +57,10 @@ function renderBoxes($text, $length) {
 }
 
 // Fungsi pembantu parsing tanggal ke pecahan kotak ddmmyyyy (8 kotak)
-function renderDateBoxes($dateString) {
-    if(!$dateString) return renderBoxes('', 8);
+function renderDateBoxes($dateString)
+{
+    if (!$dateString)
+        return renderBoxes('', 8);
     $time = strtotime($dateString);
     $d = date('d', $time);
     $m = date('m', $time);
@@ -72,221 +75,221 @@ function renderDateBoxes($dateString) {
     <meta charset="UTF-8">
     <title>Cetak F-2.29 Resmi - <?= htmlspecialchars($data['nomor_surat']); ?></title>
     <style>
-    /* Desain Struktur Cetak Kertas Standar Dukcapil (F4 / Folio) */
-    @page {
-        size: folio;
-        margin: 0.3cm 0.5cm;
-    }
-
-    body {
-        font-family: 'Arial', sans-serif;
-        font-size: 10.5px;
-        color: #000;
-        line-height: 1.15;
-        margin: 0;
-        padding: 0;
-        background-color: #fff;
-    }
-
-    /* Navigasi Browser Alert & Tools (Tidak Ikut Tercetak) */
-    .no-print-bar {
-        background: #e9ecef;
-        border-bottom: 2px solid #ced4da;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    .btn-print {
-        padding: 8px 18px;
-        background: #0d6efd;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 13px;
-    }
-
-    .btn-print:hover {
-        background: #0b5ed7;
-    }
-
-    /* Layout Lembar F-2.29 */
-    .form-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 10px;
-    }
-
-    .header-section {
-        width: 100%;
-        border-collapse: collapse;
-        font-weight: bold;
-    }
-
-    .header-section td {
-        padding: 1px 0;
-    }
-
-    .code-label-top {
-        border: 2px solid #000;
-        padding: 2px 8px;
-        font-size: 13px;
-        font-weight: bold;
-        display: inline-block;
-    }
-
-    .main-title-block {
-        text-align: center;
-        margin: 8px 0;
-    }
-
-    .main-title-block h1 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-    }
-
-    .main-title-block p {
-        margin: 2px 0 0 0;
-        font-size: 11px;
-        font-weight: bold;
-    }
-
-    /* Pembatas Baris Utama & Grid */
-    .grid-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 4px;
-    }
-
-    .grid-table td {
-        padding: 2px 3px;
-        vertical-align: middle;
-    }
-
-    /* Blok Judul Section Hitam Persis Lembar Asli */
-    .block-black-header {
-        background-color: #000;
-        color: #fff;
-        font-weight: bold;
-        font-size: 10.5px;
-        padding: 3px 6px;
-        letter-spacing: 0.5px;
-        margin-top: 4px;
-    }
-
-    /* Kontainer Border Sekeliling Data Master */
-    .block-border-content {
-        border: 2px solid #000;
-        border-top: none;
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 3px;
-    }
-
-    .block-border-content td {
-        padding: 3px 4px;
-        vertical-align: middle;
-        font-size: 10px;
-    }
-
-    /* Desain Kotak Karakter F-2.29 */
-    .box-container {
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    .char-box {
-        display: inline-block;
-        width: 12px;
-        height: 14px;
-        line-height: 14px;
-        border: 1px solid #000;
-        border-right: none;
-        text-align: center;
-        font-family: 'Courier New', monospace;
-        font-size: 11px;
-        font-weight: bold;
-        background: #fff;
-        vertical-align: middle;
-        outline: none;
-    }
-
-    .char-box:last-child {
-        border-right: 1px solid #000;
-    }
-
-    /* Style focus ketika user mengklik kotak untuk mengedit teks */
-    .char-box:focus {
-        background-color: #fff3cd;
-        border-color: #ffc107;
-        color: #000;
-    }
-
-    .inline-editable-text {
-        display: inline-block;
-        min-width: 80px;
-        border-bottom: 1px dashed #999;
-        outline: none;
-        font-weight: bold;
-    }
-
-    .inline-editable-text:focus {
-        background-color: #fff3cd;
-    }
-
-    .choice-text-item {
-        margin-right: 10px;
-        display: inline-block;
-        font-size: 9.5px;
-    }
-
-    /* Area Tanda Tangan */
-    .signature-container-table {
-        width: 100%;
-        margin-top: 15px;
-        border-collapse: collapse;
-    }
-
-    .signature-container-table td {
-        text-align: center;
-        width: 33%;
-        font-size: 10.5px;
-        vertical-align: top;
-    }
-
-    .space-sign-blank {
-        height: 50px;
-    }
-
-    @media print {
-        .no-print-bar {
-            display: none !important;
+        /* Desain Struktur Cetak Kertas Standar Dukcapil (F4 / Folio) */
+        @page {
+            size: folio;
+            margin: 0.3cm 0.5cm;
         }
 
         body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10.5px;
+            color: #000;
+            line-height: 1.15;
             margin: 0;
             padding: 0;
+            background-color: #fff;
+        }
+
+        /* Navigasi Browser Alert & Tools (Tidak Ikut Tercetak) */
+        .no-print-bar {
+            background: #e9ecef;
+            border-bottom: 2px solid #ced4da;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .btn-print {
+            padding: 8px 18px;
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn-print:hover {
+            background: #0b5ed7;
+        }
+
+        /* Layout Lembar F-2.29 */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header-section {
+            width: 100%;
+            border-collapse: collapse;
+            font-weight: bold;
+        }
+
+        .header-section td {
+            padding: 1px 0;
+        }
+
+        .code-label-top {
+            border: 2px solid #000;
+            padding: 2px 8px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .main-title-block {
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .main-title-block h1 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .main-title-block p {
+            margin: 2px 0 0 0;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* Pembatas Baris Utama & Grid */
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4px;
+        }
+
+        .grid-table td {
+            padding: 2px 3px;
+            vertical-align: middle;
+        }
+
+        /* Blok Judul Section Hitam Persis Lembar Asli */
+        .block-black-header {
+            background-color: #000;
+            color: #fff;
+            font-weight: bold;
+            font-size: 10.5px;
+            padding: 3px 6px;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* Kontainer Border Sekeliling Data Master */
+        .block-border-content {
+            border: 2px solid #000;
+            border-top: none;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 3px;
+        }
+
+        .block-border-content td {
+            padding: 3px 4px;
+            vertical-align: middle;
+            font-size: 10px;
+        }
+
+        /* Desain Kotak Karakter F-2.29 */
+        .box-container {
+            display: inline-block;
+            vertical-align: middle;
         }
 
         .char-box {
+            display: inline-block;
+            width: 12px;
+            height: 14px;
+            line-height: 14px;
             border: 1px solid #000;
             border-right: none;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            background: #fff;
+            vertical-align: middle;
+            outline: none;
         }
 
         .char-box:last-child {
             border-right: 1px solid #000;
         }
 
+        /* Style focus ketika user mengklik kotak untuk mengedit teks */
         .char-box:focus {
-            background-color: transparent;
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #000;
         }
-    }
+
+        .inline-editable-text {
+            display: inline-block;
+            min-width: 80px;
+            border-bottom: 1px dashed #999;
+            outline: none;
+            font-weight: bold;
+        }
+
+        .inline-editable-text:focus {
+            background-color: #fff3cd;
+        }
+
+        .choice-text-item {
+            margin-right: 10px;
+            display: inline-block;
+            font-size: 9.5px;
+        }
+
+        /* Area Tanda Tangan */
+        .signature-container-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+
+        .signature-container-table td {
+            text-align: center;
+            width: 33%;
+            font-size: 10.5px;
+            vertical-align: top;
+        }
+
+        .space-sign-blank {
+            height: 50px;
+        }
+
+        @media print {
+            .no-print-bar {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .char-box {
+                border: 1px solid #000;
+                border-right: none;
+            }
+
+            .char-box:last-child {
+                border-right: 1px solid #000;
+            }
+
+            .char-box:focus {
+                background-color: transparent;
+            }
+        }
     </style>
 </head>
 
@@ -371,8 +374,8 @@ function renderDateBoxes($dateString) {
                 <td>3. Jenis Kelamin</td>
                 <td>:</td>
                 <td>
-                    <?php 
-                        $jk_code = (strcasecmp($data['jenis_kelamin'], 'Laki-laki') == 0 || $data['jenis_kelamin'] == 'L') ? '1' : '2';
+                    <?php
+                    $jk_code = (strcasecmp($data['jenis_kelamin'], 'Laki-laki') == 0 || $data['jenis_kelamin'] == 'L') ? '1' : '2';
                     ?>
                     <?= renderBoxes($jk_code, 1); ?>
                     <span class="choice-text-item" style="margin-left: 8px;">1. Laki-laki</span>
@@ -397,13 +400,18 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td>
                     <?php
-                        $ag_input = strtolower($data['agama_jenazah'] ?? '');
-                        $ag_code = '1';
-                        if(strpos($ag_input, 'kristen') !== false) $ag_code = '2';
-                        elseif(strpos($ag_input, 'katolik') !== false) $ag_code = '3';
-                        elseif(strpos($ag_input, 'hindu') !== false) $ag_code = '4';
-                        elseif(strpos($ag_input, 'buddha') !== false) $ag_code = '5';
-                        elseif(strpos($ag_input, 'khonghucu') !== false) $ag_code = '6';
+                    $ag_input = strtolower($data['agama_jenazah'] ?? '');
+                    $ag_code = '1';
+                    if (strpos($ag_input, 'kristen') !== false)
+                        $ag_code = '2';
+                    elseif (strpos($ag_input, 'katolik') !== false)
+                        $ag_code = '3';
+                    elseif (strpos($ag_input, 'hindu') !== false)
+                        $ag_code = '4';
+                    elseif (strpos($ag_input, 'buddha') !== false)
+                        $ag_code = '5';
+                    elseif (strpos($ag_input, 'khonghucu') !== false)
+                        $ag_code = '6';
                     ?>
                     <?= renderBoxes($ag_code, 1); ?>
                     <span class="choice-text-item" style="margin-left: 8px;">1. Islam</span>
@@ -456,8 +464,8 @@ function renderDateBoxes($dateString) {
                 <td>3. Jam / Pukul</td>
                 <td>:</td>
                 <td>
-                    <?php 
-                        $jam = !empty($data['jam_kematian']) ? date('H:i', strtotime($data['jam_kematian'])) : '';
+                    <?php
+                    $jam = !empty($data['jam_kematian']) ? date('H:i', strtotime($data['jam_kematian'])) : '';
                     ?>
                     <?= renderBoxes($jam, 5); ?> <span class="small">WIB</span>
                 </td>
@@ -467,10 +475,12 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td>
                     <?php
-                        $tp_input = strtolower($data['tempat_kematian'] ?? '');
-                        $tp_code = '1'; // Default Rumah
-                        if(strpos($tp_input, 'rs') !== false || strpos($tp_input, 'sakit') !== false) $tp_code = '2';
-                        elseif(strpos($tp_input, 'jalan') !== false) $tp_code = '3';
+                    $tp_input = strtolower($data['tempat_kematian'] ?? '');
+                    $tp_code = '1'; // Default Rumah
+                    if (strpos($tp_input, 'rs') !== false || strpos($tp_input, 'sakit') !== false)
+                        $tp_code = '2';
+                    elseif (strpos($tp_input, 'jalan') !== false)
+                        $tp_code = '3';
                     ?>
                     <?= renderBoxes($tp_code, 1); ?>
                     <span class="choice-text-item" style="margin-left: 8px;">1. Rumah</span>
@@ -493,11 +503,14 @@ function renderDateBoxes($dateString) {
                 <td>:</td>
                 <td>
                     <?php
-                        $ym_input = strtolower($data['penolong_kematian'] ?? '');
-                        $ym_code = '4'; // Default Lainnya
-                        if(strpos($ym_input, 'dokter') !== false) $ym_code = '1';
-                        elseif(strpos($ym_input, 'tenaga') !== false) $ym_code = '2';
-                        elseif(strpos($ym_input, 'polis') !== false) $ym_code = '3';
+                    $ym_input = strtolower($data['penolong_kematian'] ?? '');
+                    $ym_code = '4'; // Default Lainnya
+                    if (strpos($ym_input, 'dokter') !== false)
+                        $ym_code = '1';
+                    elseif (strpos($ym_input, 'tenaga') !== false)
+                        $ym_code = '2';
+                    elseif (strpos($ym_input, 'polis') !== false)
+                        $ym_code = '3';
                     ?>
                     <?= renderBoxes($ym_code, 1); ?>
                     <span class="choice-text-item" style="margin-left: 8px;">1. Dokter</span>
@@ -749,27 +762,27 @@ function renderDateBoxes($dateString) {
     </div>
 
     <script>
-    // Penanganan box input karakter otomatis lompat ke sebelahnya
-    document.querySelectorAll('.char-box').forEach(box => {
-        box.addEventListener('input', function() {
-            if (this.innerText.length >= 1) {
-                this.innerText = this.innerText.toUpperCase().substring(0, 1);
-                let next = this.nextElementSibling;
-                if (next && next.classList.contains('char-box')) {
-                    next.focus();
+        // Penanganan box input karakter otomatis lompat ke sebelahnya
+        document.querySelectorAll('.char-box').forEach(box => {
+            box.addEventListener('input', function () {
+                if (this.innerText.length >= 1) {
+                    this.innerText = this.innerText.toUpperCase().substring(0, 1);
+                    let next = this.nextElementSibling;
+                    if (next && next.classList.contains('char-box')) {
+                        next.focus();
+                    }
                 }
-            }
-        });
+            });
 
-        box.addEventListener('keydown', function(e) {
-            if (e.key === "Backspace" && this.innerText.length === 0) {
-                let prev = this.previousElementSibling;
-                if (prev && prev.classList.contains('char-box')) {
-                    prev.focus();
+            box.addEventListener('keydown', function (e) {
+                if (e.key === "Backspace" && this.innerText.length === 0) {
+                    let prev = this.previousElementSibling;
+                    if (prev && prev.classList.contains('char-box')) {
+                        prev.focus();
+                    }
                 }
-            }
+            });
         });
-    });
     </script>
 </body>
 

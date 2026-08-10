@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     echo "<script>
@@ -51,7 +51,8 @@ $qr_token = dapatkanTokenVerifikasi($koneksi, 'sktm_stunting', $id_sktm, $data['
 // Fungsi format tanggal Indonesia
 function tgl_indo($tanggal)
 {
-    if (empty($tanggal) || $tanggal == '0000-00-00') return '-';
+    if (empty($tanggal) || $tanggal == '0000-00-00')
+        return '-';
     $bulan = [
         1 => 'Januari',
         'Februari',
@@ -77,248 +78,248 @@ function tgl_indo($tanggal)
     <meta charset="UTF-8">
     <title>Sistem Balai Desa - Pratinjau Cetak SKTM Stunting</title>
     <style>
-    /* CSS RESET & BASE STYLES */
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #3e3e3e;
-        font-family: "Times New Roman", Times, serif;
-        color: #000;
-    }
-
-    /* 1. TOP BAR PREVIEW */
-    .preview-header {
-        background-color: #1a1a1a;
-        color: #ffffff;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50px;
-        box-sizing: border-box;
-        z-index: 1000;
-        font-family: Arial, sans-serif;
-        font-size: 10pt;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    }
-
-    .preview-title {
-        font-weight: bold;
-    }
-
-    .btn-print {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 6px 15px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 9pt;
-        transition: background-color 0.2s;
-    }
-
-    .btn-print:hover {
-        background-color: #0b5ed7;
-    }
-
-    /* 2. CONTAINER PREVIEW */
-    .print-container {
-        margin-top: 70px;
-        margin-bottom: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    /* Desain Kertas A4 */
-    .page {
-        background-color: #ffffff;
-        width: 210mm;
-        height: 296mm;
-        padding: 15mm 20mm;
-        box-sizing: border-box;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* 3. FORMAT DOKUMEN */
-    .kop-surat {
-        border-bottom: 4px solid #000;
-        padding-bottom: 3px;
-        margin-bottom: 2px;
-        text-align: center;
-        position: relative;
-    }
-
-    .kop-logo {
-        position: absolute;
-        left: 15px;
-        top: 5px;
-        width: 60px;
-        height: auto;
-    }
-
-    .kop-teks {
-        text-align: center;
-        margin-left: 75px;
-        margin-right: 75px;
-    }
-
-    .kop-teks h4 {
-        margin: 0;
-        font-size: 13pt;
-        text-transform: uppercase;
-        font-weight: normal;
-    }
-
-    .kop-teks h3 {
-        margin: 0;
-        font-size: 15pt;
-        text-transform: uppercase;
-        font-weight: normal;
-    }
-
-    .kop-teks h4:first-child {
-        font-weight: bold;
-    }
-
-    .kop-teks p {
-        margin: 3px 0 0 0;
-        font-size: 9pt;
-        font-style: italic;
-    }
-
-    .kode-desa-row {
-        width: 100%;
-        font-size: 10pt;
-        margin-bottom: 12px;
-        margin-top: 2px;
-        font-weight: bold;
-    }
-
-    .judul-surat {
-        text-align: center;
-        margin-bottom: 12px;
-    }
-
-    .judul-surat h5 {
-        margin: 0;
-        font-size: 12pt;
-        text-decoration: underline;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    .judul-surat p {
-        margin: 2px 0 0 0;
-        font-size: 10pt;
-    }
-
-    .paragraf-pengantar {
-        text-align: justify;
-        margin-bottom: 6px;
-        font-size: 10.5pt;
-        line-height: 1.3;
-    }
-
-    .tabel-data {
-        width: 100%;
-        margin-bottom: 8px;
-        border-collapse: collapse;
-        font-size: 10.5pt;
-    }
-
-    .tabel-data td {
-        padding: 1px 0;
-        vertical-align: top;
-    }
-
-    /* Sub-tabel No KTP/KK */
-    .sub-tabel-bukti {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: inherit;
-        font-family: inherit;
-    }
-
-    .sub-tabel-bukti td {
-        padding: 0px 0px 1px 0px !important;
-        border: none !important;
-    }
-
-    /* Bagian Tanda Tangan */
-    .container-ttd {
-        width: 100%;
-        margin-top: 40px;
-        font-size: 10.5pt;
-    }
-
-    .row-ttd-atas {
-        width: 100%;
-        display: table;
-        table-layout: fixed;
-        margin-bottom: 10px;
-    }
-
-    .col-ttd {
-        display: table-cell;
-        width: 50%;
-        text-align: center;
-        vertical-align: top;
-    }
-
-    .spasi-ttd {
-        height: 65px;
-    }
-
-    .row-ttd-bawah {
-        width: 100%;
-        text-align: center;
-        margin-top: 30px;
-    }
-
-    /* 4. CSS KHUSUS PRINT FISIK (SATU HALAMAN) */
-    @media print {
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        .preview-header {
-            display: none !important;
-        }
-
+        /* CSS RESET & BASE STYLES */
         html,
         body {
+            margin: 0;
+            padding: 0;
+            background-color: #3e3e3e;
+            font-family: "Times New Roman", Times, serif;
+            color: #000;
+        }
+
+        /* 1. TOP BAR PREVIEW */
+        .preview-header {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            box-sizing: border-box;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .preview-title {
+            font-weight: bold;
+        }
+
+        .btn-print {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 9pt;
+            transition: background-color 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* 2. CONTAINER PREVIEW */
+        .print-container {
+            margin-top: 70px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Desain Kertas A4 */
+        .page {
             background-color: #ffffff;
-            height: 100%;
+            width: 210mm;
+            height: 296mm;
+            padding: 15mm 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
             overflow: hidden;
         }
 
-        .print-container {
-            margin: 0 !important;
-            padding: 0 !important;
-            gap: 0 !important;
+        /* 3. FORMAT DOKUMEN */
+        .kop-surat {
+            border-bottom: 4px solid #000;
+            padding-bottom: 3px;
+            margin-bottom: 2px;
+            text-align: center;
+            position: relative;
         }
 
-        .page {
-            width: 210mm;
-            height: 297mm;
-            padding: 15mm 20mm;
-            box-shadow: none !important;
-            page-break-after: avoid;
-            page-break-inside: avoid;
+        .kop-logo {
+            position: absolute;
+            left: 15px;
+            top: 5px;
+            width: 60px;
+            height: auto;
         }
-    }
+
+        .kop-teks {
+            text-align: center;
+            margin-left: 75px;
+            margin-right: 75px;
+        }
+
+        .kop-teks h4 {
+            margin: 0;
+            font-size: 13pt;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        .kop-teks h3 {
+            margin: 0;
+            font-size: 15pt;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        .kop-teks h4:first-child {
+            font-weight: bold;
+        }
+
+        .kop-teks p {
+            margin: 3px 0 0 0;
+            font-size: 9pt;
+            font-style: italic;
+        }
+
+        .kode-desa-row {
+            width: 100%;
+            font-size: 10pt;
+            margin-bottom: 12px;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+
+        .judul-surat {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .judul-surat h5 {
+            margin: 0;
+            font-size: 12pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .judul-surat p {
+            margin: 2px 0 0 0;
+            font-size: 10pt;
+        }
+
+        .paragraf-pengantar {
+            text-align: justify;
+            margin-bottom: 6px;
+            font-size: 10.5pt;
+            line-height: 1.3;
+        }
+
+        .tabel-data {
+            width: 100%;
+            margin-bottom: 8px;
+            border-collapse: collapse;
+            font-size: 10.5pt;
+        }
+
+        .tabel-data td {
+            padding: 1px 0;
+            vertical-align: top;
+        }
+
+        /* Sub-tabel No KTP/KK */
+        .sub-tabel-bukti {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: inherit;
+            font-family: inherit;
+        }
+
+        .sub-tabel-bukti td {
+            padding: 0px 0px 1px 0px !important;
+            border: none !important;
+        }
+
+        /* Bagian Tanda Tangan */
+        .container-ttd {
+            width: 100%;
+            margin-top: 40px;
+            font-size: 10.5pt;
+        }
+
+        .row-ttd-atas {
+            width: 100%;
+            display: table;
+            table-layout: fixed;
+            margin-bottom: 10px;
+        }
+
+        .col-ttd {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .spasi-ttd {
+            height: 65px;
+        }
+
+        .row-ttd-bawah {
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* 4. CSS KHUSUS PRINT FISIK (SATU HALAMAN) */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            .preview-header {
+                display: none !important;
+            }
+
+            html,
+            body {
+                background-color: #ffffff;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .print-container {
+                margin: 0 !important;
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+
+            .page {
+                width: 210mm;
+                height: 297mm;
+                padding: 15mm 20mm;
+                box-shadow: none !important;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 

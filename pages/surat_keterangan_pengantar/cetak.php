@@ -17,7 +17,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -102,180 +102,180 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
     <meta charset="UTF-8">
     <title>Cetak Surat Keterangan Pengantar</title>
     <style>
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #3e3e3e;
-        font-family: "Times New Roman", Times, serif;
-        color: #000;
-        font-size: 11pt;
-        /* Dikecilkan sedikit dari 12pt ke 11pt agar lebih aman */
-    }
-
-    /* Top Bar Preview */
-    .preview-header {
-        background-color: #1a1a1a;
-        color: #ffffff;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50px;
-        box-sizing: border-box;
-        z-index: 1000;
-        font-family: Arial, sans-serif;
-        font-size: 10pt;
-    }
-
-    .btn-print {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 6px 15px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .print-container {
-        margin-top: 60px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    /* Kertas A4 Mengikuti Margin Dokumen Asli */
-    .page {
-        background-color: #ffffff;
-        width: 210mm;
-        height: 297mm;
-        padding: 15mm 25mm 15mm 25mm;
-        /* Mengurangi padding atas & bawah dari 20mm ke 15mm */
-        box-sizing: border-box;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        position: relative;
-    }
-
-    /* Kop Surat Persis Foto */
-    .kop-surat {
-        text-align: center;
-        border-bottom: 3px solid #000;
-        padding-bottom: 3px;
-        margin-bottom: 10px;
-    }
-
-    .kop-surat h3 {
-        margin: 0;
-        font-size: 13pt;
-        font-weight: normal;
-        letter-spacing: 0.5px;
-    }
-
-    .kop-surat h3:first-child {
-        font-weight: bold;
-    }
-
-    .no-klasifikasi {
-        font-size: 10pt;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    /* Judul Dokumen Tengah */
-    .judul-surat {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    .judul-surat h4 {
-        margin: 0;
-        font-size: 11pt;
-        text-decoration: underline;
-        font-weight: bold;
-    }
-
-    .judul-surat p {
-        margin: 2px 0 0 0;
-        font-size: 10pt;
-    }
-
-    .pembuka {
-        margin-bottom: 10px;
-        font-size: 10pt;
-    }
-
-    /* Tabel Identitas Berurutan 1-12 */
-    .tabel-isi {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 10px;
-        font-size: 10pt;
-    }
-
-    .tabel-isi td {
-        padding: 2px 0;
-        /* Mempersempit jarak antar baris tabel */
-        vertical-align: top;
-    }
-
-    .penutup {
-        margin-top: 10px;
-        margin-bottom: 15px;
-        font-size: 10pt;
-    }
-
-    /* Layout Block Tanda Tangan Model Segitiga */
-    .block-ttd {
-        width: 100%;
-        font-size: 10pt;
-        margin-top: 5px;
-    }
-
-    .row-ttd {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-    }
-
-    .col-ttd {
-        display: table-cell;
-        text-align: center;
-        vertical-align: top;
-    }
-
-    .space-ttd {
-        height: 55px;
-        /* Sedikit mengurangi ruang tanda tangan fisik */
-    }
-
-    @media print {
-        .preview-header {
-            display: none !important;
-        }
-
         html,
         body {
-            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            background-color: #3e3e3e;
+            font-family: "Times New Roman", Times, serif;
+            color: #000;
+            font-size: 11pt;
+            /* Dikecilkan sedikit dari 12pt ke 11pt agar lebih aman */
+        }
+
+        /* Top Bar Preview */
+        .preview-header {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            box-sizing: border-box;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+        }
+
+        .btn-print {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         .print-container {
-            margin: 0 !important;
-            padding: 0 !important;
+            margin-top: 60px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        /* Kertas A4 Mengikuti Margin Dokumen Asli */
         .page {
-            box-shadow: none !important;
+            background-color: #ffffff;
             width: 210mm;
             height: 297mm;
-            padding: 15mm 25mm 15mm 25mm !important;
+            padding: 15mm 25mm 15mm 25mm;
+            /* Mengurangi padding atas & bawah dari 20mm ke 15mm */
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
-    }
+
+        /* Kop Surat Persis Foto */
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 3px;
+            margin-bottom: 10px;
+        }
+
+        .kop-surat h3 {
+            margin: 0;
+            font-size: 13pt;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        .kop-surat h3:first-child {
+            font-weight: bold;
+        }
+
+        .no-klasifikasi {
+            font-size: 10pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Judul Dokumen Tengah */
+        .judul-surat {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .judul-surat h4 {
+            margin: 0;
+            font-size: 11pt;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .judul-surat p {
+            margin: 2px 0 0 0;
+            font-size: 10pt;
+        }
+
+        .pembuka {
+            margin-bottom: 10px;
+            font-size: 10pt;
+        }
+
+        /* Tabel Identitas Berurutan 1-12 */
+        .tabel-isi {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 10pt;
+        }
+
+        .tabel-isi td {
+            padding: 2px 0;
+            /* Mempersempit jarak antar baris tabel */
+            vertical-align: top;
+        }
+
+        .penutup {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 10pt;
+        }
+
+        /* Layout Block Tanda Tangan Model Segitiga */
+        .block-ttd {
+            width: 100%;
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+
+        .row-ttd {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .col-ttd {
+            display: table-cell;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .space-ttd {
+            height: 55px;
+            /* Sedikit mengurangi ruang tanda tangan fisik */
+        }
+
+        @media print {
+            .preview-header {
+                display: none !important;
+            }
+
+            html,
+            body {
+                background-color: #ffffff;
+            }
+
+            .print-container {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .page {
+                box-shadow: none !important;
+                width: 210mm;
+                height: 297mm;
+                padding: 15mm 25mm 15mm 25mm !important;
+            }
+        }
     </style>
 </head>
 

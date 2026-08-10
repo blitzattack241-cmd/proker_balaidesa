@@ -11,7 +11,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_waris = intval($_POST['id_waris']);

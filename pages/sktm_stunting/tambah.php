@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 if (!isset($koneksi)) {
-    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+    require_once __DIR__ . '/../../koneksi.php';
 }
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
@@ -38,80 +38,80 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
 
 <!-- Style Kustom untuk Formulir Modern -->
 <style>
-.card-form {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-form {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.card-form-header {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    padding: 1.5rem !important;
-}
+    .card-form-header {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f3f5 !important;
+        padding: 1.5rem !important;
+    }
 
-.form-label-custom {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-}
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
 
-.form-control-custom {
-    border-radius: 8px !important;
-    padding: 0.6rem 1rem !important;
-    border: 1px solid #ced4da !important;
-    transition: all 0.2s ease;
-}
+    .form-control-custom {
+        border-radius: 8px !important;
+        padding: 0.6rem 1rem !important;
+        border: 1px solid #ced4da !important;
+        transition: all 0.2s ease;
+    }
 
-.form-control-custom:focus {
-    border-color: #0d6efd !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
-}
+    .form-control-custom:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
 
-.section-divider {
-    border-top: 2px dashed #e9ecef;
-    margin: 2rem 0;
-}
+    .section-divider {
+        border-top: 2px dashed #e9ecef;
+        margin: 2rem 0;
+    }
 
-.section-title-custom {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #0d6efd;
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .section-title-custom {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.btn-submit-custom {
-    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-    transition: all 0.25s ease;
-}
+    .btn-submit-custom {
+        background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+        transition: all 0.25s ease;
+    }
 
-.btn-submit-custom:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
-}
+    .btn-submit-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(13, 110, 253, 0.35);
+    }
 
-.btn-batal-custom {
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-weight: 600;
-}
+    .btn-batal-custom {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 600;
+    }
 
-/* Container Box Auto-fill Pencarian */
-.box-pencarian-container {
-    background-color: #f8faff;
-    border: 1px dashed #0d6efd;
-    border-radius: 10px;
-    padding: 15px;
-}
+    /* Container Box Auto-fill Pencarian */
+    .box-pencarian-container {
+        background-color: #f8faff;
+        border: 1px dashed #0d6efd;
+        border-radius: 10px;
+        padding: 15px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -276,10 +276,10 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
                         <select name="id_pejabat" class="form-select form-control-custom" required>
                             <option value="" disabled selected>-- Pilih Pejabat yang Mengesahkan --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($pejabat_query)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>">
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -305,104 +305,104 @@ $nomor_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, ti
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Inisialisasi Select2 pencarian penduduk via AJAX
-    $('#cari_penduduk').select2({
-        theme: 'bootstrap-5',
-        placeholder: '-- Ketik No. KK, NIK, atau Nama Orang Tua / Wali... --',
-        allowClear: true,
-        minimumInputLength: 2,
-        ajax: {
-            url: 'api/get_penduduk.php',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term
-                };
-            },
-            processResults: function(data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
-        }
-    });
+    $(document).ready(function () {
+        // Inisialisasi Select2 pencarian penduduk via AJAX
+        $('#cari_penduduk').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Ketik No. KK, NIK, atau Nama Orang Tua / Wali... --',
+            allowClear: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: 'api/get_penduduk.php',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
 
-    // Auto-fill form saat data orang tua dipilih
-    $('#cari_penduduk').on('select2:select', function(e) {
-        var data = e.params.data;
+        // Auto-fill form saat data orang tua dipilih
+        $('#cari_penduduk').on('select2:select', function (e) {
+            var data = e.params.data;
 
-        $('#input_nama').val(data.nama || '');
-        $('#input_nik').val(data.nik || '');
-        $('#input_no_kk').val(data.no_kk || data.kk || '331904');
+            $('#input_nama').val(data.nama || '');
+            $('#input_nik').val(data.nik || '');
+            $('#input_no_kk').val(data.no_kk || data.kk || '331904');
 
-        // Pengisian Tempat & Tanggal Lahir
-        if (data.tgl_lahir) {
-            $('#input_tanggal_lahir').val(data.tgl_lahir);
-        } else if (data.tanggal_lahir) {
-            $('#input_tanggal_lahir').val(data.tanggal_lahir);
-        }
+            // Pengisian Tempat & Tanggal Lahir
+            if (data.tgl_lahir) {
+                $('#input_tanggal_lahir').val(data.tgl_lahir);
+            } else if (data.tanggal_lahir) {
+                $('#input_tanggal_lahir').val(data.tanggal_lahir);
+            }
 
-        if (data.tempat_lahir) {
-            $('#input_tempat_lahir').val(data.tempat_lahir);
-        } else if (data.tempat_tgl_lahir) {
-            var ttl = data.tempat_tgl_lahir.split(',');
-            $('#input_tempat_lahir').val(ttl[0].trim());
+            if (data.tempat_lahir) {
+                $('#input_tempat_lahir').val(data.tempat_lahir);
+            } else if (data.tempat_tgl_lahir) {
+                var ttl = data.tempat_tgl_lahir.split(',');
+                $('#input_tempat_lahir').val(ttl[0].trim());
 
-            if (ttl.length > 1 && !$('#input_tanggal_lahir').val()) {
-                var rawDate = ttl[1].trim();
-                if (rawDate.includes('-') || rawDate.includes('/')) {
-                    var delimiter = rawDate.includes('-') ? '-' : '/';
-                    var parts = rawDate.split(delimiter);
-                    if (parts[0].length === 2 && parts[2].length === 4) {
-                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
-                            2, '0');
+                if (ttl.length > 1 && !$('#input_tanggal_lahir').val()) {
+                    var rawDate = ttl[1].trim();
+                    if (rawDate.includes('-') || rawDate.includes('/')) {
+                        var delimiter = rawDate.includes('-') ? '-' : '/';
+                        var parts = rawDate.split(delimiter);
+                        if (parts[0].length === 2 && parts[2].length === 4) {
+                            rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                                2, '0');
+                        }
                     }
+                    $('#input_tanggal_lahir').val(rawDate);
                 }
-                $('#input_tanggal_lahir').val(rawDate);
             }
-        }
 
-        // Auto select Jenis Kelamin
-        if (data.jenis_kelamin) {
-            var jk = data.jenis_kelamin.toString().toLowerCase();
-            if (jk.includes('l')) {
-                $('#input_jenis_kelamin').val('Laki-laki');
-            } else if (jk.includes('p')) {
-                $('#input_jenis_kelamin').val('Perempuan');
+            // Auto select Jenis Kelamin
+            if (data.jenis_kelamin) {
+                var jk = data.jenis_kelamin.toString().toLowerCase();
+                if (jk.includes('l')) {
+                    $('#input_jenis_kelamin').val('Laki-laki');
+                } else if (jk.includes('p')) {
+                    $('#input_jenis_kelamin').val('Perempuan');
+                }
             }
-        }
 
-        // Auto select Agama
-        if (data.agama) {
-            $('#input_agama').val(data.agama);
-        }
+            // Auto select Agama
+            if (data.agama) {
+                $('#input_agama').val(data.agama);
+            }
 
-        // Pekerjaan & Alamat
-        if (data.pekerjaan) {
-            $('#input_pekerjaan').val(data.pekerjaan);
-        }
+            // Pekerjaan & Alamat
+            if (data.pekerjaan) {
+                $('#input_pekerjaan').val(data.pekerjaan);
+            }
 
-        if (data.alamat_lengkap) {
-            $('#input_alamat').val(data.alamat_lengkap);
-        } else if (data.alamat) {
-            $('#input_alamat').val(data.alamat);
-        }
+            if (data.alamat_lengkap) {
+                $('#input_alamat').val(data.alamat_lengkap);
+            } else if (data.alamat) {
+                $('#input_alamat').val(data.alamat);
+            }
+        });
+
+        // Reset isi form saat pilihan dibersihkan
+        $('#cari_penduduk').on('select2:clear', function (e) {
+            $('#input_nama').val('');
+            $('#input_nik').val('');
+            $('#input_no_kk').val('331904');
+            $('#input_tempat_lahir').val('');
+            $('#input_tanggal_lahir').val('');
+            $('#input_jenis_kelamin').val('');
+            $('#input_agama').val('Islam');
+            $('#input_pekerjaan').val('');
+            $('#input_alamat').val('');
+        });
     });
-
-    // Reset isi form saat pilihan dibersihkan
-    $('#cari_penduduk').on('select2:clear', function(e) {
-        $('#input_nama').val('');
-        $('#input_nik').val('');
-        $('#input_no_kk').val('331904');
-        $('#input_tempat_lahir').val('');
-        $('#input_tanggal_lahir').val('');
-        $('#input_jenis_kelamin').val('');
-        $('#input_agama').val('Islam');
-        $('#input_pekerjaan').val('');
-        $('#input_alamat').val('');
-    });
-});
 </script>

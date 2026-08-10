@@ -14,7 +14,7 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 
 // Ambil ID dari URL
 $id_sktm = isset($_GET['id']) ? (int) $_GET['id'] : 0;

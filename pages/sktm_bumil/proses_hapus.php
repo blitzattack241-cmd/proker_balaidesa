@@ -16,15 +16,15 @@ if (!$isAdmin) {
 
 // Pastikan ada parameter ID yang dilempar untuk dihapus
 if (isset($_GET['id']) && !empty($_GET['id'])) {
-    $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+    require_once __DIR__ . '/../../koneksi.php';
     $id_sktm = mysqli_real_escape_string($koneksi, $_GET['id']);
 
     // 1. Ambil nama file foto lama dari database sebelum datanya dihapus
     $query_foto = mysqli_query($koneksi, "SELECT foto_depan, foto_ruang_tamu, foto_kamar, foto_dapur, foto_toilet FROM tb_sktm_bumil WHERE id_sktm = '$id_sktm'");
-    
+
     if ($query_foto && mysqli_num_rows($query_foto) > 0) {
         $data_foto = mysqli_fetch_assoc($query_foto);
-        
+
         // Definisikan path target folder foto
         $target_dir = "../../assets/img/sktm_bumil/";
 

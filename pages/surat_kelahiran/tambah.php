@@ -12,7 +12,7 @@ if (!$isAdmin) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     exit;
@@ -105,45 +105,45 @@ if (isset($_POST['simpan'])) {
     rel="stylesheet" />
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #0d6efd;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #0d6efd;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 
-.box-pencarian-container {
-    background-color: #f8faff;
-    border: 1px dashed #0d6efd;
-    border-radius: 10px;
-    padding: 15px;
-}
+    .box-pencarian-container {
+        background-color: #f8faff;
+        border: 1px dashed #0d6efd;
+        border-radius: 10px;
+        padding: 15px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -427,224 +427,224 @@ if (isset($_POST['simpan'])) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-// Fungsi untuk Menghitung Umur Otomatis
-function hitungUmur(tglLahir) {
-    if (!tglLahir) return '';
-    var today = new Date();
-    var birthDate = new Date(tglLahir);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age >= 0 ? age : '';
-}
-
-$(document).ready(function() {
-
-    // Helper Konfigurasi Select2 AJAX
-    function buildSelect2Config(placeholderText) {
-        return {
-            theme: 'bootstrap-5',
-            placeholder: placeholderText,
-            allowClear: true,
-            minimumInputLength: 2,
-            ajax: {
-                url: 'api/get_penduduk.php',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        search: params.term
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            }
-        };
+    // Fungsi untuk Menghitung Umur Otomatis
+    function hitungUmur(tglLahir) {
+        if (!tglLahir) return '';
+        var today = new Date();
+        var birthDate = new Date(tglLahir);
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age >= 0 ? age : '';
     }
 
-    // 1. SELECT2 CARI IBU
-    $('#cari_ibu').select2(buildSelect2Config('-- Cari NIK / Nama Ibu --'));
-    $('#cari_ibu').on('select2:select', function(e) {
-        var d = e.params.data;
-        console.log('===== IBU DATA =====');
-        console.log('Full Data Object:', d);
-        console.log('tgl_lahir:', d.tgl_lahir);
-        console.log('tanggal_lahir:', d.tanggal_lahir);
-        console.log('umur:', d.umur);
-        console.log('Debug Info:', d._debug_tgl);
+    $(document).ready(function () {
 
-        $('#input_nik_ibu').val(d.nik || d.id || '');
-        $('#input_nama_ibu').val(d.nama || '');
+        // Helper Konfigurasi Select2 AJAX
+        function buildSelect2Config(placeholderText) {
+            return {
+                theme: 'bootstrap-5',
+                placeholder: placeholderText,
+                allowClear: true,
+                minimumInputLength: 2,
+                ajax: {
+                    url: 'api/get_penduduk.php',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            };
+        }
 
-        // Mengisi Tanggal Lahir Ibu
-        var tglLahir = d.tgl_lahir || d.tanggal_lahir || '';
-        console.log('tglLahir to set:', tglLahir);
+        // 1. SELECT2 CARI IBU
+        $('#cari_ibu').select2(buildSelect2Config('-- Cari NIK / Nama Ibu --'));
+        $('#cari_ibu').on('select2:select', function (e) {
+            var d = e.params.data;
+            console.log('===== IBU DATA =====');
+            console.log('Full Data Object:', d);
+            console.log('tgl_lahir:', d.tgl_lahir);
+            console.log('tanggal_lahir:', d.tanggal_lahir);
+            console.log('umur:', d.umur);
+            console.log('Debug Info:', d._debug_tgl);
 
-        if (tglLahir && tglLahir.trim() !== '') {
-            $('#input_tanggal_lahir_ibu').val(tglLahir.trim());
-            console.log('Set tanggal_lahir_ibu to:', tglLahir.trim());
+            $('#input_nik_ibu').val(d.nik || d.id || '');
+            $('#input_nama_ibu').val(d.nama || '');
 
-            var umurValue = parseInt(d.umur) || 0;
-            if (umurValue > 0) {
-                $('#input_umur_ibu').val(umurValue);
-                console.log('Set umur_ibu to:', umurValue);
+            // Mengisi Tanggal Lahir Ibu
+            var tglLahir = d.tgl_lahir || d.tanggal_lahir || '';
+            console.log('tglLahir to set:', tglLahir);
+
+            if (tglLahir && tglLahir.trim() !== '') {
+                $('#input_tanggal_lahir_ibu').val(tglLahir.trim());
+                console.log('Set tanggal_lahir_ibu to:', tglLahir.trim());
+
+                var umurValue = parseInt(d.umur) || 0;
+                if (umurValue > 0) {
+                    $('#input_umur_ibu').val(umurValue);
+                    console.log('Set umur_ibu to:', umurValue);
+                } else {
+                    var calc = hitungUmur(tglLahir);
+                    $('#input_umur_ibu').val(calc);
+                    console.log('Calculated umur_ibu:', calc);
+                }
             } else {
-                var calc = hitungUmur(tglLahir);
-                $('#input_umur_ibu').val(calc);
-                console.log('Calculated umur_ibu:', calc);
+                console.log('No tglLahir found, trying umur only');
+                if (d.umur && parseInt(d.umur) > 0) {
+                    $('#input_umur_ibu').val(parseInt(d.umur));
+                    console.log('Set umur_ibu from API:', d.umur);
+                }
             }
-        } else {
-            console.log('No tglLahir found, trying umur only');
-            if (d.umur && parseInt(d.umur) > 0) {
-                $('#input_umur_ibu').val(parseInt(d.umur));
-                console.log('Set umur_ibu from API:', d.umur);
+
+            if (d.pekerjaan) $('#input_pekerjaan_ibu').val(d.pekerjaan);
+            if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
+                $('#input_alamat_ibu').val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
+                    .alamat);
             }
-        }
+            if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
+            if (d.desa) $('#input_desa_ibu').val(d.desa);
+            if (d.kecamatan) $('#input_kecamatan_ibu').val(d.kecamatan);
+            if (d.kabupaten) $('#input_kabupaten_ibu').val(d.kabupaten);
+        });
 
-        if (d.pekerjaan) $('#input_pekerjaan_ibu').val(d.pekerjaan);
-        if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
-            $('#input_alamat_ibu').val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
-                .alamat);
-        }
-        if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
-        if (d.desa) $('#input_desa_ibu').val(d.desa);
-        if (d.kecamatan) $('#input_kecamatan_ibu').val(d.kecamatan);
-        if (d.kabupaten) $('#input_kabupaten_ibu').val(d.kabupaten);
-    });
+        $('#cari_ibu').on('select2:clear', function () {
+            $('#input_nik_ibu, #input_nama_ibu, #input_tanggal_lahir_ibu, #input_umur_ibu, #input_pekerjaan_ibu, #input_alamat_ibu')
+                .val('');
+            $('#input_desa_ibu').val('Berugenjang');
+            $('#input_kecamatan_ibu').val('Undaan');
+            $('#input_kabupaten_ibu').val('Kudus');
+        });
 
-    $('#cari_ibu').on('select2:clear', function() {
-        $('#input_nik_ibu, #input_nama_ibu, #input_tanggal_lahir_ibu, #input_umur_ibu, #input_pekerjaan_ibu, #input_alamat_ibu')
-            .val('');
-        $('#input_desa_ibu').val('Berugenjang');
-        $('#input_kecamatan_ibu').val('Undaan');
-        $('#input_kabupaten_ibu').val('Kudus');
-    });
+        // 2. SELECT2 CARI AYAH
+        $('#cari_ayah').select2(buildSelect2Config('-- Cari NIK / Nama Ayah --'));
+        $('#cari_ayah').on('select2:select', function (e) {
+            var d = e.params.data;
+            console.log('===== AYAH DATA =====');
+            console.log('Full Data Object:', d);
+            console.log('tgl_lahir:', d.tgl_lahir);
+            console.log('tanggal_lahir:', d.tanggal_lahir);
+            console.log('umur:', d.umur);
+            console.log('Debug Info:', d._debug_tgl);
 
-    // 2. SELECT2 CARI AYAH
-    $('#cari_ayah').select2(buildSelect2Config('-- Cari NIK / Nama Ayah --'));
-    $('#cari_ayah').on('select2:select', function(e) {
-        var d = e.params.data;
-        console.log('===== AYAH DATA =====');
-        console.log('Full Data Object:', d);
-        console.log('tgl_lahir:', d.tgl_lahir);
-        console.log('tanggal_lahir:', d.tanggal_lahir);
-        console.log('umur:', d.umur);
-        console.log('Debug Info:', d._debug_tgl);
+            $('#input_nik_ayah').val(d.nik || d.id || '');
+            $('#input_nama_ayah').val(d.nama || '');
 
-        $('#input_nik_ayah').val(d.nik || d.id || '');
-        $('#input_nama_ayah').val(d.nama || '');
+            // Mengisi Tanggal Lahir Ayah
+            var tglLahir = d.tgl_lahir || d.tanggal_lahir || '';
+            console.log('tglLahir to set:', tglLahir);
 
-        // Mengisi Tanggal Lahir Ayah
-        var tglLahir = d.tgl_lahir || d.tanggal_lahir || '';
-        console.log('tglLahir to set:', tglLahir);
+            if (tglLahir && tglLahir.trim() !== '') {
+                $('#input_tanggal_lahir_ayah').val(tglLahir.trim());
+                console.log('Set tanggal_lahir_ayah to:', tglLahir.trim());
 
-        if (tglLahir && tglLahir.trim() !== '') {
-            $('#input_tanggal_lahir_ayah').val(tglLahir.trim());
-            console.log('Set tanggal_lahir_ayah to:', tglLahir.trim());
-
-            var umurValue = parseInt(d.umur) || 0;
-            if (umurValue > 0) {
-                $('#input_umur_ayah').val(umurValue);
-                console.log('Set umur_ayah to:', umurValue);
+                var umurValue = parseInt(d.umur) || 0;
+                if (umurValue > 0) {
+                    $('#input_umur_ayah').val(umurValue);
+                    console.log('Set umur_ayah to:', umurValue);
+                } else {
+                    var calc = hitungUmur(tglLahir);
+                    $('#input_umur_ayah').val(calc);
+                    console.log('Calculated umur_ayah:', calc);
+                }
             } else {
-                var calc = hitungUmur(tglLahir);
-                $('#input_umur_ayah').val(calc);
-                console.log('Calculated umur_ayah:', calc);
+                console.log('No tglLahir found, trying umur only');
+                if (d.umur && parseInt(d.umur) > 0) {
+                    $('#input_umur_ayah').val(parseInt(d.umur));
+                    console.log('Set umur_ayah from API:', d.umur);
+                }
             }
-        } else {
-            console.log('No tglLahir found, trying umur only');
-            if (d.umur && parseInt(d.umur) > 0) {
-                $('#input_umur_ayah').val(parseInt(d.umur));
-                console.log('Set umur_ayah from API:', d.umur);
+
+            if (d.pekerjaan) $('#input_pekerjaan_ayah').val(d.pekerjaan);
+            if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
+                $('#input_alamat_ayah').val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
+                    .alamat);
             }
-        }
 
-        if (d.pekerjaan) $('#input_pekerjaan_ayah').val(d.pekerjaan);
-        if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
-            $('#input_alamat_ayah').val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
-                .alamat);
-        }
-
-        // Otomatis isi Nama Kepala Keluarga jika belum terisi
-        if (!$('#input_nama_kepala_keluarga').val()) {
-            $('#input_nama_kepala_keluarga').val(d.nama || '');
-        }
-        if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
-    });
-
-    $('#cari_ayah').on('select2:clear', function() {
-        $('#input_nik_ayah, #input_nama_ayah, #input_tanggal_lahir_ayah, #input_umur_ayah, #input_pekerjaan_ayah, #input_alamat_ayah')
-            .val('');
-    });
-
-    // 3. SELECT2 CARI PELAPOR
-    $('#cari_pelapor').select2(buildSelect2Config('-- Cari NIK / Nama Pelapor --'));
-    $('#cari_pelapor').on('select2:select', function(e) {
-        var d = e.params.data;
-        $('#input_nik_pelapor').val(d.nik || d.id || '');
-        $('#input_nama_pelapor').val(d.nama || '');
-    });
-    $('#cari_pelapor').on('select2:clear', function() {
-        $('#input_nik_pelapor, #input_nama_pelapor').val('');
-    });
-
-    // 4. SELECT2 CARI SAKSI 1
-    $('#cari_saksi1').select2(buildSelect2Config('-- Cari NIK / Nama Saksi I --'));
-    $('#cari_saksi1').on('select2:select', function(e) {
-        var d = e.params.data;
-        $('#input_nik_saksi1').val(d.nik || d.id || '');
-        $('#input_nama_saksi1').val(d.nama || '');
-    });
-    $('#cari_saksi1').on('select2:clear', function() {
-        $('#input_nik_saksi1, #input_nama_saksi1').val('');
-    });
-
-    // 5. SELECT2 CARI SAKSI 2
-    $('#cari_saksi2').select2(buildSelect2Config('-- Cari NIK / Nama Saksi II --'));
-    $('#cari_saksi2').on('select2:select', function(e) {
-        var d = e.params.data;
-        $('#input_nik_saksi2').val(d.nik || d.id || '');
-        $('#input_nama_saksi2').val(d.nama || '');
-    });
-    $('#cari_saksi2').on('select2:clear', function() {
-        $('#input_nik_saksi2, #input_nama_saksi2').val('');
-    });
-
-    // Event Listener: Hitung Umur Otomatis Saat Input Tanggal Lahir Diubah Manual
-    $('#input_tanggal_lahir_ibu').on('change keyup', function() {
-        var val = $(this).val();
-        if (val) {
-            $('#input_umur_ibu').val(hitungUmur(val));
-        }
-    });
-
-    $('#input_tanggal_lahir_ayah').on('change keyup', function() {
-        var val = $(this).val();
-        if (val) {
-            $('#input_umur_ayah').val(hitungUmur(val));
-        }
-    });
-
-});
-
-// Validasi Bootstrap
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
+            // Otomatis isi Nama Kepala Keluarga jika belum terisi
+            if (!$('#input_nama_kepala_keluarga').val()) {
+                $('#input_nama_kepala_keluarga').val(d.nama || '');
             }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+            if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
+        });
+
+        $('#cari_ayah').on('select2:clear', function () {
+            $('#input_nik_ayah, #input_nama_ayah, #input_tanggal_lahir_ayah, #input_umur_ayah, #input_pekerjaan_ayah, #input_alamat_ayah')
+                .val('');
+        });
+
+        // 3. SELECT2 CARI PELAPOR
+        $('#cari_pelapor').select2(buildSelect2Config('-- Cari NIK / Nama Pelapor --'));
+        $('#cari_pelapor').on('select2:select', function (e) {
+            var d = e.params.data;
+            $('#input_nik_pelapor').val(d.nik || d.id || '');
+            $('#input_nama_pelapor').val(d.nama || '');
+        });
+        $('#cari_pelapor').on('select2:clear', function () {
+            $('#input_nik_pelapor, #input_nama_pelapor').val('');
+        });
+
+        // 4. SELECT2 CARI SAKSI 1
+        $('#cari_saksi1').select2(buildSelect2Config('-- Cari NIK / Nama Saksi I --'));
+        $('#cari_saksi1').on('select2:select', function (e) {
+            var d = e.params.data;
+            $('#input_nik_saksi1').val(d.nik || d.id || '');
+            $('#input_nama_saksi1').val(d.nama || '');
+        });
+        $('#cari_saksi1').on('select2:clear', function () {
+            $('#input_nik_saksi1, #input_nama_saksi1').val('');
+        });
+
+        // 5. SELECT2 CARI SAKSI 2
+        $('#cari_saksi2').select2(buildSelect2Config('-- Cari NIK / Nama Saksi II --'));
+        $('#cari_saksi2').on('select2:select', function (e) {
+            var d = e.params.data;
+            $('#input_nik_saksi2').val(d.nik || d.id || '');
+            $('#input_nama_saksi2').val(d.nama || '');
+        });
+        $('#cari_saksi2').on('select2:clear', function () {
+            $('#input_nik_saksi2, #input_nama_saksi2').val('');
+        });
+
+        // Event Listener: Hitung Umur Otomatis Saat Input Tanggal Lahir Diubah Manual
+        $('#input_tanggal_lahir_ibu').on('change keyup', function () {
+            var val = $(this).val();
+            if (val) {
+                $('#input_umur_ibu').val(hitungUmur(val));
+            }
+        });
+
+        $('#input_tanggal_lahir_ayah').on('change keyup', function () {
+            var val = $(this).val();
+            if (val) {
+                $('#input_umur_ayah').val(hitungUmur(val));
+            }
+        });
+
+    });
+
+    // Validasi Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>

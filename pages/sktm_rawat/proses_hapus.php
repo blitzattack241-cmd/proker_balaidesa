@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 // 2. Hubungkan ke Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<script>
             alert('Koneksi database gagal: " . mysqli_connect_error() . "');
@@ -25,12 +25,12 @@ if (mysqli_connect_errno()) {
 }
 
 // 3. Tangkap Parameter ID
-$id_sktm = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id_sktm = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($id_sktm > 0) {
     // A. Ambil nama-nama file foto yang tersimpan di database sebelum datanya dihapus
     $query_foto = mysqli_query($koneksi, "SELECT foto_depan, foto_ruang_tamu, foto_kamar, foto_dapur, foto_toilet FROM tb_sktm_rawat WHERE id_sktm = $id_sktm");
-    
+
     if ($query_foto && mysqli_num_rows($query_foto) > 0) {
         $data_foto = mysqli_fetch_assoc($query_foto);
         $upload_dir = "../../assets/img/sktm_rawat/"; // Menyesuaikan path folder dari dalam subfolder pages/sktm_rawat/

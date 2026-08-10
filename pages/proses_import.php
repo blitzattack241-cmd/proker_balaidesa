@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Koneksi Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 if (!$koneksi) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
@@ -54,29 +54,31 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 if (isset($_POST['import'])) {
     if (isset($_FILES['file_excel']['tmp_name']) && !empty($_FILES['file_excel']['tmp_name'])) {
-        
+
         $fileTmpPath = $_FILES['file_excel']['tmp_name'];
-        $fileName    = $_FILES['file_excel']['name'];
-        $fileExt     = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $fileName = $_FILES['file_excel']['name'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
         $inserted = 0;
-        $errors   = [];
+        $errors = [];
 
         // Helper fungsi pembersih data
-        $clean = function($val) use ($koneksi) {
-            if ($val === null || $val === false) return '';
-            $val = trim((string)$val);
+        $clean = function ($val) use ($koneksi) {
+            if ($val === null || $val === false)
+                return '';
+            $val = trim((string) $val);
             $val = ltrim($val, "'_");
             if (is_numeric($val) && strpos(strtoupper($val), 'E') !== false) {
-                $val = sprintf('%.0f', (float)$val);
+                $val = sprintf('%.0f', (float) $val);
             }
             return mysqli_real_escape_string($koneksi, $val);
         };
 
         // Helper konversi Status Pernikahan agar seragam (PERBAIKAN UTAMA)
-        $normalizeStatusPernikahan = function($val) {
-            $status = strtolower(trim((string)$val));
-            if (empty($status)) return 'Belum Kawin';
+        $normalizeStatusPernikahan = function ($val) {
+            $status = strtolower(trim((string) $val));
+            if (empty($status))
+                return 'Belum Kawin';
 
             if (strpos($status, 'belum') !== false) {
                 return 'Belum Kawin';
@@ -89,8 +91,9 @@ if (isset($_POST['import'])) {
         };
 
         // Helper konversi Tanggal Excel / String ke format Y-m-d
-        $parseDate = function($val) {
-            if (empty($val)) return null;
+        $parseDate = function ($val) {
+            if (empty($val))
+                return null;
             if (is_numeric($val)) {
                 try {
                     $dateTime = Date::excelToDateTimeObject($val);
@@ -107,32 +110,33 @@ if (isset($_POST['import'])) {
         if (in_array($fileExt, ['xlsx', 'xls']) && class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
             try {
                 $spreadsheet = IOFactory::load($fileTmpPath);
-                $worksheet   = $spreadsheet->getActiveSheet();
-                $rows        = $worksheet->toArray(null, true, true, true);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray(null, true, true, true);
 
                 $lastKepalaKk = '';
 
                 foreach ($rows as $rowIndex => $row) {
                     // Skip baris judul / header
-                    if ($rowIndex < 4) continue;
+                    if ($rowIndex < 4)
+                        continue;
 
-                    $rt                = $clean($row['B'] ?? '');
-                    $rw                = $clean($row['C'] ?? '');
-                    $no_kk             = $clean($row['D'] ?? '');
-                    $kepala_kk         = $clean($row['E'] ?? '');
-                    $nik               = $clean($row['G'] ?? '');
-                    $nama              = $clean($row['H'] ?? '');
-                    $jenis_kelamin     = $clean($row['I'] ?? '');
-                    $status_keluarga   = $clean($row['J'] ?? '');
-                    $tempat_lahir      = $clean($row['K'] ?? '');
-                    $raw_tgl_lahir     = $row['L'] ?? '';
-                    $raw_status        = $row['M'] ?? '';
+                    $rt = $clean($row['B'] ?? '');
+                    $rw = $clean($row['C'] ?? '');
+                    $no_kk = $clean($row['D'] ?? '');
+                    $kepala_kk = $clean($row['E'] ?? '');
+                    $nik = $clean($row['G'] ?? '');
+                    $nama = $clean($row['H'] ?? '');
+                    $jenis_kelamin = $clean($row['I'] ?? '');
+                    $status_keluarga = $clean($row['J'] ?? '');
+                    $tempat_lahir = $clean($row['K'] ?? '');
+                    $raw_tgl_lahir = $row['L'] ?? '';
+                    $raw_status = $row['M'] ?? '';
                     $status_pernikahan = $clean($normalizeStatusPernikahan($raw_status));
-                    $agama             = $clean($row['N'] ?? '');
-                    $kewarganegaraan   = $clean($row['O'] ?? '');
-                    $suku              = $clean($row['P'] ?? '');
-                    $pendidikan        = $clean($row['Q'] ?? '');
-                    $pekerjaan         = $clean($row['R'] ?? '');
+                    $agama = $clean($row['N'] ?? '');
+                    $kewarganegaraan = $clean($row['O'] ?? '');
+                    $suku = $clean($row['P'] ?? '');
+                    $pendidikan = $clean($row['Q'] ?? '');
+                    $pekerjaan = $clean($row['R'] ?? '');
 
                     // Simpan kepala KK terakhir jika baris berikutnya kosong (anggota keluarga)
                     if (!empty($kepala_kk)) {
@@ -164,7 +168,7 @@ if (isset($_POST['import'])) {
                 $errors[] = "Gagal membaca file Excel: " . $e->getMessage();
             }
 
-        // --- SKENARIO 2: IMPORT FILE CSV (FALLBACK) ---
+            // --- SKENARIO 2: IMPORT FILE CSV (FALLBACK) ---
         } else {
             $handle = fopen($fileTmpPath, "r");
 
@@ -178,25 +182,26 @@ if (isset($_POST['import'])) {
 
                 while (($data = fgetcsv($handle, 2000, $delimiter)) !== FALSE) {
                     $row++;
-                    if ($row <= 3) continue;
+                    if ($row <= 3)
+                        continue;
 
-                    $rt                = $clean($data[1] ?? '');
-                    $rw                = $clean($data[2] ?? '');
-                    $no_kk             = $clean($data[3] ?? '');
-                    $kepala_kk         = $clean($data[4] ?? '');
-                    $nik               = $clean($data[6] ?? '');
-                    $nama              = $clean($data[7] ?? '');
-                    $jenis_kelamin     = $clean($data[8] ?? '');
-                    $status_keluarga   = $clean($data[9] ?? '');
-                    $tempat_lahir      = $clean($data[10] ?? '');
-                    $raw_tgl_lahir     = $data[11] ?? '';
-                    $raw_status        = $data[12] ?? '';
+                    $rt = $clean($data[1] ?? '');
+                    $rw = $clean($data[2] ?? '');
+                    $no_kk = $clean($data[3] ?? '');
+                    $kepala_kk = $clean($data[4] ?? '');
+                    $nik = $clean($data[6] ?? '');
+                    $nama = $clean($data[7] ?? '');
+                    $jenis_kelamin = $clean($data[8] ?? '');
+                    $status_keluarga = $clean($data[9] ?? '');
+                    $tempat_lahir = $clean($data[10] ?? '');
+                    $raw_tgl_lahir = $data[11] ?? '';
+                    $raw_status = $data[12] ?? '';
                     $status_pernikahan = $clean($normalizeStatusPernikahan($raw_status));
-                    $agama             = $clean($data[13] ?? '');
-                    $kewarganegaraan   = $clean($data[14] ?? '');
-                    $suku              = $clean($data[15] ?? '');
-                    $pendidikan        = $clean($data[16] ?? '');
-                    $pekerjaan         = $clean($data[17] ?? '');
+                    $agama = $clean($data[13] ?? '');
+                    $kewarganegaraan = $clean($data[14] ?? '');
+                    $suku = $clean($data[15] ?? '');
+                    $pendidikan = $clean($data[16] ?? '');
+                    $pekerjaan = $clean($data[17] ?? '');
 
                     if (!empty($kepala_kk)) {
                         $lastKepalaKk = $kepala_kk;

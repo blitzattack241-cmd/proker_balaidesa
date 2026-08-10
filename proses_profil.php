@@ -8,7 +8,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
-$koneksi = mysqli_connect('localhost', 'root', '', 'db_balaidesa');
+require_once __DIR__ . '/koneksi.php';
 if (mysqli_connect_errno()) {
     die('Koneksi database gagal: ' . mysqli_connect_error());
 }

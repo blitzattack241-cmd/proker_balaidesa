@@ -3,14 +3,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../koneksi.php';
 if (mysqli_connect_errno()) {
     echo "<div class='alert alert-danger m-4 rounded-3 shadow-sm'>Koneksi database gagal: " . mysqli_connect_error() . "</div>";
     return;
 }
 
 if ($koneksi) {
-    mysqli_set_charset($koneksi, 'utf8mb4');
+    // charset handled centrally in koneksi.php
 }
 
 function tableExists(mysqli $koneksi, string $namaTable): bool
@@ -256,71 +256,71 @@ $namaBulanTerpilih = $filterBulan !== null ? ($namaBulanList[sprintf('%02d', $fi
 ?>
 
 <style>
-.green-banner {
-    background: linear-gradient(135deg, #0b8a4f 0%, #086b3d 100%);
-    border-radius: 16px;
-    padding: 1.8rem 2rem;
-    color: #ffffff;
-    margin-bottom: 1.5rem;
-}
+    .green-banner {
+        background: linear-gradient(135deg, #0b8a4f 0%, #086b3d 100%);
+        border-radius: 16px;
+        padding: 1.8rem 2rem;
+        color: #ffffff;
+        margin-bottom: 1.5rem;
+    }
 
-.banner-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-}
+    .banner-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
 
-.banner-subtitle {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.875rem;
-    margin: 0;
-}
+    .banner-subtitle {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.875rem;
+        margin: 0;
+    }
 
-.main-card {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    padding: 1.5rem;
-}
+    .main-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 1.5rem;
+    }
 
-.table-agenda {
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
-}
+    .table-agenda {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+    }
 
-.table-agenda thead th {
-    background-color: #f8fafc;
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 0.8rem;
-    padding: 10px;
-    border: 1px solid #cbd5e1;
-    text-align: center;
-}
+    .table-agenda thead th {
+        background-color: #f8fafc;
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        text-align: center;
+    }
 
-.table-agenda tbody td {
-    padding: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 0.85rem;
-    color: #334155;
-    vertical-align: top;
-    word-wrap: break-word;
-}
+    .table-agenda tbody td {
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.85rem;
+        color: #334155;
+        vertical-align: top;
+        word-wrap: break-word;
+    }
 
-/* Style tambahan untuk kolom Keterangan yang bisa diedit langsung */
-.editable-ket {
-    background-color: #fffde7;
-    outline: none;
-    cursor: text;
-    transition: background-color 0.2s;
-}
+    /* Style tambahan untuk kolom Keterangan yang bisa diedit langsung */
+    .editable-ket {
+        background-color: #fffde7;
+        outline: none;
+        cursor: text;
+        transition: background-color 0.2s;
+    }
 
-.editable-ket:focus {
-    background-color: #ffffff;
-    box-shadow: inset 0 0 0 2px #0b8a4f;
-    border-radius: 4px;
-}
+    .editable-ket:focus {
+        background-color: #ffffff;
+        box-shadow: inset 0 0 0 2px #0b8a4f;
+        border-radius: 4px;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -353,10 +353,9 @@ $namaBulanTerpilih = $filterBulan !== null ? ($namaBulanList[sprintf('%02d', $fi
                 <select name="bulan" class="form-select">
                     <option value="" <?php echo ($filterBulan === null) ? 'selected' : ''; ?>>Semua Bulan</option>
                     <?php foreach ($namaBulanList as $key => $val): ?>
-                    <option value="<?php echo $key; ?>"
-                        <?php echo ($filterBulan !== null && sprintf('%02d', $filterBulan) === $key) ? 'selected' : ''; ?>>
-                        <?php echo $val; ?>
-                    </option>
+                        <option value="<?php echo $key; ?>" <?php echo ($filterBulan !== null && sprintf('%02d', $filterBulan) === $key) ? 'selected' : ''; ?>>
+                            <?php echo $val; ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -369,9 +368,9 @@ $namaBulanTerpilih = $filterBulan !== null ? ($namaBulanList[sprintf('%02d', $fi
                     $thnSekarang = date('Y');
                     for ($t = $thnSekarang; $t >= $thnSekarang - 5; $t--):
                         ?>
-                    <option value="<?php echo $t; ?>" <?php echo ($filterTahun !== null && $filterTahun == $t) ? 'selected' : ''; ?>>
-                        <?php echo $t; ?>
-                    </option>
+                        <option value="<?php echo $t; ?>" <?php echo ($filterTahun !== null && $filterTahun == $t) ? 'selected' : ''; ?>>
+                            <?php echo $t; ?>
+                        </option>
                     <?php endfor; ?>
                 </select>
             </div>
@@ -408,36 +407,37 @@ $namaBulanTerpilih = $filterBulan !== null ? ($namaBulanList[sprintf('%02d', $fi
                 </thead>
                 <tbody>
                     <?php if (!empty($filteredRows)): ?>
-                    <?php $no = 1; ?>
-                    <?php foreach ($filteredRows as $row): ?>
-                    <?php
-                        $tanggal = '-';
-                        if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
-                            $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
-                        }
-                    ?>
-                    <tr>
-                        <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                        <td>
-                            <strong
-                                class="text-dark"><?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?></strong>
-                        </td>
-                        <td><?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '-')); ?></td>
-                        <td class="text-center"><?php echo htmlspecialchars($tanggal); ?></td>
-                        <td><?php echo htmlspecialchars(cleanUtf8(normalizeNomorSuratValue($row['nomor_surat'] ?? '') ?: '-')); ?></td>
-                        <td><?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '-')); ?></td>
-                        <!-- Kolom Keterangan dikosongkan secara default & bisa diketik/edited secara langsung -->
-                        <td contenteditable="true" class="editable-ket"
-                            title="Klik di sini untuk mengisi keterangan manual jika diperlukan"></td>
-                    </tr>
-                    <?php endforeach; ?>
+                        <?php $no = 1; ?>
+                        <?php foreach ($filteredRows as $row): ?>
+                            <?php
+                            $tanggal = '-';
+                            if (!empty($row['tanggal_surat']) && strtotime($row['tanggal_surat']) !== false) {
+                                $tanggal = date('d/m/Y', strtotime($row['tanggal_surat']));
+                            }
+                            ?>
+                            <tr>
+                                <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                                <td>
+                                    <strong
+                                        class="text-dark"><?php echo htmlspecialchars(cleanUtf8($row['jenis_surat'])); ?></strong>
+                                </td>
+                                <td><?php echo htmlspecialchars(cleanUtf8($row['nama_pemohon'] ?: '-')); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($tanggal); ?></td>
+                                <td><?php echo htmlspecialchars(cleanUtf8(normalizeNomorSuratValue($row['nomor_surat'] ?? '') ?: '-')); ?>
+                                </td>
+                                <td><?php echo htmlspecialchars(cleanUtf8($row['tujuan'] ?: '-')); ?></td>
+                                <!-- Kolom Keterangan dikosongkan secara default & bisa diketik/edited secara langsung -->
+                                <td contenteditable="true" class="editable-ket"
+                                    title="Klik di sini untuk mengisi keterangan manual jika diperlukan"></td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
-                            Tidak ada data surat keluar pada bulan
-                            <strong><?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></strong>.
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                Tidak ada data surat keluar pada bulan
+                                <strong><?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></strong>.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>

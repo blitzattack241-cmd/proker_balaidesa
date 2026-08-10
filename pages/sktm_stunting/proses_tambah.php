@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 // 2. Koneksi ke Database
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+require_once __DIR__ . '/../../koneksi.php';
 require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 
 if (mysqli_connect_errno()) {
@@ -28,23 +28,23 @@ if (mysqli_connect_errno()) {
 
 // 3. Memproses Data ketika Form Disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
+
     // Generasi / Reservasi nomor surat definitif
-    $nomor_surat     = generateNomorSuratGlobal($koneksi, true);
-    $tanggal_surat   = $_POST['tanggal_surat'] ?? '';
-    $nama_warga      = $_POST['nama_warga'] ?? '';
-    $no_ktp          = $_POST['no_ktp'] ?? '';
-    $no_kk           = $_POST['no_kk'] ?? '';
-    $tempat_lahir    = $_POST['tempat_lahir'] ?? '';
-    $tanggal_lahir   = $_POST['tanggal_lahir'] ?? '';
-    $jenis_kelamin   = $_POST['jenis_kelamin'] ?? '';
-    $agama           = $_POST['agama'] ?? '';
-    $pekerjaan       = $_POST['pekerjaan'] ?? '';
-    $alamat_tinggal  = $_POST['alamat_tinggal'] ?? '';
-    $nama_anak       = $_POST['nama_anak'] ?? '';
+    $nomor_surat = generateNomorSuratGlobal($koneksi, true);
+    $tanggal_surat = $_POST['tanggal_surat'] ?? '';
+    $nama_warga = $_POST['nama_warga'] ?? '';
+    $no_ktp = $_POST['no_ktp'] ?? '';
+    $no_kk = $_POST['no_kk'] ?? '';
+    $tempat_lahir = $_POST['tempat_lahir'] ?? '';
+    $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+    $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+    $agama = $_POST['agama'] ?? '';
+    $pekerjaan = $_POST['pekerjaan'] ?? '';
+    $alamat_tinggal = $_POST['alamat_tinggal'] ?? '';
+    $nama_anak = $_POST['nama_anak'] ?? '';
     $kewarganegaraan = $_POST['kewarganegaraan'] ?? '';
-    $keperluan       = $_POST['keperluan'] ?? '';
-    $id_pejabat      = $_POST['id_pejabat'] ?? '';
+    $keperluan = $_POST['keperluan'] ?? '';
+    $id_pejabat = $_POST['id_pejabat'] ?? '';
 
     // Validasi input wajib agar tidak kosong
     if (empty($nomor_surat) || empty($nama_warga) || empty($nama_anak) || empty($id_pejabat)) {
@@ -79,22 +79,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt) {
         // 's' = string, 'i' = integer (id_pejabat)
         mysqli_stmt_bind_param(
-            $stmt, 
-            "ssssssssssssssi", 
-            $nomor_surat, 
-            $tanggal_surat, 
-            $nama_warga, 
-            $no_ktp, 
-            $no_kk, 
-            $tempat_lahir, 
-            $tanggal_lahir, 
-            $jenis_kelamin, 
-            $agama, 
-            $pekerjaan, 
-            $alamat_tinggal, 
-            $nama_anak, 
-            $kewarganegaraan, 
-            $keperluan, 
+            $stmt,
+            "ssssssssssssssi",
+            $nomor_surat,
+            $tanggal_surat,
+            $nama_warga,
+            $no_ktp,
+            $no_kk,
+            $tempat_lahir,
+            $tanggal_lahir,
+            $jenis_kelamin,
+            $agama,
+            $pekerjaan,
+            $alamat_tinggal,
+            $nama_anak,
+            $kewarganegaraan,
+            $keperluan,
             $id_pejabat
         );
 

@@ -13,7 +13,10 @@ if (!$isAdmin) {
     exit;
 }
 
-$koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
+// legacy direct connect removed; use centralized connection
+// keep session and access checks above
+// require central connection
+require_once __DIR__ . '/../../koneksi.php';
 
 // Pastikan parameter ID tersedia
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -43,10 +46,10 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
 
 <div class="container-fluid px-4">
     <h3 class="mt-4">Edit SKTM Ibu Hamil (Bumil)</h3>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="index.php?page=dashboard">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="index.php?page=sktm-bumil">Daftar SKTM Bumil</a></li>
-        <li class="breadcrumb-item active">Edit Surat</li>
+    require_once __DIR__ . '/../../koneksi.php';
+    <li class="breadcrumb-item"><a href="index.php?page=dashboard">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="index.php?page=sktm-bumil">Daftar SKTM Bumil</a></li>
+    <li class="breadcrumb-item active">Edit Surat</li>
     </ol>
 
     <div class="card mb-4">
@@ -184,12 +187,12 @@ $query_pejabat = mysqli_query($koneksi, "SELECT id_pejabat, nama_pejabat, jabata
                         <label for="id_pejabat" class="form-label">Pejabat Penandatangan Surat</label>
                         <select class="form-select" id="id_pejabat" name="id_pejabat" required>
                             <option value="">-- Pilih Pejabat Penandatangan --</option>
-                            <?php while($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                            <option value="<?= $pejabat['id_pejabat']; ?>"
-                                <?= $data['id_pejabat'] == $pejabat['id_pejabat'] ? 'selected' : ''; ?>>
-                                <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
-                                (<?= htmlspecialchars($pejabat['jabatan']); ?>)
-                            </option>
+                            <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                                <option value="<?= $pejabat['id_pejabat']; ?>"
+                                    <?= $data['id_pejabat'] == $pejabat['id_pejabat'] ? 'selected' : ''; ?>>
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']); ?>
+                                    (<?= htmlspecialchars($pejabat['jabatan']); ?>)
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>
