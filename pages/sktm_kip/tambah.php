@@ -354,7 +354,7 @@ $(document).ready(function() {
     $('#cari_penduduk').select2({
         theme: 'bootstrap-5',
         placeholder: '-- Ketik No. KK, NIK, atau Nama Penduduk... --',
-        allowClear: true, // Tombol silang untuk hapus/clear
+        allowClear: true,
         minimumInputLength: 2,
         ajax: {
             url: 'api/get_penduduk.php',
@@ -411,7 +411,7 @@ $(document).ready(function() {
 
         // Auto select jenis kelamin
         if (data.jenis_kelamin) {
-            var jk = data.jenis_kelamin.toLowerCase();
+            var jk = data.jenis_kelamin.toString().toLowerCase();
             if (jk.includes('l')) {
                 $('#input_jenis_kelamin').val('Laki-laki');
             } else if (jk.includes('p')) {
@@ -419,20 +419,37 @@ $(document).ready(function() {
             }
         }
 
+        // Auto select Agama
         if (data.agama) {
             $('#input_agama').val(data.agama);
         }
 
-        if (data.status_perkawinan) {
-            $('#input_status_perkawinan').val(data.status_perkawinan);
+        // Auto select Status Perkawinan (LOGIKA DIPERBAIKI)
+        var rawStatus = data.status_pernikahan || data.status_perkawinan || '';
+        if (rawStatus) {
+            var val = rawStatus.toString().trim().toUpperCase();
+
+            if (val.includes('BELUM') || val === 'BK' || val === '1') {
+                $('#input_status_perkawinan').val('Belum Kawin');
+            } else if (val.includes('CERAI HIDUP') || val === 'CH' || val === '3') {
+                $('#input_status_perkawinan').val('Cerai Hidup');
+            } else if (val.includes('CERAI MATI') || val === 'CM' || val === '4') {
+                $('#input_status_perkawinan').val('Cerai Mati');
+            } else if (val.includes('KAWIN') || val === 'K' || val === '2') {
+                $('#input_status_perkawinan').val('Kawin');
+            } else {
+                $('#input_status_perkawinan').val(rawStatus);
+            }
         }
 
         if (data.pekerjaan) {
             $('#input_pekerjaan').val(data.pekerjaan);
         }
 
-        if (data.alamat_tinggal || data.alamat_jalan || data.alamat_lengkap) {
-            $('#input_alamat').val(data.alamat_tinggal || data.alamat_jalan || data.alamat_lengkap);
+        if (data.alamat_lengkap) {
+            $('#input_alamat').val(data.alamat_lengkap);
+        } else if (data.alamat) {
+            $('#input_alamat').val(data.alamat);
         }
     });
 

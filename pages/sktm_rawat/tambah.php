@@ -26,8 +26,7 @@ $query_pejabat = mysqli_query($koneksi, "SELECT * FROM tb_pejabat ORDER BY nama_
 // Proses Simpan Data Form
 if (isset($_POST['simpan'])) {
     // Ambil Data Pemohon & Surat
-    // Reservasi nomor surat definitif di sini (saat benar-benar disimpan),
-    // bukan saat halaman form dibuka, agar nomor tidak bertambah saat batal/reload.
+    // Reservasi nomor surat definitif di sini saat disimpann agar tidak lompat saat reload
     $nomor_surat = mysqli_real_escape_string($koneksi, generateNomorSuratGlobal($koneksi, true));
     $nama_pemohon = mysqli_real_escape_string($koneksi, $_POST['nama_pemohon']);
     $tempat_lahir = mysqli_real_escape_string($koneksi, $_POST['tempat_lahir']);
@@ -64,9 +63,9 @@ if (isset($_POST['simpan'])) {
             $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
             // Validasi Format
-            $allowed_ext = ['jpg', 'jpeg', 'png'];
+            $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
             if (!in_array($file_ext, $allowed_ext)) {
-                echo "<script>alert('Format file $field harus JPG, JPEG, atau PNG!');</script>";
+                echo "<script>alert('Format file $field harus JPG, JPEG, PNG, atau WEBP!');</script>";
                 $upload_ok = false;
                 break;
             }
@@ -139,6 +138,20 @@ if (isset($_POST['simpan'])) {
 }
 ?>
 
+<!-- CDN CSS Select2 & Select2 Bootstrap 5 Theme -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
+<style>
+.box-pencarian-container {
+    background-color: #f8faff;
+    border: 1px dashed #0d6efd;
+    border-radius: 10px;
+    padding: 15px;
+}
+</style>
+
 <div class="container-fluid px-4 py-3">
     <!-- Header Alur Dashboard -->
     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -160,6 +173,22 @@ if (isset($_POST['simpan'])) {
         <div class="row">
             <!-- SISI KIRI: DATA UTAMA PEMOHON -->
             <div class="col-lg-8">
+                <!-- BOX AUTO-FILL DATA PENDUDUK -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body box-pencarian-container">
+                        <label class="form-label text-primary fw-bold mb-2">
+                            <i class="fas fa-search me-1"></i> CARI & AUTO-FILL DATA PEMOHON (KETIK NO. KK / NIK / NAMA)
+                        </label>
+                        <select id="cari_penduduk" class="form-select" style="width: 100%;">
+                            <option value=""></option>
+                        </select>
+                        <small class="text-muted mt-2 d-block" style="font-size: 0.85rem;">
+                            <i class="fas fa-info-circle me-1"></i> Pilih nama pemohon untuk mengisikan secara otomatis
+                            data ke formulir di bawah ini.
+                        </small>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm border-0 rounded-3 mb-4">
                     <div class="card-header bg-white border-bottom py-3">
                         <h5 class="card-title fw-bold text-secondary mb-0"><i
@@ -176,22 +205,24 @@ if (isset($_POST['simpan'])) {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Nama Lengkap Pemohon</label>
-                                <input type="text" class="form-control" name="nama_pemohon"
-                                    placeholder="Masukkan nama pemegang surat" required>
+                                <input type="text" id="nama_pemohon" class="form-control text-uppercase"
+                                    name="nama_pemohon" placeholder="Masukkan nama pemegang surat" required>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Tempat Lahir</label>
-                                <input type="text" class="form-control" name="tempat_lahir" required>
+                                <input type="text" id="tempat_lahir" class="form-control" name="tempat_lahir"
+                                    placeholder="Tempat lahir" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Tanggal Lahir</label>
-                                <input type="date" class="form-control" name="tanggal_lahir" required>
+                                <input type="date" id="tanggal_lahir" class="form-control" name="tanggal_lahir"
+                                    required>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Jenis Kelamin</label>
-                                <select class="form-select" name="jenis_kelamin" required>
+                                <select id="jenis_kelamin" class="form-select" name="jenis_kelamin" required>
                                     <option value="" disabled selected>-- Pilih Jenis Kelamin --</option>
                                     <option value="Laki-Laki">Laki-Laki</option>
                                     <option value="Perempuan">Perempuan</option>
@@ -199,28 +230,29 @@ if (isset($_POST['simpan'])) {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Pekerjaan</label>
-                                <input type="text" class="form-control" name="pekerjaan"
+                                <input type="text" id="pekerjaan" class="form-control" name="pekerjaan"
                                     placeholder="Contoh: Buruh Harian Lepas" required>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Agama</label>
-                                <input type="text" class="form-control" name="agama" value="Islam" required>
+                                <input type="text" id="agama" class="form-control" name="agama" value="Islam" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Kewarganegaraan</label>
-                                <input type="text" class="form-control" name="kewarganegaraan" value="Indonesia"
-                                    required>
+                                <input type="text" id="kewarganegaraan" class="form-control" name="kewarganegaraan"
+                                    value="Indonesia" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">No. Kartu Keluarga (KK)</label>
-                                <input type="text" class="form-control" name="no_kk" maxlength="16" value="331904"
-                                    required>
+                                <input type="text" id="no_kk" class="form-control" name="no_kk" maxlength="16"
+                                    value="331904" required>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">NIK Pemohon (KTP)</label>
-                                <input type="text" class="form-control" name="no_ktp" maxlength="16" required>
+                                <input type="text" id="no_ktp" class="form-control" name="no_ktp" maxlength="16"
+                                    placeholder="16 Digit NIK" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Rumah Sakit/Puskesmas Tujuan</label>
@@ -230,7 +262,7 @@ if (isset($_POST['simpan'])) {
 
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Alamat Lengkap Tinggal</label>
-                                <textarea class="form-control" name="alamat_tinggal" rows="2"
+                                <textarea id="alamat_tinggal" class="form-control" name="alamat_tinggal" rows="2"
                                     placeholder="Tuliskan nama jalan, RT/RW, dukuh" required></textarea>
                             </div>
                         </div>
@@ -373,8 +405,8 @@ if (isset($_POST['simpan'])) {
                             </div>
                         </div>
                         <span class="text-muted small d-block" style="font-size: 0.75rem;"><i
-                                class="fas fa-info-circle me-1"></i>Format file diperbolehkan: JPG, JPEG, PNG (Maks
-                            2MB)</span>
+                                class="fas fa-info-circle me-1"></i>Format file diperbolehkan: JPG, JPEG, PNG, WEBP
+                            (Maks 2MB)</span>
                     </div>
                 </div>
             </div>
@@ -382,18 +414,117 @@ if (isset($_POST['simpan'])) {
     </form>
 </div>
 
-<!-- JAVASCRIPT VALIDASI & DINAMISASI FORM -->
+<!-- CDN Library jQuery & Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- JAVASCRIPT VALIDASI, AUTOFILL, & DINAMISASI FORM -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+$(document).ready(function() {
+    // 1. Inisialisasi Select2 Pencarian Pemohon via AJAX
+    $('#cari_penduduk').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax: {
+            url: 'api/get_penduduk.php',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    search: params.term
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+
+    // 2. Event Listener Auto-fill Data Pemohon Saat Pilih Hasil Pencarian
+    $('#cari_penduduk').on('select2:select', function(e) {
+        var data = e.params.data;
+
+        $('#nama_pemohon').val(data.nama || '');
+        $('#no_ktp').val(data.nik || '');
+        $('#no_kk').val(data.no_kk || data.kk || '331904');
+
+        // Parsing Tempat & Tanggal Lahir
+        if (data.tgl_lahir) {
+            $('#tanggal_lahir').val(data.tgl_lahir);
+        } else if (data.tanggal_lahir) {
+            $('#tanggal_lahir').val(data.tanggal_lahir);
+        }
+
+        if (data.tempat_lahir) {
+            $('#tempat_lahir').val(data.tempat_lahir);
+        } else if (data.tempat_tgl_lahir) {
+            var ttl = data.tempat_tgl_lahir.split(',');
+            $('#tempat_lahir').val(ttl[0].trim());
+
+            if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
+                var rawDate = ttl[1].trim();
+                if (rawDate.includes('-') || rawDate.includes('/')) {
+                    var delimiter = rawDate.includes('-') ? '-' : '/';
+                    var parts = rawDate.split(delimiter);
+                    if (parts[0].length === 2 && parts[2].length === 4) {
+                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                            2, '0');
+                    }
+                }
+                $('#tanggal_lahir').val(rawDate);
+            }
+        }
+
+        // Auto Select Jenis Kelamin
+        if (data.jenis_kelamin) {
+            var jk = data.jenis_kelamin.toString().toLowerCase();
+            if (jk.includes('l')) {
+                $('#jenis_kelamin').val('Laki-Laki');
+            } else if (jk.includes('p')) {
+                $('#jenis_kelamin').val('Perempuan');
+            }
+        }
+
+        // Agama
+        if (data.agama) {
+            $('#agama').val(data.agama);
+        }
+
+        // Pekerjaan & Alamat
+        if (data.pekerjaan) {
+            $('#pekerjaan').val(data.pekerjaan);
+        }
+
+        if (data.alamat_lengkap) {
+            $('#alamat_tinggal').val(data.alamat_lengkap);
+        } else if (data.alamat) {
+            $('#alamat_tinggal').val(data.alamat);
+        }
+    });
+
+    // 3. Reset Isi Form Pemohon Saat Pilihan Dihapus
+    $('#cari_penduduk').on('select2:clear', function(e) {
+        $('#nama_pemohon').val('');
+        $('#no_ktp').val('');
+        $('#no_kk').val('331904');
+        $('#tempat_lahir').val('');
+        $('#tanggal_lahir').val('');
+        $('#jenis_kelamin').val('');
+        $('#agama').val('Islam');
+        $('#pekerjaan').val('');
+        $('#alamat_tinggal').val('');
+    });
+
+    // 4. Pengelolaan Baris Dinamis Pasien
     const containerPasien = document.getElementById("container-pasien");
     const btnAddPasien = document.getElementById("add-pasien-row");
 
-    // 1. Fungsi Tambah Baris Pasien Baru (One-To-Many)
     btnAddPasien.addEventListener("click", function() {
-        const rows = containerPasien.querySelectorAll(".pasien-row");
-        const lastRow = rows[rows.length - 1];
-
-        // Buat element baru
         const newRow = document.createElement("div");
         newRow.className = "row g-2 mb-3 pasien-row";
         newRow.innerHTML = `
@@ -414,7 +545,6 @@ document.addEventListener("DOMContentLoaded", function() {
         toggleRemoveButtons();
     });
 
-    // 2. Event Listener untuk Hapus Baris Pasien
     containerPasien.addEventListener("click", function(e) {
         if (e.target.closest(".btn-remove-pasien")) {
             const row = e.target.closest(".pasien-row");
@@ -423,10 +553,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Fungsi Mengaktifkan/Menonaktifkan Tombol Hapus Baris Pasien
     function toggleRemoveButtons() {
         const rows = containerPasien.querySelectorAll(".pasien-row");
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
             const btnRemove = row.querySelector(".btn-remove-pasien");
             if (rows.length === 1) {
                 btnRemove.setAttribute("disabled", "true");
@@ -436,7 +565,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 3. Fitur Pratinjau Gambar Langsung (Live Preview Image)
+    // 5. Fitur Live Preview Image
     const imgInputs = document.querySelectorAll(".img-input");
     imgInputs.forEach(input => {
         input.addEventListener("change", function() {

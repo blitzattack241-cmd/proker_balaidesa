@@ -78,7 +78,7 @@ if (isset($_POST['submit_login'])) {
         background:
             linear-gradient(rgba(0, 0, 0, 0.45),
                 rgba(0, 0, 0, 0.45)),
-            url("uplouds/balaidesa.jpg");
+            url("uplouds/Gapura.jpeg");
 
         background-size: cover;
         background-position: center;

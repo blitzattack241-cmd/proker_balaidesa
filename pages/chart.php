@@ -1,4 +1,5 @@
 <?php
+// --- FUNGSI HELPER PARSER TEMPAT & BULAN LAHIR ---
 function simdes_extract_tempat_lahir($value): string
 {
     $value = trim((string) $value);
@@ -6,15 +7,22 @@ function simdes_extract_tempat_lahir($value): string
         return 'Tidak Diketahui';
     }
 
+    // 1. Format dengan koma: "Kudus, 12 Mei 2000" -> "Kudus"
     if (preg_match('/^([^,]+),/u', $value, $matches)) {
-        return trim($matches[1]);
+        $place = trim($matches[1]);
+        if ($place !== '' && !is_numeric($place)) {
+            return ucwords(strtolower($place));
+        }
     }
 
-    if (preg_match('/^([A-Za-zÀ-ÿ\s\.\-]+)(?:\s|$)/u', $value, $matches)) {
-        $place = trim($matches[1]);
-        if ($place !== '') {
-            return $place;
-        }
+    // 2. Format tanpa koma: "Kudus 12-05-2000" atau "Kudus 2000-05-12" -> "Kudus"
+    // Menghapus pola tanggal/angka di bagian akhir string
+    $cleanPlace = preg_replace('/\s+(\d{1,4}[-\/\s]|\d{1,2}\s+[A-Za-z]+).*$/u', '', $value);
+    $cleanPlace = trim($cleanPlace);
+
+    // Pastikan hasil ekstraksi bukan murni angka atau format tanggal
+    if ($cleanPlace !== '' && !preg_match('/^\d+$/', $cleanPlace)) {
+        return ucwords(strtolower($cleanPlace));
     }
 
     return 'Tidak Diketahui';
@@ -27,33 +35,42 @@ function simdes_extract_bulan_lahir($value): string
         return 'Tidak Diketahui';
     }
 
+    $names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    // 1. Cek format YYYY-MM-DD atau YYYY/MM/DD
+    if (preg_match('/\b(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})\b/', $value, $m)) {
+        $bulanNum = (int) $m[2];
+        if ($bulanNum >= 1 && $bulanNum <= 12) {
+            return $names[$bulanNum - 1];
+        }
+    }
+
+    // 2. Cek format DD-MM-YYYY atau DD/MM/YYYY
+    if (preg_match('/\b(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})\b/', $value, $m)) {
+        $bulanNum = (int) $m[2];
+        if ($bulanNum >= 1 && $bulanNum <= 12) {
+            return $names[$bulanNum - 1];
+        }
+    }
+
+    // 3. Cek format nama bulan teks (Januari, Feb, dsb)
     $monthMap = [
-        'januari' => 'Januari',
         'jan' => 'Januari',
-        'februari' => 'Februari',
         'feb' => 'Februari',
-        'maret' => 'Maret',
         'mar' => 'Maret',
-        'april' => 'April',
         'apr' => 'April',
         'mei' => 'Mei',
         'may' => 'Mei',
-        'juni' => 'Juni',
         'jun' => 'Juni',
-        'juli' => 'Juli',
         'jul' => 'Juli',
-        'agustus' => 'Agustus',
         'agu' => 'Agustus',
         'aug' => 'Agustus',
-        'september' => 'September',
-        'sept' => 'September',
         'sep' => 'September',
-        'oktober' => 'Oktober',
+        'okt' => 'Oktober',
         'oct' => 'Oktober',
-        'november' => 'November',
         'nov' => 'November',
-        'desember' => 'Desember',
-        'dec' => 'Desember',
+        'des' => 'Desember',
+        'dec' => 'Desember'
     ];
 
     foreach ($monthMap as $key => $label) {
@@ -62,32 +79,38 @@ function simdes_extract_bulan_lahir($value): string
         }
     }
 
-    if (preg_match('/(?:^|[^0-9])(0?[1-9]|1[0-2])(?:[^0-9]|$)/', $value, $matches)) {
-        $num = (int) $matches[1];
-        $names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        return $names[$num - 1] ?? 'Tidak Diketahui';
-    }
-
     return 'Tidak Diketahui';
 }
 
-// Koneksi ke Database (Sesuaikan dengan file koneksi Anda, misal: include 'koneksi.php';)
+// --- KONEKSI DATABASE ---
 $koneksi = mysqli_connect("localhost", "root", "", "db_balaidesa");
 
 if (!$koneksi) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
-// 1. Data Persebaran Penduduk Per RT (Line / Area Chart)
-$q_rt = mysqli_query($koneksi, "SELECT rt, COUNT(*) as total FROM tb_penduduk WHERE rt IS NOT NULL AND rt != '' GROUP BY rt ORDER BY rt ASC");
+// 1. Data Persebaran Penduduk Per RT & RW (DIPERBARUI)
+$q_rt = mysqli_query($koneksi, "
+    SELECT rt, rw, COUNT(*) as total 
+    FROM tb_penduduk 
+    WHERE rt IS NOT NULL AND rt != '' AND rt != '0' 
+      AND rw IS NOT NULL AND rw != '' AND rw != '0'
+    GROUP BY CAST(rw AS UNSIGNED), CAST(rt AS UNSIGNED) 
+    ORDER BY CAST(rw AS UNSIGNED) ASC, CAST(rt AS UNSIGNED) ASC
+");
+
 $label_rt = [];
 $data_rt = [];
 while ($r = mysqli_fetch_assoc($q_rt)) {
-    $label_rt[] = 'RT ' . str_pad($r['rt'], 3, '0', STR_PAD_LEFT);
+    // Menghasilkan format: "RT 001 / RW 001"
+    $rt_formatted = 'RT ' . str_pad($r['rt'], 3, '0', STR_PAD_LEFT);
+    $rw_formatted = 'RW ' . str_pad($r['rw'], 3, '0', STR_PAD_LEFT);
+
+    $label_rt[] = $rt_formatted . ' / ' . $rw_formatted;
     $data_rt[] = (int) $r['total'];
 }
 
-// 2. Data Statistik Pekerjaan (Bar Chart)
+// 2. Data Statistik Pekerjaan (Top 10)
 $q_kerja = mysqli_query($koneksi, "SELECT pekerjaan, COUNT(*) as total FROM tb_penduduk WHERE pekerjaan IS NOT NULL AND pekerjaan != '' GROUP BY pekerjaan ORDER BY total DESC LIMIT 10");
 $label_kerja = [];
 $data_kerja = [];
@@ -96,17 +119,17 @@ while ($r = mysqli_fetch_assoc($q_kerja)) {
     $data_kerja[] = (int) $r['total'];
 }
 
-// 3. Data Perbandingan Jenis Kelamin (Doughnut / Pie Chart)
+// 3. Data Perbandingan Jenis Kelamin
 $q_jk = mysqli_query($koneksi, "SELECT jenis_kelamin, COUNT(*) as total FROM tb_penduduk WHERE jenis_kelamin IS NOT NULL GROUP BY jenis_kelamin");
 $label_jk = [];
 $data_jk = [];
 while ($r = mysqli_fetch_assoc($q_jk)) {
-    $jk = strtoupper($r['jenis_kelamin']);
+    $jk = strtoupper(trim($r['jenis_kelamin']));
     $label_jk[] = ($jk == 'L' || $jk == 'LAKI-LAKI') ? 'Laki-laki' : (($jk == 'P' || $jk == 'PEREMPUAN') ? 'Perempuan' : $jk);
     $data_jk[] = (int) $r['total'];
 }
 
-// 4. Data Statistik Agama (Pie / Doughnut Chart)
+// 4. Data Statistik Agama
 $q_agama = mysqli_query($koneksi, "SELECT agama, COUNT(*) as total FROM tb_penduduk WHERE agama IS NOT NULL AND agama != '' GROUP BY agama ORDER BY total DESC");
 $label_agama = [];
 $data_agama = [];
@@ -115,46 +138,76 @@ while ($r = mysqli_fetch_assoc($q_agama)) {
     $data_agama[] = (int) $r['total'];
 }
 
-// 5. Data Statistik Tempat Lahir dan Bulan Lahir
-$q_lahir = mysqli_query($koneksi, "SELECT tempat_tgl_lahir FROM tb_penduduk WHERE tempat_tgl_lahir IS NOT NULL AND TRIM(tempat_tgl_lahir) != ''");
+// 5. Data Tempat Lahir dan Bulan Lahir
+$q_lahir = mysqli_query($koneksi, "SELECT * FROM tb_penduduk");
+
 $stat_tempat_lahir = [];
-$stat_bulan_lahir = [];
+$stat_bulan_lahir = [
+    'Januari' => 0,
+    'Februari' => 0,
+    'Maret' => 0,
+    'April' => 0,
+    'Mei' => 0,
+    'Juni' => 0,
+    'Juli' => 0,
+    'Agustus' => 0,
+    'September' => 0,
+    'Oktober' => 0,
+    'November' => 0,
+    'Desember' => 0,
+    'Tidak Diketahui' => 0
+];
+
 while ($r = mysqli_fetch_assoc($q_lahir)) {
-    $tempat = simdes_extract_tempat_lahir($r['tempat_tgl_lahir']);
-    $bulan = simdes_extract_bulan_lahir($r['tempat_tgl_lahir']);
-    $stat_tempat_lahir[$tempat] = ($stat_tempat_lahir[$tempat] ?? 0) + 1;
-    $stat_bulan_lahir[$bulan] = ($stat_bulan_lahir[$bulan] ?? 0) + 1;
+    $str_tempat = !empty($r['tempat_lahir']) ? $r['tempat_lahir'] : ($r['tempat_tgl_lahir'] ?? '');
+    $str_bulan = !empty($r['tgl_lahir']) ? $r['tgl_lahir'] : ($r['tempat_tgl_lahir'] ?? '');
+
+    if (trim($str_tempat) !== '') {
+        $tempat = simdes_extract_tempat_lahir($str_tempat);
+        $stat_tempat_lahir[$tempat] = ($stat_tempat_lahir[$tempat] ?? 0) + 1;
+    }
+
+    if (trim($str_bulan) !== '') {
+        $bulan = simdes_extract_bulan_lahir($str_bulan);
+        $stat_bulan_lahir[$bulan] = ($stat_bulan_lahir[$bulan] ?? 0) + 1;
+    }
 }
 
 ksort($stat_tempat_lahir);
-ksort($stat_bulan_lahir);
+
+if (isset($stat_bulan_lahir['Tidak Diketahui']) && $stat_bulan_lahir['Tidak Diketahui'] === 0) {
+    unset($stat_bulan_lahir['Tidak Diketahui']);
+}
 
 $label_tempat_lahir = array_keys($stat_tempat_lahir);
 $data_tempat_lahir = array_values($stat_tempat_lahir);
+
 $label_bulan_lahir = array_keys($stat_bulan_lahir);
 $data_bulan_lahir = array_values($stat_bulan_lahir);
 
-if (empty($label_rt) && empty($label_kerja) && empty($label_jk) && empty($label_agama)) {
-    $label_rt = ['RT 001'];
-    $data_rt = [0];
-    $label_kerja = ['Belum Ada Data'];
-    $data_kerja = [0];
-    $label_jk = ['Belum Ada Data'];
-    $data_jk = [0];
-    $label_agama = ['Belum Ada Data'];
-    $data_agama = [0];
-    $label_tempat_lahir = ['Tidak Diketahui'];
-    $data_tempat_lahir = [0];
-    $label_bulan_lahir = ['Tidak Diketahui'];
-    $data_bulan_lahir = [0];
-}
-// 6. Data Statistik Kelompok Usia (berdasarkan kolom umur yang tersedia)
+// 6. Data Kelompok Usia
 $q_usia = mysqli_query($koneksi, "
     SELECT
-        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 0 AND 5 THEN 1 ELSE 0 END) AS balita,
-        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 6 AND 17 THEN 1 ELSE 0 END) AS anak_anak,
-        SUM(CASE WHEN umur IS NOT NULL AND umur BETWEEN 18 AND 59 THEN 1 ELSE 0 END) AS produktif,
-        SUM(CASE WHEN umur IS NOT NULL AND umur >= 60 THEN 1 ELSE 0 END) AS lansia
+        SUM(CASE 
+            WHEN tgl_lahir IS NOT NULL AND tgl_lahir != '0000-00-00' THEN TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) BETWEEN 0 AND 5
+            WHEN umur IS NOT NULL THEN umur BETWEEN 0 AND 5 
+            ELSE 0 
+        END) AS balita,
+        SUM(CASE 
+            WHEN tgl_lahir IS NOT NULL AND tgl_lahir != '0000-00-00' THEN TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) BETWEEN 6 AND 17
+            WHEN umur IS NOT NULL THEN umur BETWEEN 6 AND 17 
+            ELSE 0 
+        END) AS anak_anak,
+        SUM(CASE 
+            WHEN tgl_lahir IS NOT NULL AND tgl_lahir != '0000-00-00' THEN TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) BETWEEN 18 AND 59
+            WHEN umur IS NOT NULL THEN umur BETWEEN 18 AND 59 
+            ELSE 0 
+        END) AS produktif,
+        SUM(CASE 
+            WHEN tgl_lahir IS NOT NULL AND tgl_lahir != '0000-00-00' THEN TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) >= 60
+            WHEN umur IS NOT NULL THEN umur >= 60 
+            ELSE 0 
+        END) AS lansia
     FROM tb_penduduk
 ");
 
@@ -167,10 +220,33 @@ $data_usia = [
     (int) ($d_usia['produktif'] ?? 0),
     (int) ($d_usia['lansia'] ?? 0)
 ];
+
+// Fallback tampilan awal jika database belum ada data
+if (empty($label_rt)) {
+    $label_rt = ['RT 001 / RW 001'];
+    $data_rt = [0];
+}
+if (empty($label_kerja)) {
+    $label_kerja = ['Belum Ada Data'];
+    $data_kerja = [0];
+}
+if (empty($label_jk)) {
+    $label_jk = ['Belum Ada Data'];
+    $data_jk = [0];
+}
+if (empty($label_agama)) {
+    $label_agama = ['Belum Ada Data'];
+    $data_agama = [0];
+}
+if (empty($label_tempat_lahir)) {
+    $label_tempat_lahir = ['Tidak Diketahui'];
+    $data_tempat_lahir = [0];
+}
 ?>
 
-<!-- Load CDN Chart.js -->
+<!-- CDN Chart.js & FontAwesome -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
     .chart-card {
@@ -178,15 +254,18 @@ $data_usia = [
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         padding: 1.25rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         height: 100%;
     }
 
     .chart-title {
         font-weight: 700;
-        font-size: 1.05rem;
+        font-size: 1rem;
         color: #1e293b;
         margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .chart-container {
@@ -197,7 +276,6 @@ $data_usia = [
 </style>
 
 <div class="container-fluid px-4 py-4">
-    <!-- Header Halaman -->
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
             <h4 class="fw-bold text-dark mb-1">Statistik & Grafik Penduduk</h4>
@@ -208,84 +286,92 @@ $data_usia = [
         </button>
     </div>
 
-    <!-- Grid Grafik -->
     <div class="row g-4">
-
-        <!-- 1. Chart Persebaran Penduduk Per RT -->
+        <!-- 1. RT Chart (Persebaran Per RT & RW) -->
         <div class="col-md-6">
             <div class="chart-card">
-                <div class="chart-title">Persebaran Penduduk Per RT</div>
+                <div class="chart-title">
+                    <i class="fas fa-map-marker-alt text-primary"></i> Persebaran Penduduk Per RT & RW
+                </div>
                 <div class="chart-container">
                     <canvas id="chartRT"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Chart Statistik Pekerjaan / Pendidikan -->
+        <!-- 2. Pekerjaan Chart -->
         <div class="col-md-6">
             <div class="chart-card">
-                <div class="chart-title">Statistik Pekerjaan Penduduk</div>
+                <div class="chart-title"><i class="fas fa-briefcase text-success"></i> Top 10 Pekerjaan Penduduk</div>
                 <div class="chart-container">
                     <canvas id="chartPekerjaan"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Chart Perbandingan Jenis Kelamin -->
+        <!-- 3. Jenis Kelamin Chart -->
         <div class="col-md-6">
             <div class="chart-card">
-                <div class="chart-title">Perbandingan Jenis Kelamin</div>
+                <div class="chart-title"><i class="fas fa-venus-mars text-danger"></i> Perbandingan Jenis Kelamin</div>
                 <div class="chart-container">
                     <canvas id="chartJK"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Chart Statistik Agama -->
+        <!-- 4. Agama Chart -->
         <div class="col-md-6">
             <div class="chart-card">
-                <div class="chart-title">Statistik Agama</div>
+                <div class="chart-title"><i class="fas fa-pray text-warning"></i> Statistik Agama</div>
                 <div class="chart-container">
                     <canvas id="chartAgama"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- 5. Chart Tempat Lahir -->
+        <!-- 5. Kelompok Usia Chart -->
         <div class="col-md-6">
             <div class="chart-card">
-                <div class="chart-title">Statistik Tempat Lahir</div>
-                <div class="chart-container">
-                    <canvas id="chartTempatLahir"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- 6. Chart Bulan Lahir -->
-        <div class="col-md-6">
-            <div class="chart-card">
-                <div class="chart-title">Statistik Bulan Lahir</div>
-                <div class="chart-container">
-                    <canvas id="chartBulanLahir"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7. Chart Kelompok Usia -->
-        <div class="col-md-6">
-            <div class="chart-card">
-                <div class="chart-title">Statistik Kelompok Usia</div>
+                <div class="chart-title"><i class="fas fa-users text-info"></i> Statistik Kelompok Usia</div>
                 <div class="chart-container">
                     <canvas id="chartUsia"></canvas>
                 </div>
             </div>
         </div>
 
+        <!-- 6. Bulan Lahir Chart -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title"><i class="fas fa-calendar-alt text-secondary"></i> Statistik Bulan Lahir</div>
+                <div class="chart-container">
+                    <canvas id="chartBulanLahir"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Tempat Lahir Chart -->
+        <div class="col-12">
+            <div class="chart-card">
+                <div class="chart-title"><i class="fas fa-city text-dark"></i> Statistik Tempat Lahir</div>
+                <div class="chart-container" style="height: 320px;">
+                    <canvas id="chartTempatLahir"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Format Data dari PHP ke JavaScript
+    const yAxisConfig = {
+        beginAtZero: true,
+        ticks: {
+            precision: 0
+        },
+        grid: {
+            color: '#f1f5f9'
+        }
+    };
+
     const labelRT = <?= json_encode($label_rt) ?>;
     const dataRT = <?= json_encode($data_rt) ?>;
 
@@ -294,27 +380,38 @@ $data_usia = [
 
     const labelJK = <?= json_encode($label_jk) ?>;
     const dataJK = <?= json_encode($data_jk) ?>;
+    const colorJK = labelJK.map(label => {
+        const key = String(label).toLowerCase();
+        if (key.includes('laki')) return '#0284c7';
+        if (key.includes('perempuan')) return '#ec4899';
+        return '#94a3b8';
+    });
 
     const labelAgama = <?= json_encode($label_agama) ?>;
     const dataAgama = <?= json_encode($data_agama) ?>;
-    const labelTempatLahir = <?= json_encode($label_tempat_lahir) ?>;
-    const dataTempatLahir = <?= json_encode($data_tempat_lahir) ?>;
+
+    const labelUsia = <?= json_encode($label_usia) ?>;
+    const dataUsia = <?= json_encode($data_usia) ?>;
+
     const labelBulanLahir = <?= json_encode($label_bulan_lahir) ?>;
     const dataBulanLahir = <?= json_encode($data_bulan_lahir) ?>;
 
-    // --- 1. Render Line Chart (Persebaran Per RT) ---
+    const labelTempatLahir = <?= json_encode($label_tempat_lahir) ?>;
+    const dataTempatLahir = <?= json_encode($data_tempat_lahir) ?>;
+
+    // 1. Chart RT (Diubah Rotasi Label agar pas saat dibaca)
     new Chart(document.getElementById('chartRT'), {
         type: 'line',
         data: {
             labels: labelRT,
             datasets: [{
-                label: 'Jiwa',
+                label: 'Jumlah Jiwa',
                 data: dataRT,
                 borderColor: '#0284c7',
-                backgroundColor: 'rgba(56, 189, 248, 0.3)',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
                 fill: true,
                 tension: 0.35,
-                pointRadius: 4,
+                pointRadius: 5,
                 pointBackgroundColor: '#0284c7',
                 borderWidth: 3
             }]
@@ -324,27 +421,25 @@ $data_usia = [
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top'
+                    display: false
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
+                y: yAxisConfig,
                 x: {
                     grid: {
                         color: '#f1f5f9'
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
                     }
                 }
             }
         }
     });
 
-    // --- 2. Render Bar Chart (Statistik Pekerjaan) ---
+    // 2. Chart Pekerjaan
     new Chart(document.getElementById('chartPekerjaan'), {
         type: 'bar',
         data: {
@@ -352,10 +447,8 @@ $data_usia = [
             datasets: [{
                 label: 'Jumlah',
                 data: dataKerja,
-                backgroundColor: ['#0284c7', '#16a34a', '#f59e0b', '#8b5cf6', '#ef4444', '#0f766e',
-                    '#2563eb', '#dc2626', '#14b8a6', '#84cc16'
-                ],
-                borderRadius: 4
+                backgroundColor: '#10b981',
+                borderRadius: 6
             }]
         },
         options: {
@@ -363,17 +456,11 @@ $data_usia = [
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top'
+                    display: false
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
+                y: yAxisConfig,
                 x: {
                     grid: {
                         display: false
@@ -387,14 +474,15 @@ $data_usia = [
         }
     });
 
-    // --- 3. Render Pie/Doughnut Chart (Jenis Kelamin) ---
+    // 3. Chart Jenis Kelamin
     new Chart(document.getElementById('chartJK'), {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: labelJK,
             datasets: [{
                 data: dataJK,
-                backgroundColor: ['#0284c7', '#ef4444']
+                backgroundColor: colorJK,
+                borderWidth: 2
             }]
         },
         options: {
@@ -402,14 +490,13 @@ $data_usia = [
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top'
+                    position: 'bottom'
                 }
             }
         }
     });
 
-    // --- 4. Render Pie Chart (Agama) ---
+    // 4. Chart Agama
     new Chart(document.getElementById('chartAgama'), {
         type: 'pie',
         data: {
@@ -417,7 +504,7 @@ $data_usia = [
             datasets: [{
                 data: dataAgama,
                 backgroundColor: ['#0284c7', '#16a34a', '#eab308', '#a855f7', '#f97316', '#06b6d4',
-                    '#6366f1', '#ec4899'
+                    '#6366f1'
                 ]
             }]
         },
@@ -426,96 +513,13 @@ $data_usia = [
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top'
+                    position: 'bottom'
                 }
             }
         }
     });
 
-    // --- 5. Render Bar Chart (Tempat Lahir) ---
-    new Chart(document.getElementById('chartTempatLahir'), {
-        type: 'bar',
-        data: {
-            labels: labelTempatLahir,
-            datasets: [{
-                label: 'Jumlah Penduduk',
-                data: dataTempatLahir,
-                backgroundColor: '#0f766e',
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                }
-            }
-        }
-    });
-
-    // --- 6. Render Bar Chart (Bulan Lahir) ---
-    new Chart(document.getElementById('chartBulanLahir'), {
-        type: 'bar',
-        data: {
-            labels: labelBulanLahir,
-            datasets: [{
-                label: 'Jumlah Penduduk',
-                data: dataBulanLahir,
-                backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#14b8a6',
-                    '#fb7185', '#84cc16', '#6366f1', '#f97316', '#0ea5e9', '#64748b'
-                ],
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-
-    // Data Usia dari PHP ke JS
-    const labelUsia = <?= json_encode($label_usia) ?>;
-    const dataUsia = <?= json_encode($data_usia) ?>;
-
-    // --- Render Bar/Doughnut Chart (Kelompok Usia) ---
+    // 5. Chart Kelompok Usia
     new Chart(document.getElementById('chartUsia'), {
         type: 'bar',
         data: {
@@ -536,15 +540,80 @@ $data_usia = [
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
+                y: yAxisConfig,
                 x: {
                     grid: {
                         display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // 6. Chart Bulan Lahir
+    new Chart(document.getElementById('chartBulanLahir'), {
+        type: 'bar',
+        data: {
+            labels: labelBulanLahir,
+            datasets: [{
+                label: 'Jumlah Penduduk',
+                data: dataBulanLahir,
+                backgroundColor: '#6366f1',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: yAxisConfig,
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // 7. Chart Tempat Lahir
+    new Chart(document.getElementById('chartTempatLahir'), {
+        type: 'bar',
+        data: {
+            labels: labelTempatLahir,
+            datasets: [{
+                label: 'Jumlah Penduduk',
+                data: dataTempatLahir,
+                backgroundColor: '#0f766e',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: yAxisConfig,
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
                     }
                 }
             }

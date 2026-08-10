@@ -59,12 +59,16 @@ $qr_token = dapatkanTokenVerifikasi($koneksi, 'surat_undangan', $id_undangan, $d
 
 // Ambil data penerima dari tb_undangan_tujuan
 $nama_penerima = '';
+$nama_jabatan_penerima = '';
 $tempat_penerima = '';
 $query_tujuan = mysqli_query($koneksi, "SELECT * FROM `tb_undangan_tujuan` WHERE `id_undangan` = $id_undangan ORDER BY `id_tujuan` ASC");
 if ($query_tujuan) {
     $tujuan = mysqli_fetch_assoc($query_tujuan);
     if (!empty($tujuan['nama_tujuan'])) {
         $nama_penerima = $tujuan['nama_tujuan'];
+    }
+    if (!empty($tujuan['nama_jabatan_tujuan'])) {
+        $nama_jabatan_penerima = $tujuan['nama_jabatan_tujuan'];
     }
     if (!empty($tujuan['alamat_tujuan'])) {
         $tempat_penerima = $tujuan['alamat_tujuan'];
@@ -108,214 +112,214 @@ function tgl_indo($tanggal)
     <meta charset="UTF-8">
     <title>Surat Undangan - <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></title>
     <style>
-        /* Pengaturan Dasar Halaman sesuai standar dokumen desa */
+    /* Pengaturan Dasar Halaman sesuai standar dokumen desa */
+    body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 11pt;
+        color: #000;
+        background-color: #525659;
+        margin: 0;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Pembatas Ukuran Kertas F4/Folio */
+    .kertas {
+        background-color: #fff;
+        width: 215mm;
+        min-height: 330mm;
+        padding: 25mm 20mm 20mm 25mm;
+        box-sizing: border-box;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Kop Surat */
+    .kop-surat {
+        text-align: center;
+        position: relative;
+        margin-bottom: 10px;
+    }
+
+    .kop-surat h2 {
+        font-size: 16pt;
+        text-transform: uppercase;
+        margin: 0;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+
+    .kop-surat h3 {
+        font-size: 14pt;
+        text-transform: uppercase;
+        margin: 2px 0;
+        font-weight: normal;
+        letter-spacing: 0.5px;
+    }
+
+    .kop-surat h4 {
+        font-size: 15pt;
+        text-transform: uppercase;
+        margin: 0;
+        font-weight: normal;
+        letter-spacing: 0.5px;
+    }
+
+    .kop-surat p {
+        font-size: 11pt;
+        font-style: italic;
+        margin: 5px 0 0 0;
+        font-weight: normal;
+    }
+
+    .garis-kop {
+        border: none;
+        border-top: 3px solid #000;
+        border-bottom: 1px solid #000;
+        height: 3px;
+        margin-top: 8px;
+        margin-bottom: 25px;
+    }
+
+    /* Tata Letak Info Baris Atas */
+    .tabel-meta {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    .tabel-meta td {
+        vertical-align: top;
+        line-height: 1.5;
+        padding: 2px 0;
+    }
+
+    /* Isi Konten Surat */
+    .paragraf {
+        text-align: justify;
+        text-indent: 40px;
+        line-height: 1.6;
+        margin-top: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* Tabel Rincian Acara/Waktu (Bagian Tengah) */
+    .tabel-rincian {
+        width: 100%;
+        margin-left: 40px;
+        margin-top: 15px;
+        margin-bottom: 20px;
+        border-collapse: collapse;
+    }
+
+    .tabel-rincian td {
+        vertical-align: top;
+        padding: 4px 0;
+        line-height: 1.5;
+    }
+
+    /* Bagian Tanda Tangan */
+    .tabel-ttd {
+        width: 100%;
+        margin-top: 40px;
+    }
+
+    .tabel-ttd td {
+        text-align: center;
+        vertical-align: top;
+    }
+
+    .space-ttd {
+        height: 75px;
+    }
+
+    .nama-kades {
+        font-weight: bold;
+        text-decoration: underline;
+        text-transform: uppercase;
+    }
+
+    /* Fitur Live Edit */
+    [contenteditable="true"] {
+        outline: none;
+        transition: background 0.2s;
+    }
+
+    [contenteditable="true"]:hover {
+        background-color: #f1f3f5;
+        cursor: edit;
+    }
+
+    [contenteditable="true"]:focus {
+        background-color: #e9ecef;
+    }
+
+    /* Pengaturan Mode Cetak Fisik */
+    @media print {
         body {
-            font-family: "Times New Roman", Times, serif;
-            font-size: 11pt;
-            color: #000;
-            background-color: #525659;
-            margin: 0;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Pembatas Ukuran Kertas F4/Folio */
-        .kertas {
             background-color: #fff;
-            width: 215mm;
-            min-height: 330mm;
-            padding: 25mm 20mm 20mm 25mm;
-            box-sizing: border-box;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            padding: 0;
+            display: block;
         }
 
-        /* Kop Surat */
-        .kop-surat {
-            text-align: center;
-            position: relative;
-            margin-bottom: 10px;
+        .no-print {
+            display: none;
         }
 
-        .kop-surat h2 {
-            font-size: 16pt;
-            text-transform: uppercase;
-            margin: 0;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        .kop-surat h3 {
-            font-size: 14pt;
-            text-transform: uppercase;
-            margin: 2px 0;
-            font-weight: normal;
-            letter-spacing: 0.5px;
-        }
-
-        .kop-surat h4 {
-            font-size: 15pt;
-            text-transform: uppercase;
-            margin: 0;
-            font-weight: normal;
-            letter-spacing: 0.5px;
-        }
-
-        .kop-surat p {
-            font-size: 11pt;
-            font-style: italic;
-            margin: 5px 0 0 0;
-            font-weight: normal;
-        }
-
-        .garis-kop {
-            border: none;
-            border-top: 3px solid #000;
-            border-bottom: 1px solid #000;
-            height: 3px;
-            margin-top: 8px;
-            margin-bottom: 25px;
-        }
-
-        /* Tata Letak Info Baris Atas */
-        .tabel-meta {
+        .kertas {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
+            min-height: auto;
+            padding: 0;
+            box-shadow: none;
         }
 
-        .tabel-meta td {
-            vertical-align: top;
-            line-height: 1.5;
-            padding: 2px 0;
-        }
-
-        /* Isi Konten Surat */
-        .paragraf {
-            text-align: justify;
-            text-indent: 40px;
-            line-height: 1.6;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-
-        /* Tabel Rincian Acara/Waktu (Bagian Tengah) */
-        .tabel-rincian {
-            width: 100%;
-            margin-left: 40px;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-        }
-
-        .tabel-rincian td {
-            vertical-align: top;
-            padding: 4px 0;
-            line-height: 1.5;
-        }
-
-        /* Bagian Tanda Tangan */
-        .tabel-ttd {
-            width: 100%;
-            margin-top: 40px;
-        }
-
-        .tabel-ttd td {
-            text-align: center;
-            vertical-align: top;
-        }
-
-        .space-ttd {
-            height: 75px;
-        }
-
-        .nama-kades {
-            font-weight: bold;
-            text-decoration: underline;
-            text-transform: uppercase;
-        }
-
-        /* Fitur Live Edit */
-        [contenteditable="true"] {
-            outline: none;
-            transition: background 0.2s;
-        }
-
-        [contenteditable="true"]:hover {
-            background-color: #f1f3f5;
-            cursor: edit;
-        }
-
+        [contenteditable="true"]:hover,
         [contenteditable="true"]:focus {
-            background-color: #e9ecef;
+            background-color: transparent !important;
         }
+    }
 
-        /* Pengaturan Mode Cetak Fisik */
-        @media print {
-            body {
-                background-color: #fff;
-                padding: 0;
-                display: block;
-            }
+    /* Bar Navigasi */
+    .nav-control {
+        text-align: center;
+        padding: 15px;
+        background: #2e3133;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
 
-            .no-print {
-                display: none;
-            }
+    .btn-cetak {
+        padding: 8px 18px;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 10pt;
+        font-weight: bold;
+        transition: 0.2s;
+    }
 
-            .kertas {
-                width: 100%;
-                min-height: auto;
-                padding: 0;
-                box-shadow: none;
-            }
+    .btn-cetak:hover {
+        background-color: #218838;
+    }
 
-            [contenteditable="true"]:hover,
-            [contenteditable="true"]:focus {
-                background-color: transparent !important;
-            }
-        }
-
-        /* Bar Navigasi */
-        .nav-control {
-            text-align: center;
-            padding: 15px;
-            background: #2e3133;
-            width: 100%;
-            position: sticky;
-            top: 0;
-            z-index: 9999;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .btn-cetak {
-            padding: 8px 18px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10pt;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn-cetak:hover {
-            background-color: #218838;
-        }
-
-        .badge-info-edit {
-            background-color: #17a2b8;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 9.5pt;
-            display: flex;
-            align-items: center;
-        }
+    .badge-info-edit {
+        background-color: #17a2b8;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-size: 9.5pt;
+        display: flex;
+        align-items: center;
+    }
     </style>
 </head>
 
@@ -378,9 +382,14 @@ function tgl_indo($tanggal)
                 <td style="width: 50%; padding-left: 40px;">
                     Berugenjang, <?= tgl_indo($data['tanggal_surat'] ?? date('Y-m-d')); ?><br>
                     Kepada Yth. Bapak/Ibu/Sdr/i<br>
-                    <div style="font-weight: bold; margin-top: 5px; text-transform: uppercase;" contenteditable="true">
+                    <div style="margin-top: 5px; text-transform: uppercase;" contenteditable="true">
                         <?= htmlspecialchars($nama_penerima ?: 'NAMA PENERIMA'); ?>
                     </div>
+                    <?php if (!empty($nama_jabatan_penerima)): ?>
+                    <div style="margin-top: 4px; text-transform: uppercase;" contenteditable="true">
+                        <?= htmlspecialchars($nama_jabatan_penerima); ?>
+                    </div>
+                    <?php endif; ?>
                     <div style="margin-top: 15px;">Di -</div>
                     <div style="text-indent: 30px; text-decoration: underline;" contenteditable="true">
                         <?= htmlspecialchars($tempat_penerima ?: 'Tempat'); ?>
@@ -402,7 +411,7 @@ function tgl_indo($tanggal)
             <tr>
                 <td style="width: 18%;">Hari</td>
                 <td style="width: 3%;">:</td>
-                <td style="width: 79%;" contenteditable="true"><?= htmlspecialchars($data['hari'] ?? ''); ?></td>
+                <td style="width: 79%;" contenteditable="true"><?= htmlspecialchars($data['hari_acara'] ?? ''); ?></td>
             </tr>
             <tr>
                 <td>Tanggal</td>
@@ -414,7 +423,7 @@ function tgl_indo($tanggal)
             <tr>
                 <td>Jam</td>
                 <td>:</td>
-                <td contenteditable="true"><?= htmlspecialchars($data['jam'] ?? '19.00 Wib s/d selesai'); ?></td>
+                <td contenteditable="true"><?= htmlspecialchars($data['jam_acara'] ?? '19.00 Wib s/d selesai'); ?></td>
             </tr>
             <tr>
                 <td>Tempat</td>
@@ -426,13 +435,13 @@ function tgl_indo($tanggal)
             <tr>
                 <td>Acara</td>
                 <td>:</td>
-                <td style="font-weight: bold;" contenteditable="true"><?= htmlspecialchars($data['acara'] ?? ''); ?>
+                <td contenteditable="true"><?= htmlspecialchars($data['acara'] ?? ''); ?>
                 </td>
             </tr>
             <tr>
                 <td>Keterangan</td>
                 <td>:</td>
-                <td style="font-weight: bold;" contenteditable="true">
+                <td contenteditable="true">
                     <?= htmlspecialchars($data['keterangan'] ?? 'Mohon Hadir Tepat Waktu'); ?>
                 </td>
             </tr>
@@ -455,7 +464,7 @@ function tgl_indo($tanggal)
                         <p class="nama-kades"><?= htmlspecialchars($nama_penandatangan); ?></p>
                     </div>
                     <?php if (!empty($nip_penandatangan) && $nip_penandatangan !== '-'): ?>
-                        <p style="margin: 0; font-size: 10pt;">NIP. <?= htmlspecialchars($nip_penandatangan); ?></p>
+                    <p style="margin: 0; font-size: 10pt;">NIP. <?= htmlspecialchars($nip_penandatangan); ?></p>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -464,11 +473,11 @@ function tgl_indo($tanggal)
 
     <!-- Script Pemicu Print Otomatis -->
     <script>
-        window.onload = function () {
-            setTimeout(function () {
-                window.print();
-            }, 700);
-        };
+    window.onload = function() {
+        setTimeout(function() {
+            window.print();
+        }, 700);
+    };
     </script>
 </body>
 

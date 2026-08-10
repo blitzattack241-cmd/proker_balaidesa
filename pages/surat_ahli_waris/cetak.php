@@ -182,7 +182,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
         font-size: 12pt;
         text-decoration: underline;
         text-transform: uppercase;
-        font-weight: bold;
+        font-weight: normal;
     }
 
     .paragraf-salam {
@@ -343,8 +343,8 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
 
             <!-- PARAGRAF PEMBUKA -->
             <p class="paragraf-salam">
-                Kami yang bertandatangan di bawah ini, para ahli waris dari almarhum : <strong
-                    contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></strong> dengan dihadiri
+                Kami yang bertandatangan di bawah ini, para ahli waris dari almarhum : <span
+                    contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></span> dengan dihadiri
                 oleh saksi-saksi:
             </p>
 
@@ -355,7 +355,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     <td width="4%">1.</td>
                     <td width="15%">Nama</td>
                     <td width="3%">:</td>
-                    <td><strong contenteditable="true"><?= htmlspecialchars($saksi_list[0]['nama_saksi']); ?></strong>
+                    <td><span contenteditable="true"><?= htmlspecialchars($saksi_list[0]['nama_saksi']); ?></span>
                     </td>
                 </tr>
                 <tr>
@@ -377,7 +377,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     <td>2.</td>
                     <td>Nama</td>
                     <td>:</td>
-                    <td><strong contenteditable="true"><?= htmlspecialchars($saksi_list[1]['nama_saksi']); ?></strong>
+                    <td><span contenteditable="true"><?= htmlspecialchars($saksi_list[1]['nama_saksi']); ?></span>
                     </td>
                 </tr>
                 <tr>
@@ -397,16 +397,16 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
 
             <!-- PARAGRAF KEDUA MENDIANG -->
             <p class="paragraf-salam" style="text-indent: 0px;">
-                Menerangkan dengan sesungguhnya, dan sanggup diangkat sumpah, bahwa Almarhum/Almarhumah <strong
-                    contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></strong> yang bertempat
+                Menerangkan dengan sesungguhnya, dan sanggup diangkat sumpah, bahwa Almarhum/Almarhumah <span
+                    contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></span> yang bertempat
                 tinggal terakhir di <span
                     contenteditable="true"><?= htmlspecialchars($data['alamat_terakhir']); ?></span> pada tanggal <span
                     contenteditable="true"><?= tgl_indo($data['tanggal_meninggal']); ?></span> telah Meninggal Dunia di
                 <span contenteditable="true"><?= htmlspecialchars($data['tempat_meninggal']); ?></span>. Dari perkawinan
-                Almarhum/Almarhumah <strong
-                    contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></strong> dengan istri/suami
-                **) <strong
-                    contenteditable="true"><?= !empty($data['nama_pasangan']) ? htmlspecialchars($data['nama_pasangan']) : '....................'; ?></strong>
+                Almarhum/Almarhumah <span contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></span>
+                dengan istri/suami
+                **) <span
+                    contenteditable="true"><?= !empty($data['nama_pasangan']) ? htmlspecialchars($data['nama_pasangan']) : '....................'; ?></span>
                 (alm) dilahirkan <span contenteditable="true"><?= $jumlah_anak; ?> (<?= $jumlah_anak_huruf; ?>)</span>
                 orang anak yaitu :
             </p>
@@ -419,7 +419,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     ?>
                 <tr>
                     <td width="4%"><?= $i++; ?>.</td>
-                    <td width="30%"><strong contenteditable="true"><?= htmlspecialchars($anak['nama_anak']); ?></strong>
+                    <td width="30%"><span contenteditable="true"><?= htmlspecialchars($anak['nama_anak']); ?></span>
                     </td>
                     <td width="33%">Pekerjaan : <span
                             contenteditable="true"><?= htmlspecialchars($anak['pekerjaan']); ?></span></td>
@@ -448,7 +448,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                 demikian kami istri/suami dan ke <?= $jumlah_anak; ?> (<?= $jumlah_anak_huruf; ?>) orang anak yang masih
                 hidup beserta .......................................................... cucu yang berasal dari anak
                 ke..................... yang telah meninggal dunia adalah satu-satunya ahli waris
-                <strong><?= htmlspecialchars($data['nama_almarhum']); ?></strong>.
+                <span contenteditable="true"><?= htmlspecialchars($data['nama_almarhum']); ?></span>.
             </p>
 
             <!-- TANGGAL SURAT -->
@@ -457,7 +457,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
             </div>
 
             <!-- AREA TANDA TANGAN AHLI WARIS -->
-            <div style="text-align: center; font-weight: bold; margin-top: 3px; margin-bottom: 3px;">
+            <div style="text-align: center; margin-top: 3px; margin-bottom: 3px;">
                 Para ahli waris tersebut :
             </div>
 
@@ -474,8 +474,8 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                     <td width="5%"><?= $j; ?>.</td>
                     <td width="20%">Anak ke <?= $j; ?></td>
                     <td width="3%">:</td>
-                    <td width="27%"><strong
-                            contenteditable="true"><?= htmlspecialchars($anak_ttd['nama_anak']); ?></strong></td>
+                    <td width="27%"><span contenteditable="true"><?= htmlspecialchars($anak_ttd['nama_anak']); ?></span>
+                    </td>
                     <td width="3%">:</td>
                     <td width="37%" class="td-ttd-relative">
                         <?php if($is_meterai_row): ?>
@@ -495,15 +495,15 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
             </table>
 
             <!-- AREA SAKSI WARIS -->
-            <div style="margin-top: 8px; font-weight: bold; text-decoration: underline;">
+            <div style="margin-top: 8px; text-decoration: underline;">
                 Saksi Waris :
             </div>
             <table class="tabel-ttd-waris" style="margin-left: 15px; margin-top: 2px;">
                 <?php if (isset($saksi_list[0])): ?>
                 <tr>
                     <td width="4%">1.</td>
-                    <td width="25%"><strong
-                            contenteditable="true"><?= htmlspecialchars($saksi_list[0]['nama_saksi']); ?></strong></td>
+                    <td width="25%"><span
+                            contenteditable="true"><?= htmlspecialchars($saksi_list[0]['nama_saksi']); ?></span></td>
                     <td><span contenteditable="true">(
                             ....................................................................................
                             )</span></td>
@@ -512,7 +512,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                 <?php if (isset($saksi_list[1])): ?>
                 <tr>
                     <td>2.</td>
-                    <td><strong contenteditable="true"><?= htmlspecialchars($saksi_list[1]['nama_saksi']); ?></strong>
+                    <td><span contenteditable="true"><?= htmlspecialchars($saksi_list[1]['nama_saksi']); ?></span>
                     </td>
                     <td><span contenteditable="true">(
                             ....................................................................................
@@ -528,7 +528,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                         Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ........................................<br>
                         Tanggal &nbsp;&nbsp;&nbsp;: ........................................<br>
                         Dikuatkan oleh kami,<br>
-                        <strong>Camat Undaan</strong>
+                        Camat Undaan
                         <div style="height: 85px;"></div>
                         .......................................................
                     </td>
@@ -541,7 +541,7 @@ $jumlah_anak_huruf = trim(penyebut($jumlah_anak));
                                 <?= htmlspecialchars($data['nomor_surat']); ?><br>
                                 Tanggal &nbsp;&nbsp;&nbsp;: <?= tgl_indo($data['tanggal_surat']); ?><br>
                                 Disaksikan dan dibenarkan oleh kami,<br>
-                                <strong><?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang</strong>
+                                <span><?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang</span>
                             </div>
 
                             <!-- QR CODE RATA TENGAH (CENTER) -->

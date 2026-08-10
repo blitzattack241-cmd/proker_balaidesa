@@ -7,10 +7,35 @@ if (!$koneksi) {
     exit();
 }
 
+// Helper: Format Normalisasi Status Perkawinan (Diperbarui)
+function formatStatusPerkawinan($status)
+{
+    $val = strtolower(trim((string)$status));
+    if (empty($val)) return 'Belum Kawin';
+
+    if (strpos($val, 'janda') !== false || strpos($val, 'duda') !== false) {
+        return 'Janda / Duda';
+    } elseif (strpos($val, 'cerai tercatat') !== false || strpos($val, 'tercatat') !== false) {
+        return 'Cerai Tercatat';
+    } elseif (strpos($val, 'cerai mati') !== false) {
+        return 'Cerai Mati';
+    } elseif (strpos($val, 'cerai hidup') !== false) {
+        return 'Cerai Hidup';
+    } elseif (strpos($val, 'cerai') !== false) {
+        return 'Cerai';
+    } elseif (strpos($val, 'belum') !== false) {
+        return 'Belum Kawin';
+    } elseif (strpos($val, 'kawin') !== false || strpos($val, 'nikah') !== false) {
+        return 'Kawin';
+    }
+    return 'Belum Kawin';
+}
+
 // Helper: Parse tempat_tgl_lahir - Handle multiple date formats
 function extractTglLahir($tempat_tgl_lahir)
 {
-    if (!$tempat_tgl_lahir) return '';
+    if (!$tempat_tgl_lahir)
+        return '';
     $str = trim($tempat_tgl_lahir);
 
     // 1. Ekstrak format YYYY-MM-DD
@@ -34,18 +59,16 @@ function extractTglLahir($tempat_tgl_lahir)
 // Helper: Extract tempat lahir dengan menghapus pola tanggal dari string
 function extractTempatLahir($tempat_tgl_lahir)
 {
-    if (!$tempat_tgl_lahir) return '';
+    if (!$tempat_tgl_lahir)
+        return '';
 
     $str = trim($tempat_tgl_lahir);
 
-    // Jika dipisahkan oleh koma (misal: "Kudus, 1995-08-17")
     if (strpos($str, ',') !== false) {
         $parts = explode(',', $str);
         return trim($parts[0]);
     }
 
-    // Jika tidak ada koma (misal: "Kudus 1995-08-17" atau "Kudus 17-08-1995")
-    // Hapus semua format tanggal angka dari string
     $cleanStr = preg_replace('/\b(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4}|\d{2}\/\d{2}\/\d{4})\b/', '', $str);
 
     return trim($cleanStr);
@@ -54,7 +77,8 @@ function extractTempatLahir($tempat_tgl_lahir)
 // Helper: Hitung umur dari tanggal lahir
 function calculateAge($birthDate)
 {
-    if (!$birthDate) return 0;
+    if (!$birthDate)
+        return 0;
     try {
         $birthDateTime = new DateTime($birthDate);
         $today = new DateTime();
@@ -77,7 +101,7 @@ if ($searchTerm !== '') {
     $search = mysqli_real_escape_string($koneksi, $searchTerm);
 
     // Cari berdasarkan Nama, NIK, atau No. KK
-    $query = "SELECT id, nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, pekerjaan, alamat, rt, rw 
+    $query = "SELECT id, nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, tempat_lahir, tgl_lahir, pekerjaan, alamat, rt, rw, status_pernikahan, status_keluarga 
               FROM tb_penduduk 
               WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' 
               ORDER BY nama ASC
@@ -90,8 +114,8 @@ if ($searchTerm !== '') {
         $alamat_lengkap = trim(($row['alamat'] ?? '') . ' ' . ($row['rt'] ? 'RT ' . sprintf("%03d", $row['rt']) : '') . ' ' . ($row['rw'] ? '/ RW ' . sprintf("%03d", $row['rw']) : ''));
 
         // Extract tanggal lahir dan tempat lahir
-        $tgl_lahir = extractTglLahir($row['tempat_tgl_lahir']);
-        $tempat_lahir = extractTempatLahir($row['tempat_tgl_lahir']);
+        $tgl_lahir = $row['tgl_lahir'] ?: extractTglLahir($row['tempat_tgl_lahir']);
+        $tempat_lahir = $row['tempat_lahir'] ?: extractTempatLahir($row['tempat_tgl_lahir']);
         $umur = calculateAge($tgl_lahir);
 
         $data[] = [
@@ -104,6 +128,8 @@ if ($searchTerm !== '') {
             'tgl_lahir' => $tgl_lahir,
             'tanggal_lahir' => $tgl_lahir,
             'tempat_lahir' => $tempat_lahir,
+            'status_pernikahan' => formatStatusPerkawinan($row['status_pernikahan'] ?? ''),
+            'status_keluarga' => $row['status_keluarga'] ?? '',
             'umur' => (int) $umur,
             'pekerjaan' => $row['pekerjaan'],
             'jenis_kelamin' => $row['jenis_kelamin'],
@@ -132,13 +158,14 @@ if (isset($_GET['id'])) {
     $row = mysqli_fetch_assoc($result);
 
     if ($row) {
-        $tgl_lahir = extractTglLahir($row['tempat_tgl_lahir']);
-        $tempat_lahir = extractTempatLahir($row['tempat_tgl_lahir']);
+        $tgl_lahir = $row['tgl_lahir'] ?: extractTglLahir($row['tempat_tgl_lahir']);
+        $tempat_lahir = $row['tempat_lahir'] ?: extractTempatLahir($row['tempat_tgl_lahir']);
         $umur = calculateAge($tgl_lahir);
 
         $row['tgl_lahir'] = $tgl_lahir;
         $row['tanggal_lahir'] = $tgl_lahir;
         $row['tempat_lahir'] = $tempat_lahir;
+        $row['status_pernikahan'] = formatStatusPerkawinan($row['status_pernikahan'] ?? '');
         $row['umur'] = (int) $umur;
         $row['alamat_lengkap'] = trim(($row['alamat'] ?? '') . " RT " . sprintf("%03d", $row['rt']) . " / RW " . sprintf("%03d", $row['rw']));
         echo json_encode(['status' => 'success', 'data' => $row]);
@@ -152,7 +179,7 @@ if (isset($_GET['id'])) {
 if (isset($_GET['test'])) {
     $test_nik = $_GET['test'];
     $search = mysqli_real_escape_string($koneksi, $test_nik);
-    $query = "SELECT id, nik, nama, tempat_tgl_lahir FROM tb_penduduk WHERE nik LIKE '%$search%' LIMIT 1";
+    $query = "SELECT id, nik, nama, tempat_tgl_lahir, status_pernikahan FROM tb_penduduk WHERE nik LIKE '%$search%' LIMIT 1";
     $result = mysqli_query($koneksi, $query);
     $row = mysqli_fetch_assoc($result);
 
@@ -160,7 +187,8 @@ if (isset($_GET['test'])) {
         echo json_encode([
             'raw_data' => $row,
             'tempat_lahir_parsed' => extractTempatLahir($row['tempat_tgl_lahir']),
-            'tgl_lahir_parsed' => extractTglLahir($row['tempat_tgl_lahir'])
+            'tgl_lahir_parsed' => extractTglLahir($row['tempat_tgl_lahir']),
+            'status_pernikahan_parsed' => formatStatusPerkawinan($row['status_pernikahan'])
         ]);
     } else {
         echo json_encode(['error' => 'No data found']);

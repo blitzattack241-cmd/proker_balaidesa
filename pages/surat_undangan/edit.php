@@ -28,7 +28,7 @@ if (!isset($_GET['id']) || empty(trim($_GET['id']))) {
     exit;
 }
 
-$id_undangan = (int)$_GET['id'];
+$id_undangan = (int) $_GET['id'];
 
 // 2. Ambil Data Utama Surat Undangan
 $query_surat = mysqli_query($koneksi, "SELECT * FROM `tb_surat_undangan` WHERE `id_undangan` = $id_undangan");
@@ -50,19 +50,19 @@ $query_pejabat = mysqli_query($koneksi, "SELECT * FROM `tb_pejabat` ORDER BY `ja
 
 // 5. Proses Update Data saat Tombol Disubmit
 if (isset($_POST['update'])) {
-    $nomor_surat    = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
-    $sifat          = mysqli_real_escape_string($koneksi, $_POST['sifat']);
-    $lampiran       = mysqli_real_escape_string($koneksi, $_POST['lampiran']);
-    $perihal        = mysqli_real_escape_string($koneksi, $_POST['perihal']);
-    $tempat_surat   = mysqli_real_escape_string($koneksi, $_POST['tempat_surat']);
-    $tanggal_surat  = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
-    $hari_acara     = mysqli_real_escape_string($koneksi, $_POST['hari_acara']);
-    $tanggal_acara  = mysqli_real_escape_string($koneksi, $_POST['tanggal_acara']);
-    $jam_acara      = mysqli_real_escape_string($koneksi, $_POST['jam_acara']);
-    $tempat_acara   = mysqli_real_escape_string($koneksi, $_POST['tempat_acara']);
-    $acara          = mysqli_real_escape_string($koneksi, $_POST['acara']);
-    $keterangan     = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
-    $id_pejabat     = (int)$_POST['id_pejabat'];
+    $nomor_surat = mysqli_real_escape_string($koneksi, $_POST['nomor_surat']);
+    $sifat = mysqli_real_escape_string($koneksi, $_POST['sifat']);
+    $lampiran = mysqli_real_escape_string($koneksi, $_POST['lampiran']);
+    $perihal = mysqli_real_escape_string($koneksi, $_POST['perihal']);
+    $tempat_surat = mysqli_real_escape_string($koneksi, $_POST['tempat_surat']);
+    $tanggal_surat = mysqli_real_escape_string($koneksi, $_POST['tanggal_surat']);
+    $hari_acara = mysqli_real_escape_string($koneksi, $_POST['hari_acara']);
+    $tanggal_acara = mysqli_real_escape_string($koneksi, $_POST['tanggal_acara']);
+    $jam_acara = mysqli_real_escape_string($koneksi, $_POST['jam_acara']);
+    $tempat_acara = mysqli_real_escape_string($koneksi, $_POST['tempat_acara']);
+    $acara = mysqli_real_escape_string($koneksi, $_POST['acara']);
+    $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan']);
+    $id_pejabat = (int) $_POST['id_pejabat'];
 
     // Aktifkan Transaksi Database
     mysqli_begin_transaction($koneksi);
@@ -75,7 +75,7 @@ if (isset($_POST['update'])) {
             `hari_acara` = '$hari_acara', `tanggal_acara` = '$tanggal_acara', `jam_acara` = '$jam_acara', 
             `tempat_acara` = '$tempat_acara', `acara` = '$acara', `keterangan` = '$keterangan', `id_pejabat` = '$id_pejabat' 
             WHERE `id_undangan` = $id_undangan";
-        
+
         if (!mysqli_query($koneksi, $sql_update_surat)) {
             throw new Exception("Gagal memperbarui data utama surat: " . mysqli_error($koneksi));
         }
@@ -86,9 +86,10 @@ if (isset($_POST['update'])) {
             throw new Exception("Gagal mereset data penerima lama: " . mysqli_error($koneksi));
         }
 
-        $nama_tujuan    = $_POST['nama_tujuan'] ?? [];
+        $nama_tujuan = $_POST['nama_tujuan'] ?? [];
         $jabatan_tujuan = $_POST['jabatan_tujuan'] ?? [];
-        $alamat_tujuan  = $_POST['alamat_tujuan'] ?? [];
+        $nama_jabatan_tujuan = $_POST['nama_jabatan_tujuan'] ?? [];
+        $alamat_tujuan = $_POST['alamat_tujuan'] ?? [];
 
         if (empty($nama_tujuan) || empty(trim($nama_tujuan[0]))) {
             throw new Exception("Daftar Penerima Undangan tidak boleh kosong!");
@@ -96,13 +97,14 @@ if (isset($_POST['update'])) {
 
         for ($i = 0; $i < count($nama_tujuan); $i++) {
             if (!empty(trim($nama_tujuan[$i]))) {
-                $nama    = mysqli_real_escape_string($koneksi, $nama_tujuan[$i]);
+                $nama = mysqli_real_escape_string($koneksi, $nama_tujuan[$i]);
                 $jabatan = mysqli_real_escape_string($koneksi, $jabatan_tujuan[$i]);
-                $alamat  = mysqli_real_escape_string($koneksi, $alamat_tujuan[$i]);
+                $nama_jabatan = mysqli_real_escape_string($koneksi, $nama_jabatan_tujuan[$i] ?? '');
+                $alamat = mysqli_real_escape_string($koneksi, $alamat_tujuan[$i]);
 
-                $sql_insert_tujuan = "INSERT INTO `tb_undangan_tujuan` (`id_undangan`, `nama_tujuan`, `jabatan_tujuan`, `alamat_tujuan`) 
-                                      VALUES ('$id_undangan', '$nama', '$jabatan', '$alamat')";
-                
+                $sql_insert_tujuan = "INSERT INTO `tb_undangan_tujuan` (`id_undangan`, `nama_tujuan`, `jabatan_tujuan`, `nama_jabatan_tujuan`, `alamat_tujuan`) 
+                                      VALUES ('$id_undangan', '$nama', '$jabatan', '$nama_jabatan', '$alamat')";
+
                 if (!mysqli_query($koneksi, $sql_insert_tujuan)) {
                     throw new Exception("Gagal menyimpan baris penerima ke-" . ($i + 1) . ": " . mysqli_error($koneksi));
                 }
@@ -127,27 +129,27 @@ if (isset($_POST['update'])) {
 ?>
 
 <style>
-.card-modern {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 15px !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
 
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.form-label-custom {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-}
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
 
-.section-divider {
-    border-top: 2px dashed #e9ecef;
-    margin: 2rem 0;
-}
+    .section-divider {
+        border-top: 2px dashed #e9ecef;
+        margin: 2rem 0;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -209,7 +211,7 @@ if (isset($_POST['update'])) {
                         <div class="col-md-4">
                             <label class="form-label form-label-custom">Hari Acara</label>
                             <select class="form-select" name="hari_acara" required>
-                                <?php 
+                                <?php
                                 $hari_list = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                                 foreach ($hari_list as $h) {
                                     $selected = ($data_surat['hari_acara'] == $h) ? 'selected' : '';
@@ -248,11 +250,11 @@ if (isset($_POST['update'])) {
                             <label class="form-label form-label-custom">Pejabat Penandatangan (Ttd)</label>
                             <select class="form-select" name="id_pejabat" required>
                                 <option value="">-- Pilih Pejabat Desa --</option>
-                                <?php while($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                <option value="<?= $pejabat['id_pejabat']; ?>"
-                                    <?= ($data_surat['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
-                                    <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
-                                </option>
+                                <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
+                                    <option value="<?= $pejabat['id_pejabat']; ?>"
+                                        <?= ($data_surat['id_pejabat'] == $pejabat['id_pejabat']) ? 'selected' : ''; ?>>
+                                        <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
+                                    </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -271,65 +273,76 @@ if (isset($_POST['update'])) {
                     </div>
 
                     <div id="container-penerima">
-                        <?php 
+                        <?php
                         $index = 1;
                         if (mysqli_num_rows($query_tujuan) > 0) {
                             while ($tujuan = mysqli_fetch_assoc($query_tujuan)) {
                                 ?>
-                        <div class="card p-3 mb-3 item-penerima border-0 shadow-sm"
-                            style="border-left: 4px solid #198754 !important;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-secondary badge bg-white border">Penerima
-                                    #<?= $index; ?></span>
-                                <?php if ($index > 1): ?>
-                                <button type="button" class="btn btn-sm btn-outline-danger border-0 btn-hapus-baris"
-                                    style="padding: 2px 6px;">
-                                    <i class="fas fa-trash-alt"></i> Hapus
-                                </button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="mb-2">
-                                <label class="small fw-semibold text-muted">Jabatan / Sapaan (Yth.)</label>
-                                <input type="text" class="form-control form-control-sm" name="jabatan_tujuan[]"
-                                    value="<?= htmlspecialchars($tujuan['jabatan_tujuan']); ?>">
-                            </div>
-                            <div class="mb-2">
-                                <label class="small fw-semibold text-muted">Nama Penerima</label>
-                                <input type="text" class="form-control form-control-sm" name="nama_tujuan[]"
-                                    value="<?= htmlspecialchars($tujuan['nama_tujuan']); ?>" required>
-                            </div>
-                            <div>
-                                <label class="small fw-semibold text-muted">Alamat Tujuan</label>
-                                <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]"
-                                    value="<?= htmlspecialchars($tujuan['alamat_tujuan']); ?>">
-                            </div>
-                        </div>
-                        <?php
+                                <div class="card p-3 mb-3 item-penerima border-0 shadow-sm"
+                                    style="border-left: 4px solid #198754 !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-secondary badge bg-white border">Penerima
+                                            #<?= $index; ?></span>
+                                        <?php if ($index > 1): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger border-0 btn-hapus-baris"
+                                                style="padding: 2px 6px;">
+                                                <i class="fas fa-trash-alt"></i> Hapus
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="small fw-semibold text-muted">Jabatan / Sapaan (Yth.)</label>
+                                        <input type="text" class="form-control form-control-sm" name="jabatan_tujuan[]"
+                                            value="<?= htmlspecialchars($tujuan['jabatan_tujuan']); ?>">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="small fw-semibold text-muted">Nama Penerima</label>
+                                        <input type="text" class="form-control form-control-sm" name="nama_tujuan[]"
+                                            value="<?= htmlspecialchars($tujuan['nama_tujuan']); ?>" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="small fw-semibold text-muted">Nama Jabatan</label>
+                                        <input type="text" class="form-control form-control-sm" name="nama_jabatan_tujuan[]"
+                                            value="<?= htmlspecialchars($tujuan['nama_jabatan_tujuan'] ?? ''); ?>"
+                                            placeholder="Contoh: Ketua RT / Ketua RW">
+                                    </div>
+                                    <div>
+                                        <label class="small fw-semibold text-muted">Alamat Tujuan</label>
+                                        <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]"
+                                            value="<?= htmlspecialchars($tujuan['alamat_tujuan']); ?>">
+                                    </div>
+                                </div>
+                                <?php
                                 $index++;
                             }
                         } else {
                             // Antisipasi fallback jika data kosong
                             ?>
-                        <div class="card p-3 mb-3 item-penerima border-0 shadow-sm"
-                            style="border-left: 4px solid #198754 !important;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-secondary badge bg-white border">Penerima #1</span>
+                            <div class="card p-3 mb-3 item-penerima border-0 shadow-sm"
+                                style="border-left: 4px solid #198754 !important;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-secondary badge bg-white border">Penerima #1</span>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="small fw-semibold text-muted">Jabatan / Sapaan (Yth.)</label>
+                                    <input type="text" class="form-control form-control-sm" name="jabatan_tujuan[]"
+                                        value="Bpk/Ibu/Sdr/I">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="small fw-semibold text-muted">Nama Penerima</label>
+                                    <input type="text" class="form-control form-control-sm" name="nama_tujuan[]" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="small fw-semibold text-muted">Nama Jabatan</label>
+                                    <input type="text" class="form-control form-control-sm" name="nama_jabatan_tujuan[]"
+                                        placeholder="Contoh: Ketua RT / Ketua RW">
+                                </div>
+                                <div>
+                                    <label class="small fw-semibold text-muted">Alamat Tujuan</label>
+                                    <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]"
+                                        value="Tempat">
+                                </div>
                             </div>
-                            <div class="mb-2">
-                                <label class="small fw-semibold text-muted">Jabatan / Sapaan (Yth.)</label>
-                                <input type="text" class="form-control form-control-sm" name="jabatan_tujuan[]"
-                                    value="Bpk/Ibu/Sdr/I">
-                            </div>
-                            <div class="mb-2">
-                                <label class="small fw-semibold text-muted">Nama Penerima</label>
-                                <input type="text" class="form-control form-control-sm" name="nama_tujuan[]" required>
-                            </div>
-                            <div>
-                                <label class="small fw-semibold text-muted">Alamat Tujuan</label>
-                                <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]"
-                                    value="Tempat">
-                            </div>
-                        </div>
                         <?php } ?>
                     </div>
                 </div>
@@ -350,11 +363,11 @@ if (isset($_POST['update'])) {
 
 <!-- JAVASCRIPT DINAMIS UNTUK FORM EDIT -->
 <script>
-document.getElementById('btn-tambah-penerima').addEventListener('click', function() {
-    var container = document.getElementById('container-penerima');
-    var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
+    document.getElementById('btn-tambah-penerima').addEventListener('click', function () {
+        var container = document.getElementById('container-penerima');
+        var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
 
-    var htmlBarisBaru = `
+        var htmlBarisBaru = `
     <div class="card p-3 mb-3 item-penerima border-0 shadow-sm" style="border-left: 4px solid #198754 !important;">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold text-secondary badge bg-white border">Penerima #${jumlahBaris}</span>
@@ -370,25 +383,29 @@ document.getElementById('btn-tambah-penerima').addEventListener('click', functio
             <label class="small fw-semibold text-muted">Nama Penerima</label>
             <input type="text" class="form-control form-control-sm" name="nama_tujuan[]" placeholder="Nama lengkap penerima" required>
         </div>
+        <div class="mb-2">
+            <label class="small fw-semibold text-muted">Nama Jabatan</label>
+            <input type="text" class="form-control form-control-sm" name="nama_jabatan_tujuan[]" placeholder="Contoh: Ketua RT / Ketua RW">
+        </div>
         <div>
             <label class="small fw-semibold text-muted">Alamat Tujuan</label>
             <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]" value="Tempat">
         </div>
     </div>`;
 
-    container.insertAdjacentHTML('beforeend', htmlBarisBaru);
-});
+        container.insertAdjacentHTML('beforeend', htmlBarisBaru);
+    });
 
-document.getElementById('container-penerima').addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
-        var baris = e.target.closest('.item-penerima');
-        baris.remove();
+    document.getElementById('container-penerima').addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
+            var baris = e.target.closest('.item-penerima');
+            baris.remove();
 
-        // Re-index label angka penerima agar berurutan kembali
-        var semuaBaris = document.getElementsByClassName('item-penerima');
-        for (var i = 0; i < semuaBaris.length; i++) {
-            semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
+            // Re-index label angka penerima agar berurutan kembali
+            var semuaBaris = document.getElementsByClassName('item-penerima');
+            for (var i = 0; i < semuaBaris.length; i++) {
+                semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
+            }
         }
-    }
-});
+    });
 </script>

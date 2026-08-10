@@ -66,6 +66,7 @@ if (isset($_POST['simpan'])) {
         // 2. Ambil data array penerima dari form dinamis
         $nama_tujuan = $_POST['nama_tujuan'] ?? [];
         $jabatan_tujuan = $_POST['jabatan_tujuan'] ?? [];
+        $nama_jabatan_tujuan = $_POST['nama_jabatan_tujuan'] ?? [];
         $alamat_tujuan = $_POST['alamat_tujuan'] ?? [];
 
         // Validasi minimal harus ada 1 nama penerima
@@ -78,10 +79,11 @@ if (isset($_POST['simpan'])) {
             if (!empty(trim($nama_tujuan[$i]))) {
                 $nama = mysqli_real_escape_string($koneksi, $nama_tujuan[$i]);
                 $jabatan = mysqli_real_escape_string($koneksi, $jabatan_tujuan[$i]);
+                $nama_jabatan = mysqli_real_escape_string($koneksi, $nama_jabatan_tujuan[$i] ?? '');
                 $alamat = mysqli_real_escape_string($koneksi, $alamat_tujuan[$i]);
 
-                $sql_tujuan = "INSERT INTO `tb_undangan_tujuan` (`id_undangan`, `nama_tujuan`, `jabatan_tujuan`, `alamat_tujuan`) 
-                               VALUES ('$id_undangan_baru', '$nama', '$jabatan', '$alamat')";
+                $sql_tujuan = "INSERT INTO `tb_undangan_tujuan` (`id_undangan`, `nama_tujuan`, `jabatan_tujuan`, `nama_jabatan_tujuan`, `alamat_tujuan`) 
+                               VALUES ('$id_undangan_baru', '$nama', '$jabatan', '$nama_jabatan', '$alamat')";
 
                 if (!mysqli_query($koneksi, $sql_tujuan)) {
                     throw new Exception("Gagal menyimpan data penerima pada baris ke-" . ($i + 1) . ": " . mysqli_error($koneksi));
@@ -107,27 +109,27 @@ if (isset($_POST['simpan'])) {
 ?>
 
 <style>
-    .card-modern {
-        border: none !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
-    }
+.card-modern {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+}
 
-    .page-title-modern {
-        font-weight: 700;
-        color: #2c3e50;
-    }
+.page-title-modern {
+    font-weight: 700;
+    color: #2c3e50;
+}
 
-    .form-label-custom {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-    }
+.form-label-custom {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
 
-    .section-divider {
-        border-top: 2px dashed #e9ecef;
-        margin: 2rem 0;
-    }
+.section-divider {
+    border-top: 2px dashed #e9ecef;
+    margin: 2rem 0;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -229,9 +231,9 @@ if (isset($_POST['simpan'])) {
                             <select class="form-select" name="id_pejabat" required>
                                 <option value="">-- Pilih Pejabat Desa --</option>
                                 <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)): ?>
-                                    <option value="<?= $pejabat['id_pejabat']; ?>">
-                                        <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
-                                    </option>
+                                <option value="<?= $pejabat['id_pejabat']; ?>">
+                                    <?= htmlspecialchars($pejabat['nama_pejabat']) . " (" . htmlspecialchars($pejabat['jabatan']) . ")"; ?>
+                                </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -266,6 +268,11 @@ if (isset($_POST['simpan'])) {
                                 <input type="text" class="form-control form-control-sm" name="nama_tujuan[]"
                                     placeholder="Contoh: NASIMAN / BUDI" required>
                             </div>
+                            <div class="mb-2">
+                                <label class="small fw-semibold text-muted">Nama Jabatan</label>
+                                <input type="text" class="form-control form-control-sm" name="nama_jabatan_tujuan[]"
+                                    placeholder="Contoh: Ketua RT / Ketua RW">
+                            </div>
                             <div>
                                 <label class="small fw-semibold text-muted">Alamat Tujuan</label>
                                 <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]"
@@ -292,11 +299,11 @@ if (isset($_POST['simpan'])) {
 
 <!-- JAVASCRIPT LOGIC UNTUK MANIPULASI BARIS PENERIMA -->
 <script>
-    document.getElementById('btn-tambah-penerima').addEventListener('click', function () {
-        var container = document.getElementById('container-penerima');
-        var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
+document.getElementById('btn-tambah-penerima').addEventListener('click', function() {
+    var container = document.getElementById('container-penerima');
+    var jumlahBaris = container.getElementsByClassName('item-penerima').length + 1;
 
-        var htmlBarisBaru = `
+    var htmlBarisBaru = `
     <div class="card p-3 mb-3 item-penerima border-0 shadow-sm animate__animated animate__fadeIn" style="border-left: 4px solid #198754 !important;">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="fw-bold text-secondary badge bg-white border">Penerima #${jumlahBaris}</span>
@@ -312,26 +319,30 @@ if (isset($_POST['simpan'])) {
             <label class="small fw-semibold text-muted">Nama Penerima</label>
             <input type="text" class="form-control form-control-sm" name="nama_tujuan[]" placeholder="Nama lengkap penerima" required>
         </div>
+        <div class="mb-2">
+            <label class="small fw-semibold text-muted">Nama Jabatan</label>
+            <input type="text" class="form-control form-control-sm" name="nama_jabatan_tujuan[]" placeholder="Contoh: Ketua RT / Ketua RW">
+        </div>
         <div>
             <label class="small fw-semibold text-muted">Alamat Tujuan</label>
             <input type="text" class="form-control form-control-sm" name="alamat_tujuan[]" value="Tempat">
         </div>
     </div>`;
 
-        container.insertAdjacentHTML('beforeend', htmlBarisBaru);
-    });
+    container.insertAdjacentHTML('beforeend', htmlBarisBaru);
+});
 
-    // Event Handler dinamis untuk menghapus baris penerima tambahan
-    document.getElementById('container-penerima').addEventListener('click', function (e) {
-        if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
-            var baris = e.target.closest('.item-penerima');
-            baris.remove();
+// Event Handler dinamis untuk menghapus baris penerima tambahan
+document.getElementById('container-penerima').addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-hapus-baris') || e.target.closest('.btn-hapus-baris')) {
+        var baris = e.target.closest('.item-penerima');
+        baris.remove();
 
-            // Mengurutkan ulang nomor label (Penerima #1, #2, dst) pasca penghapusan
-            var semuaBaris = document.getElementsByClassName('item-penerima');
-            for (var i = 0; i < semuaBaris.length; i++) {
-                semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
-            }
+        // Mengurutkan ulang nomor label (Penerima #1, #2, dst) pasca penghapusan
+        var semuaBaris = document.getElementsByClassName('item-penerima');
+        for (var i = 0; i < semuaBaris.length; i++) {
+            semuaBaris[i].querySelector('.badge').innerText = 'Penerima #' + (i + 1);
         }
-    });
+    }
+});
 </script>

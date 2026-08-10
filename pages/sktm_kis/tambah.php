@@ -99,6 +99,11 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
+<!-- CDN CSS Select2 & Select2 Bootstrap 5 Theme -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
 <style>
 .form-section-title {
     font-size: 1.1rem;
@@ -130,12 +135,20 @@ if (isset($_POST['submit'])) {
     box-shadow: 0 6px 15px rgba(25, 135, 84, 0.35);
     color: white !important;
 }
+
+/* Style tambahan untuk Box Auto-fill Pencarian */
+.box-pencarian-container {
+    background-color: #f8faff;
+    border: 1px dashed #0d6efd;
+    border-radius: 10px;
+    padding: 15px;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-            <h3 class="page-title-modern mt-2 mb-1">Buat Surat Keterangan Tidak Mampu</h3>
+            <h3 class="page-title-modern mt-2 mb-1">Buat Surat Keterangan Tidak Mampu (KIS)</h3>
             <ol class="breadcrumb breadcrumb-modern mb-0">
                 <li class="breadcrumb-item"><a href="index.php?page=dashboard"
                         class="text-decoration-none">Dashboard</a></li>
@@ -152,6 +165,20 @@ if (isset($_POST['submit'])) {
         <div class="card-body p-4">
             <form action="" method="POST" enctype="multipart/form-data">
 
+                <!-- BOX AUTO-FILL DATA PENDUDUK -->
+                <div class="box-pencarian-container mb-4">
+                    <label class="form-label text-primary fw-bold mb-2">
+                        <i class="fas fa-search me-1"></i> CARI & AUTO-FILL DATA PEMOHON (KETIK NO. KK / NIK / NAMA)
+                    </label>
+                    <select id="cari_penduduk" class="form-select" style="width: 100%;">
+                        <option value=""></option>
+                    </select>
+                    <small class="text-muted mt-2 d-block" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> Pilih nama pemohon yang muncul untuk mengisikan otomatis
+                        data ke formulir di bawah ini.
+                    </small>
+                </div>
+
                 <!-- BAGIAN 1: DATA UTAMA SURAT -->
                 <div class="form-section-title">
                     <i class="fas fa-envelope-open-text me-2 text-primary"></i>Informasi Pokok Surat
@@ -166,23 +193,24 @@ if (isset($_POST['submit'])) {
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Lengkap Pemohon</label>
-                        <input type="text" name="nama_warga" class="form-control" placeholder="Masukkan nama pemohon"
-                            required>
+                        <input type="text" id="nama_warga" name="nama_warga" class="form-control text-uppercase"
+                            placeholder="Masukkan nama pemohon" required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Tempat Lahir</label>
-                        <input type="text" name="tempat_lahir" class="form-control" placeholder="Tempat lahir" required>
+                        <input type="text" id="tempat_lahir" name="tempat_lahir" class="form-control"
+                            placeholder="Tempat lahir" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" class="form-control" required>
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Jenis Kelamin</label>
-                        <select name="jenis_kelamin" class="form-select" required>
+                        <select id="jenis_kelamin" name="jenis_kelamin" class="form-select" required>
                             <option value="">-- Pilih --</option>
                             <option value="Laki-Laki">Laki-Laki</option>
                             <option value="Perempuan">Perempuan</option>
@@ -190,44 +218,51 @@ if (isset($_POST['submit'])) {
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Agama</label>
-                        <input type="text" name="agama" class="form-control" value="Islam" required>
+                        <select id="agama" name="agama" class="form-select" required>
+                            <option value="Islam" selected>Islam</option>
+                            <option value="Kristen">Kristen</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Budha">Budha</option>
+                            <option value="Konghucu">Konghucu</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">No. KTP (NIK)</label>
-                        <input type="text" name="no_ktp" class="form-control" minlength="16" maxlength="16"
+                        <input type="text" id="no_ktp" name="no_ktp" class="form-control" minlength="16" maxlength="16"
                             placeholder="16 Digit NIK" required>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label for="no_kk" class="form-label">Nomor Kartu Keluarga (KK)</label>
-                        <!-- Perbaikan: Diberi name="no_kk" agar sesuai dengan proses_tambah.php -->
+                        <label for="no_kk" class="form-label fw-bold">Nomor Kartu Keluarga (KK)</label>
                         <input type="text" id="no_kk" name="no_kk" maxlength="16" class="form-control" value="331904"
                             placeholder="Contoh: 33190..." required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Pekerjaan</label>
-                        <input type="text" name="pekerjaan" class="form-control" placeholder="Pekerjaan saat ini"
-                            required>
+                        <input type="text" id="pekerjaan" name="pekerjaan" class="form-control"
+                            placeholder="Pekerjaan saat ini" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Kewarganegaraan</label>
-                        <input type="text" name="kewarganegaraan" class="form-control" value="WNI" required>
+                        <input type="text" id="kewarganegaraan" name="kewarganegaraan" class="form-control" value="WNI"
+                            required>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Alamat Lengkap</label>
-                        <textarea name="alamat_tinggal" class="form-control" rows="3"
+                        <textarea id="alamat_tinggal" name="alamat_tinggal" class="form-control" rows="3"
                             placeholder="Alamat tinggal pemohon..." required></textarea>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Keperluan</label>
-                        <textarea name="keperluan" class="form-control" rows="3"
+                        <textarea id="keperluan" name="keperluan" class="form-control" rows="3"
                             placeholder="Contoh: Permohonan Pengajuan Peralihan BPJS Mandiri kelas 3 ke KIS/JKN APBD..."
-                            required></textarea>
+                            required>Permohonan Pengajuan Peralihan BPJS Mandiri kelas 3 ke KIS/JKN APBD</textarea>
                     </div>
                 </div>
 
@@ -237,7 +272,7 @@ if (isset($_POST['submit'])) {
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Daftar Nama & NIK Anggota Keluarga</label>
-                    <textarea name="anggota_keluarga" class="form-control" rows="4"
+                    <textarea id="anggota_keluarga" name="anggota_keluarga" class="form-control" rows="4"
                         placeholder="Format penulisan bebas, disarankan:&#10;1. NAMA (NIK)&#10;2. NAMA (NIK)"
                         required></textarea>
                     <div class="form-text text-muted">Tuliskan nama anggota keluarga beserta NIK-nya masing-masing yang
@@ -251,17 +286,17 @@ if (isset($_POST['submit'])) {
                 <div class="row mb-3">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Berlaku Mulai</label>
-                        <input type="date" name="berlaku_mulai" class="form-control" value="<?= date('Y-m-d'); ?>"
-                            required>
+                        <input type="date" id="berlaku_mulai" name="berlaku_mulai" class="form-control"
+                            value="<?= date('Y-m-d'); ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Tanggal Surat Dibuat</label>
-                        <input type="date" name="tanggal_surat" class="form-control" value="<?= date('Y-m-d'); ?>"
-                            required>
+                        <input type="date" id="tanggal_surat" name="tanggal_surat" class="form-control"
+                            value="<?= date('Y-m-d'); ?>" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Pejabat Penandatangan</label>
-                        <select name="id_pejabat" class="form-select" required>
+                        <select id="id_pejabat" name="id_pejabat" class="form-select" required>
                             <option value="">-- Pilih Pejabat Desa --</option>
                             <?php while ($pejabat = mysqli_fetch_assoc($query_pejabat)) { ?>
                             <option value="<?= $pejabat['id_pejabat']; ?>">
@@ -313,3 +348,110 @@ if (isset($_POST['submit'])) {
         </div>
     </div>
 </div>
+
+<!-- CDN Library jQuery & Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi Select2 pencarian pemohon via AJAX
+    $('#cari_penduduk').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Ketik No. KK, NIK, atau Nama Pemohon... --',
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax: {
+            url: 'api/get_penduduk.php',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    search: params.term
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Auto-fill form saat data pemohon dipilih
+    $('#cari_penduduk').on('select2:select', function(e) {
+        var data = e.params.data;
+
+        $('#nama_warga').val(data.nama || '');
+        $('#no_ktp').val(data.nik || '');
+        $('#no_kk').val(data.no_kk || data.kk || '331904');
+
+        // Handling Tempat & Tanggal Lahir
+        if (data.tgl_lahir) {
+            $('#tanggal_lahir').val(data.tgl_lahir);
+        } else if (data.tanggal_lahir) {
+            $('#tanggal_lahir').val(data.tanggal_lahir);
+        }
+
+        if (data.tempat_lahir) {
+            $('#tempat_lahir').val(data.tempat_lahir);
+        } else if (data.tempat_tgl_lahir) {
+            var ttl = data.tempat_tgl_lahir.split(',');
+            $('#tempat_lahir').val(ttl[0].trim());
+
+            if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
+                var rawDate = ttl[1].trim();
+                if (rawDate.includes('-') || rawDate.includes('/')) {
+                    var delimiter = rawDate.includes('-') ? '-' : '/';
+                    var parts = rawDate.split(delimiter);
+                    if (parts[0].length === 2 && parts[2].length === 4) {
+                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                            2, '0');
+                    }
+                }
+                $('#tanggal_lahir').val(rawDate);
+            }
+        }
+
+        // Auto Select Jenis Kelamin
+        if (data.jenis_kelamin) {
+            var jk = data.jenis_kelamin.toString().toLowerCase();
+            if (jk.includes('l')) {
+                $('#jenis_kelamin').val('Laki-Laki');
+            } else if (jk.includes('p')) {
+                $('#jenis_kelamin').val('Perempuan');
+            }
+        }
+
+        // Auto Select Agama
+        if (data.agama) {
+            $('#agama').val(data.agama);
+        }
+
+        // Pekerjaan & Alamat
+        if (data.pekerjaan) {
+            $('#pekerjaan').val(data.pekerjaan);
+        }
+
+        if (data.alamat_lengkap) {
+            $('#alamat_tinggal').val(data.alamat_lengkap);
+        } else if (data.alamat) {
+            $('#alamat_tinggal').val(data.alamat);
+        }
+    });
+
+    // Reset isi form saat pilihan dihapus
+    $('#cari_penduduk').on('select2:clear', function(e) {
+        $('#nama_warga').val('');
+        $('#no_ktp').val('');
+        $('#no_kk').val('331904');
+        $('#tempat_lahir').val('');
+        $('#tanggal_lahir').val('');
+        $('#jenis_kelamin').val('');
+        $('#agama').val('Islam');
+        $('#pekerjaan').val('');
+        $('#alamat_tinggal').val('');
+    });
+});
+</script>

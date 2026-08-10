@@ -329,7 +329,7 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
                 <td width="3%">1.</td>
                 <td width="27%">Nama</td>
                 <td width="3%">:</td>
-                <td width="32%"><strong><?= htmlspecialchars(strtoupper($data['nama_penggarap'])); ?></strong></td>
+                <td width="32%"><?= htmlspecialchars(strtoupper($data['nama_penggarap'])); ?></td>
                 <td width="15%">Bin / Binti</td>
                 <td width="3%">:</td>
                 <td width="17%">

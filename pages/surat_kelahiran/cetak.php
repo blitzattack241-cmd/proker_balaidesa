@@ -599,7 +599,9 @@ function renderDateBoxes($dateString) {
                     <div class="space-sign-blank"></div>
                     <div class="qr-sign-block">
                         <?= tampilkanQR('surat_kelahiran', $id, $qr_token); ?>
-                        <p class="ttd-nama" style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;" contenteditable="true">
+                        <p class="ttd-nama"
+                            style="text-decoration: underline; font-weight: bold; text-transform: uppercase; margin:0;"
+                            contenteditable="true">
                             VIWIT MARIYANTO
                         </p>
                     </div>

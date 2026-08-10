@@ -73,6 +73,21 @@ if (isset($_POST['import'])) {
             return mysqli_real_escape_string($koneksi, $val);
         };
 
+        // Helper konversi Status Pernikahan agar seragam (PERBAIKAN UTAMA)
+        $normalizeStatusPernikahan = function($val) {
+            $status = strtolower(trim((string)$val));
+            if (empty($status)) return 'Belum Kawin';
+
+            if (strpos($status, 'belum') !== false) {
+                return 'Belum Kawin';
+            } elseif (strpos($status, 'janda') !== false || strpos($status, 'duda') !== false || strpos($status, 'cerai') !== false) {
+                return 'Cerai / Janda / Duda';
+            } elseif (strpos($status, 'kawin') !== false || strpos($status, 'nikah') !== false) {
+                return 'Kawin';
+            }
+            return 'Belum Kawin';
+        };
+
         // Helper konversi Tanggal Excel / String ke format Y-m-d
         $parseDate = function($val) {
             if (empty($val)) return null;
@@ -111,7 +126,8 @@ if (isset($_POST['import'])) {
                     $status_keluarga   = $clean($row['J'] ?? '');
                     $tempat_lahir      = $clean($row['K'] ?? '');
                     $raw_tgl_lahir     = $row['L'] ?? '';
-                    $status_pernikahan = $clean($row['M'] ?? '');
+                    $raw_status        = $row['M'] ?? '';
+                    $status_pernikahan = $clean($normalizeStatusPernikahan($raw_status));
                     $agama             = $clean($row['N'] ?? '');
                     $kewarganegaraan   = $clean($row['O'] ?? '');
                     $suku              = $clean($row['P'] ?? '');
@@ -174,7 +190,8 @@ if (isset($_POST['import'])) {
                     $status_keluarga   = $clean($data[9] ?? '');
                     $tempat_lahir      = $clean($data[10] ?? '');
                     $raw_tgl_lahir     = $data[11] ?? '';
-                    $status_pernikahan = $clean($data[12] ?? '');
+                    $raw_status        = $data[12] ?? '';
+                    $status_pernikahan = $clean($normalizeStatusPernikahan($raw_status));
                     $agama             = $clean($data[13] ?? '');
                     $kewarganegaraan   = $clean($data[14] ?? '');
                     $suku              = $clean($data[15] ?? '');

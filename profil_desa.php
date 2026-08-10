@@ -41,7 +41,7 @@ $desa = [
         ['jabatan' => 'Kaur Pembangunan & Kesra', 'nama' => 'Sulikan', 'foto' => 'assets/img/sulikan.jpg'],
         ['jabatan' => 'Kaur Keuangan & Umum', 'nama' => 'Jamiatun', 'foto' => 'assets/img/jamiatun.jpg'],
         ['jabatan' => 'Pembantu Kaur Keuangan & Umum', 'nama' => 'Harto', 'foto' => 'assets/img/harto.jpg'],
-        ['jabatan' => 'Kaur Pemerintahan', 'nama' => 'Sutikno', 'foto' => 'assets/img/sutikno.jpg'],
+        ['jabatan' => 'Sekretaris Desa', 'nama' => 'Pujiono, S.Pd.', 'foto' => 'assets/img/pak carik.jpeg'],
         ['jabatan' => 'Pembantu Kaur Pemerintahan', 'nama' => 'Sukarin', 'foto' => 'assets/img/sukarin.jpg'],
         ['jabatan' => 'Kepala Dusun', 'nama' => 'Ngadirun', 'foto' => 'assets/img/ngadirun.jpg'],
         ['jabatan' => 'Modin', 'nama' => 'Subur', 'foto' => 'assets/img/subur.jpg'],

@@ -27,6 +27,21 @@ require_once __DIR__ . '/../../includes/nomor_surat_helper.php';
 $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview saja, tidak menambah nomor
 ?>
 
+<!-- CDN CSS Select2 & Select2 Bootstrap 5 Theme -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
+<style>
+/* Style tambahan untuk Kotak Pencarian Auto-fill */
+.box-pencarian-container {
+    background-color: #f8faff;
+    border: 1px dashed #0d6efd;
+    border-radius: 10px;
+    padding: 15px;
+}
+</style>
+
 <div class="container-fluid px-4">
     <h3 class="mt-4">Buat SKTM Ibu Hamil (Bumil)</h3>
     <ol class="breadcrumb mb-4">
@@ -41,6 +56,20 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
         </div>
         <div class="card-body">
             <form action="pages/sktm_bumil/proses_tambah.php" method="POST" enctype="multipart/form-data">
+
+                <!-- BOX AUTO-FILL DATA PENDUDUK -->
+                <div class="box-pencarian-container mb-4">
+                    <label class="form-label text-primary fw-bold mb-2">
+                        <i class="fas fa-search me-1"></i> CARI & AUTO-FILL DATA IBU HAMIL (KETIK NO. KK / NIK / NAMA)
+                    </label>
+                    <select id="cari_penduduk" class="form-select" style="width: 100%;">
+                        <option value=""></option>
+                    </select>
+                    <small class="text-muted mt-2 d-block" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> Pilih nama warga yang muncul untuk mengisikan otomatis
+                        data ke formulir di bawah ini.
+                    </small>
+                </div>
 
                 <h5 class="text-primary mb-3"><i class="fas fa-envelope-open-text me-2"></i>Informasi Surat</h5>
                 <div class="row">
@@ -64,7 +93,7 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="nama_warga" class="form-label">Nama Lengkap Ibu</label>
-                        <input type="text" class="form-control" id="nama_warga" name="nama_warga"
+                        <input type="text" class="form-control text-uppercase" id="nama_warga" name="nama_warga"
                             placeholder="Nama lengkap sesuai KTP" required>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -85,7 +114,6 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
 
                     <div class="col-md-6 mb-3">
                         <label for="no_kk" class="form-label">Nomor Kartu Keluarga (KK)</label>
-                        <!-- Perbaikan: Diberi name="no_kk" agar sesuai dengan proses_tambah.php -->
                         <input type="text" id="no_kk" name="no_kk" maxlength="16" class="form-control" value="331904"
                             placeholder="Contoh: 33190..." required>
                     </div>
@@ -227,3 +255,110 @@ $nomor_surat_otomatis = generateNomorSuratGlobal($koneksi, false); // preview sa
         </div>
     </div>
 </div>
+
+<!-- CDN Library jQuery & Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi Select2 pencarian penduduk via AJAX
+    $('#cari_penduduk').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Ketik No. KK, NIK, atau Nama Ibu Hamil... --',
+        allowClear: true,
+        minimumInputLength: 2,
+        ajax: {
+            url: 'api/get_penduduk.php',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    search: params.term
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Auto-fill form saat data warga dipilih
+    $('#cari_penduduk').on('select2:select', function(e) {
+        var data = e.params.data;
+
+        $('#nama_warga').val(data.nama || '');
+        $('#no_ktp').val(data.nik || '');
+        $('#no_kk').val(data.no_kk || data.kk || '331904');
+
+        // Handling Tempat & Tanggal Lahir
+        if (data.tgl_lahir) {
+            $('#tanggal_lahir').val(data.tgl_lahir);
+        } else if (data.tanggal_lahir) {
+            $('#tanggal_lahir').val(data.tanggal_lahir);
+        }
+
+        if (data.tempat_lahir) {
+            $('#tempat_lahir').val(data.tempat_lahir);
+        } else if (data.tempat_tgl_lahir) {
+            var ttl = data.tempat_tgl_lahir.split(',');
+            $('#tempat_lahir').val(ttl[0].trim());
+
+            if (ttl.length > 1 && !$('#tanggal_lahir').val()) {
+                var rawDate = ttl[1].trim();
+                if (rawDate.includes('-') || rawDate.includes('/')) {
+                    var delimiter = rawDate.includes('-') ? '-' : '/';
+                    var parts = rawDate.split(delimiter);
+                    if (parts[0].length === 2 && parts[2].length === 4) {
+                        rawDate = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(
+                            2, '0');
+                    }
+                }
+                $('#tanggal_lahir').val(rawDate);
+            }
+        }
+
+        // Auto Select Jenis Kelamin
+        if (data.jenis_kelamin) {
+            var jk = data.jenis_kelamin.toString().toLowerCase();
+            if (jk.includes('p')) {
+                $('#jenis_kelamin').val('Perempuan');
+            } else if (jk.includes('l')) {
+                $('#jenis_kelamin').val('Laki-laki');
+            }
+        }
+
+        // Auto Select Agama
+        if (data.agama) {
+            $('#agama').val(data.agama);
+        }
+
+        // Pekerjaan & Alamat
+        if (data.pekerjaan) {
+            $('#pekerjaan').val(data.pekerjaan);
+        }
+
+        if (data.alamat_lengkap) {
+            $('#alamat_tinggal').val(data.alamat_lengkap);
+        } else if (data.alamat) {
+            $('#alamat_tinggal').val(data.alamat);
+        }
+    });
+
+    // Reset isi form saat pilihan dihapus
+    $('#cari_penduduk').on('select2:clear', function(e) {
+        $('#nama_warga').val('');
+        $('#no_ktp').val('');
+        $('#no_kk').val('331904');
+        $('#tempat_lahir').val('');
+        $('#tanggal_lahir').val('');
+        $('#jenis_kelamin').val('Perempuan');
+        $('#agama').val('Islam');
+        $('#pekerjaan').val('');
+        $('#alamat_tinggal').val('');
+    });
+});
+</script>

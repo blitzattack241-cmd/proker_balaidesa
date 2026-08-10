@@ -42,33 +42,86 @@ if ($columnResult) {
 
 // Mapping kolom database
 $fieldMap = [
-    'nomor_surat', 'tanggal_surat',
-    'nama_kepala_keluarga', 'no_kk',
+    'nomor_surat',
+    'tanggal_surat',
+    'nama_kepala_keluarga',
+    'no_kk',
     // Jenazah
-    'nik_jenazah', 'nama_jenazah', 'jenis_kelamin',
-    'tanggal_lahir_jenazah', 'umur', 'tempat_lahir_jenazah',
-    'agama_jenazah', 'pekerjaan_jenazah',
-    'alamat_jenazah', 'desa_jenazah', 'kecamatan_jenazah', 'kabupaten_jenazah', 'provinsi_jenazah',
+    'nik_jenazah',
+    'nama_jenazah',
+    'jenis_kelamin',
+    'tanggal_lahir_jenazah',
+    'umur',
+    'tempat_lahir_jenazah',
+    'agama_jenazah',
+    'pekerjaan_jenazah',
+    'alamat_jenazah',
+    'desa_jenazah',
+    'kecamatan_jenazah',
+    'kabupaten_jenazah',
+    'provinsi_jenazah',
     'anak_ke',
     // Peristiwa Kematian
-    'hari_kematian', 'tanggal_kematian', 'jam_kematian',
-    'sebab_kematian', 'tempat_kematian', 'penolong_kematian',
+    'hari_kematian',
+    'tanggal_kematian',
+    'jam_kematian',
+    'sebab_kematian',
+    'tempat_kematian',
+    'penolong_kematian',
     // Ayah
-    'nik_ayah', 'nama_ayah', 'tanggal_lahir_ayah', 'umur_ayah', 'pekerjaan_ayah',
-    'alamat_ayah', 'desa_ayah', 'kecamatan_ayah', 'kabupaten_ayah', 'provinsi_ayah',
+    'nik_ayah',
+    'nama_ayah',
+    'tanggal_lahir_ayah',
+    'umur_ayah',
+    'pekerjaan_ayah',
+    'alamat_ayah',
+    'desa_ayah',
+    'kecamatan_ayah',
+    'kabupaten_ayah',
+    'provinsi_ayah',
     // Ibu
-    'nik_ibu', 'nama_ibu', 'tanggal_lahir_ibu', 'umur_ibu', 'pekerjaan_ibu',
-    'alamat_ibu', 'desa_ibu', 'kecamatan_ibu', 'kabupaten_ibu', 'provinsi_ibu',
+    'nik_ibu',
+    'nama_ibu',
+    'tanggal_lahir_ibu',
+    'umur_ibu',
+    'pekerjaan_ibu',
+    'alamat_ibu',
+    'desa_ibu',
+    'kecamatan_ibu',
+    'kabupaten_ibu',
+    'provinsi_ibu',
     // Pelapor
-    'nik_pelapor', 'nama_pelapor', 'hubungan_pelapor',
-    'tanggal_lahir_pelapor', 'umur_pelapor', 'pekerjaan_pelapor',
-    'alamat_pelapor', 'desa_pelapor', 'kecamatan_pelapor', 'kabupaten_pelapor', 'provinsi_pelapor',
+    'nik_pelapor',
+    'nama_pelapor',
+    'hubungan_pelapor',
+    'tanggal_lahir_pelapor',
+    'umur_pelapor',
+    'pekerjaan_pelapor',
+    'alamat_pelapor',
+    'desa_pelapor',
+    'kecamatan_pelapor',
+    'kabupaten_pelapor',
+    'provinsi_pelapor',
     // Saksi I
-    'nik_saksi1', 'nama_saksi1', 'umur_saksi1', 'pekerjaan_saksi1',
-    'alamat_saksi1', 'desa_saksi1', 'kecamatan_saksi1', 'kabupaten_saksi1', 'provinsi_saksi1',
+    'nik_saksi1',
+    'nama_saksi1',
+    'umur_saksi1',
+    'pekerjaan_saksi1',
+    'alamat_saksi1',
+    'desa_saksi1',
+    'kecamatan_saksi1',
+    'kabupaten_saksi1',
+    'provinsi_saksi1',
     // Saksi II
-    'nik_saksi2', 'nama_saksi2', 'umur_saksi2', 'pekerjaan_saksi2',
-    'alamat_saksi2', 'desa_saksi2', 'kecamatan_saksi2', 'kabupaten_saksi2', 'provinsi_saksi2',
+    'nik_saksi2',
+    'nama_saksi2',
+    'umur_saksi2',
+    'pekerjaan_saksi2',
+    'alamat_saksi2',
+    'desa_saksi2',
+    'kecamatan_saksi2',
+    'kabupaten_saksi2',
+    'provinsi_saksi2',
 ];
 
 // PROSES SIMPAN DATA FORM
@@ -113,42 +166,42 @@ if (isset($_POST['simpan'])) {
     rel="stylesheet" />
 
 <style>
-.page-title-modern {
-    font-weight: 700;
-    color: #2c3e50;
-}
+    .page-title-modern {
+        font-weight: 700;
+        color: #2c3e50;
+    }
 
-.card-modern {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
+    .card-modern {
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 
-.section-form-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #dc3545;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 8px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
+    .section-form-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #dc3545;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
 
-.form-label-modern {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.85rem;
-}
+    .form-label-modern {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.85rem;
+    }
 
-.form-control-modern {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-size: 0.9rem;
-}
+    .form-control-modern {
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 0.9rem;
+    }
 
-.select2-container--bootstrap-5 .select2-selection {
-    border-radius: 8px !important;
-}
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 8px !important;
+    }
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -635,203 +688,218 @@ if (isset($_POST['simpan'])) {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-// Helper 1: Format Tanggal ke YYYY-MM-DD
-function formatDateForInput(dateString) {
-    if (!dateString) return '';
-    if (typeof dateString === 'string' && dateString.includes(' ')) {
-        dateString = dateString.split(' ')[0];
-    }
-    var d = new Date(dateString);
-    if (isNaN(d.getTime()) && typeof dateString === 'string') {
-        var parts = dateString.split(/[\/\-]/);
-        if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
-            return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+    // Helper 1: Format Tanggal ke YYYY-MM-DD
+    function formatDateForInput(dateString) {
+        if (!dateString) return '';
+        if (typeof dateString === 'string' && dateString.includes(' ')) {
+            dateString = dateString.split(' ')[0];
         }
-        return '';
-    }
-    var month = '' + (d.getMonth() + 1);
-    var day = '' + d.getDate();
-    var year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-}
-
-// Helper 2: Hitung Umur Berdasarkan Tanggal Lahir
-function hitungUmur(dateString) {
-    var formattedDate = formatDateForInput(dateString);
-    if (!formattedDate) return '';
-
-    var today = new Date();
-    var birthDate = new Date(formattedDate);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age >= 0 ? age : '';
-}
-
-$(document).ready(function() {
-
-    // Konfigurasi Ajax Select2
-    function buildSelect2Config(placeholderText) {
-        return {
-            theme: 'bootstrap-5',
-            placeholder: placeholderText,
-            allowClear: true,
-            minimumInputLength: 2,
-            ajax: {
-                url: 'api/get_penduduk.php',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        search: params.term
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
+        var d = new Date(dateString);
+        if (isNaN(d.getTime()) && typeof dateString === 'string') {
+            var parts = dateString.split(/[\/\-]/);
+            if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
+                return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
             }
-        };
+            return '';
+        }
+        var month = '' + (d.getMonth() + 1);
+        var day = '' + d.getDate();
+        var year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
     }
 
-    // Generic Populate Handler
-    function autofillPersonData(d, prefix) {
-        $('#input_nik_' + prefix).val(d.nik || d.id || '');
-        $('#input_nama_' + prefix).val(d.nama || '');
-
-        var rawTgl = d.tgl_lahir || d.tanggal_lahir || '';
-        var formattedTgl = formatDateForInput(rawTgl);
-
-        if (formattedTgl) {
-            $('#input_tanggal_lahir_' + prefix).val(formattedTgl);
-            $('#input_umur_' + prefix).val(hitungUmur(formattedTgl));
-        } else if (d.umur) {
-            $('#input_umur_' + prefix).val(d.umur);
-        }
-
-        if (d.pekerjaan) $('#input_pekerjaan_' + prefix).val(d.pekerjaan);
-        if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
-            $('#input_alamat_' + prefix).val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
-            .alamat);
-        }
-        if (d.desa) $('#input_desa_' + prefix).val(d.desa);
-        if (d.kecamatan) $('#input_kecamatan_' + prefix).val(d.kecamatan);
-        if (d.kabupaten) $('#input_kabupaten_' + prefix).val(d.kabupaten);
-        if (d.provinsi) $('#input_provinsi_' + prefix).val(d.provinsi);
+    // Helper 1b: Parse tempat lahir dari tempat_tgl_lahir gabungan
+    function parsePlaceFromCombined(value) {
+        if (!value) return '';
+        var parts = value.split(',');
+        return parts.length > 0 ? parts[0].trim() : '';
     }
 
-    // 1. CARI JENAZAH
-    $('#cari_jenazah').select2(buildSelect2Config('-- Cari NIK / Nama Jenazah --'));
-    $('#cari_jenazah').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'jenazah');
-        if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
-        if (d.jenis_kelamin) $('#input_jenis_kelamin_jenazah').val(d.jenis_kelamin);
-        if (d.tempat_lahir) $('#input_tempat_lahir_jenazah').val(d.tempat_lahir);
-        if (d.agama) $('#input_agama_jenazah').val(d.agama);
-    });
-    $('#cari_jenazah').on('select2:clear', function() {
-        $('#input_nik_jenazah, #input_nama_jenazah, #input_tempat_lahir_jenazah, #input_tanggal_lahir_jenazah, #input_umur_jenazah, #input_pekerjaan_jenazah, #input_alamat_jenazah')
-            .val('');
-    });
+    // Helper 2: Hitung Umur Berdasarkan Tanggal Lahir
+    function hitungUmur(dateString) {
+        var formattedDate = formatDateForInput(dateString);
+        if (!formattedDate) return '';
 
-    // 2. CARI AYAH
-    $('#cari_ayah').select2(buildSelect2Config('-- Cari NIK / Nama Ayah --'));
-    $('#cari_ayah').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'ayah');
-        if (!$('#input_nama_kepala_keluarga').val()) {
-            $('#input_nama_kepala_keluarga').val(d.nama || '');
+        var today = new Date();
+        var birthDate = new Date(formattedDate);
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var m = today.getMonth() - birthDate.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
         }
-        if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
-    });
-    $('#cari_ayah').on('select2:clear', function() {
-        $('#input_nik_ayah, #input_nama_ayah, #input_tanggal_lahir_ayah, #input_umur_ayah, #input_pekerjaan_ayah, #input_alamat_ayah')
-            .val('');
-    });
+        return age >= 0 ? age : '';
+    }
 
-    // 3. CARI IBU
-    $('#cari_ibu').select2(buildSelect2Config('-- Cari NIK / Nama Ibu --'));
-    $('#cari_ibu').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'ibu');
-        if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
-    });
-    $('#cari_ibu').on('select2:clear', function() {
-        $('#input_nik_ibu, #input_nama_ibu, #input_tanggal_lahir_ibu, #input_umur_ibu, #input_pekerjaan_ibu, #input_alamat_ibu')
-            .val('');
-    });
+    $(document).ready(function () {
 
-    // 4. CARI PELAPOR
-    $('#cari_pelapor').select2(buildSelect2Config('-- Cari NIK / Nama Pelapor --'));
-    $('#cari_pelapor').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'pelapor');
-    });
-    $('#cari_pelapor').on('select2:clear', function() {
-        $('#input_nik_pelapor, #input_nama_pelapor, #input_tanggal_lahir_pelapor, #input_umur_pelapor, #input_pekerjaan_pelapor, #input_alamat_pelapor')
-            .val('');
-    });
+        // Konfigurasi Ajax Select2
+        function buildSelect2Config(placeholderText) {
+            return {
+                theme: 'bootstrap-5',
+                placeholder: placeholderText,
+                allowClear: true,
+                minimumInputLength: 2,
+                ajax: {
+                    url: 'api/get_penduduk.php',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            };
+        }
 
-    // 5. CARI SAKSI 1
-    $('#cari_saksi1').select2(buildSelect2Config('-- Cari NIK / Nama Saksi I --'));
-    $('#cari_saksi1').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'saksi1');
-    });
-    $('#cari_saksi1').on('select2:clear', function() {
-        $('#input_nik_saksi1, #input_nama_saksi1, #input_umur_saksi1, #input_pekerjaan_saksi1, #input_alamat_saksi1')
-            .val('');
-    });
+        // Generic Populate Handler
+        function autofillPersonData(d, prefix) {
+            $('#input_nik_' + prefix).val(d.nik || d.id || '');
+            $('#input_nama_' + prefix).val(d.nama || '');
 
-    // 6. CARI SAKSI 2
-    $('#cari_saksi2').select2(buildSelect2Config('-- Cari NIK / Nama Saksi II --'));
-    $('#cari_saksi2').on('select2:select', function(e) {
-        var d = e.params.data;
-        autofillPersonData(d, 'saksi2');
-    });
-    $('#cari_saksi2').on('select2:clear', function() {
-        $('#input_nik_saksi2, #input_nama_saksi2, #input_umur_saksi2, #input_pekerjaan_saksi2, #input_alamat_saksi2')
-            .val('');
-    });
+            var rawTgl = d.tgl_lahir || d.tanggal_lahir || '';
+            var formattedTgl = formatDateForInput(rawTgl);
 
-    // Hitung Umur Real-time jika tanggal diubah manual
-    $('#input_tanggal_lahir_jenazah').on('change keyup', function() {
-        $('#input_umur_jenazah').val(hitungUmur($(this).val()));
-    });
-    $('#input_tanggal_lahir_ayah').on('change keyup', function() {
-        $('#input_umur_ayah').val(hitungUmur($(this).val()));
-    });
-    $('#input_tanggal_lahir_ibu').on('change keyup', function() {
-        $('#input_umur_ibu').val(hitungUmur($(this).val()));
-    });
-    $('#input_tanggal_lahir_pelapor').on('change keyup', function() {
-        $('#input_umur_pelapor').val(hitungUmur($(this).val()));
-    });
-
-});
-
-// Validasi Form Bootstrap
-(function() {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
+            if (formattedTgl) {
+                $('#input_tanggal_lahir_' + prefix).val(formattedTgl);
+                $('#input_umur_' + prefix).val(hitungUmur(formattedTgl));
+            } else if (d.umur) {
+                $('#input_umur_' + prefix).val(d.umur);
             }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+
+            if (d.pekerjaan) $('#input_pekerjaan_' + prefix).val(d.pekerjaan);
+            if (d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d.alamat) {
+                $('#input_alamat_' + prefix).val(d.alamat_tinggal || d.alamat_jalan || d.alamat_lengkap || d
+                    .alamat);
+            }
+            if (d.desa) $('#input_desa_' + prefix).val(d.desa);
+            if (d.kecamatan) $('#input_kecamatan_' + prefix).val(d.kecamatan);
+            if (d.kabupaten) $('#input_kabupaten_' + prefix).val(d.kabupaten);
+            if (d.provinsi) $('#input_provinsi_' + prefix).val(d.provinsi);
+        }
+
+        // 1. CARI JENAZAH
+        $('#cari_jenazah').select2(buildSelect2Config('-- Cari NIK / Nama Jenazah --'));
+        $('#cari_jenazah').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'jenazah');
+            if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
+            if (d.jenis_kelamin) {
+                var jk = d.jenis_kelamin.toString().toLowerCase();
+                if (jk.includes('l')) {
+                    $('#input_jenis_kelamin_jenazah').val('Laki-laki');
+                } else if (jk.includes('p')) {
+                    $('#input_jenis_kelamin_jenazah').val('Perempuan');
+                }
+            }
+            var place = d.tempat_lahir || parsePlaceFromCombined(d.tempat_tgl_lahir) || '';
+            if (place) $('#input_tempat_lahir_jenazah').val(place);
+            if (d.agama) $('#input_agama_jenazah').val(d.agama);
+        });
+        $('#cari_jenazah').on('select2:clear', function () {
+            $('#input_nik_jenazah, #input_nama_jenazah, #input_tempat_lahir_jenazah, #input_tanggal_lahir_jenazah, #input_umur_jenazah, #input_pekerjaan_jenazah, #input_alamat_jenazah')
+                .val('');
+        });
+
+        // 2. CARI AYAH
+        $('#cari_ayah').select2(buildSelect2Config('-- Cari NIK / Nama Ayah --'));
+        $('#cari_ayah').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'ayah');
+            if (!$('#input_nama_kepala_keluarga').val()) {
+                $('#input_nama_kepala_keluarga').val(d.nama || '');
+            }
+            if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
+        });
+        $('#cari_ayah').on('select2:clear', function () {
+            $('#input_nik_ayah, #input_nama_ayah, #input_tanggal_lahir_ayah, #input_umur_ayah, #input_pekerjaan_ayah, #input_alamat_ayah')
+                .val('');
+        });
+
+        // 3. CARI IBU
+        $('#cari_ibu').select2(buildSelect2Config('-- Cari NIK / Nama Ibu --'));
+        $('#cari_ibu').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'ibu');
+            if (d.no_kk || d.nokk) $('#input_nomor_kk').val(d.no_kk || d.nokk);
+        });
+        $('#cari_ibu').on('select2:clear', function () {
+            $('#input_nik_ibu, #input_nama_ibu, #input_tanggal_lahir_ibu, #input_umur_ibu, #input_pekerjaan_ibu, #input_alamat_ibu')
+                .val('');
+        });
+
+        // 4. CARI PELAPOR
+        $('#cari_pelapor').select2(buildSelect2Config('-- Cari NIK / Nama Pelapor --'));
+        $('#cari_pelapor').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'pelapor');
+        });
+        $('#cari_pelapor').on('select2:clear', function () {
+            $('#input_nik_pelapor, #input_nama_pelapor, #input_tanggal_lahir_pelapor, #input_umur_pelapor, #input_pekerjaan_pelapor, #input_alamat_pelapor')
+                .val('');
+        });
+
+        // 5. CARI SAKSI 1
+        $('#cari_saksi1').select2(buildSelect2Config('-- Cari NIK / Nama Saksi I --'));
+        $('#cari_saksi1').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'saksi1');
+        });
+        $('#cari_saksi1').on('select2:clear', function () {
+            $('#input_nik_saksi1, #input_nama_saksi1, #input_umur_saksi1, #input_pekerjaan_saksi1, #input_alamat_saksi1')
+                .val('');
+        });
+
+        // 6. CARI SAKSI 2
+        $('#cari_saksi2').select2(buildSelect2Config('-- Cari NIK / Nama Saksi II --'));
+        $('#cari_saksi2').on('select2:select', function (e) {
+            var d = e.params.data;
+            autofillPersonData(d, 'saksi2');
+        });
+        $('#cari_saksi2').on('select2:clear', function () {
+            $('#input_nik_saksi2, #input_nama_saksi2, #input_umur_saksi2, #input_pekerjaan_saksi2, #input_alamat_saksi2')
+                .val('');
+        });
+
+        // Hitung Umur Real-time jika tanggal diubah manual
+        $('#input_tanggal_lahir_jenazah').on('change keyup', function () {
+            $('#input_umur_jenazah').val(hitungUmur($(this).val()));
+        });
+        $('#input_tanggal_lahir_ayah').on('change keyup', function () {
+            $('#input_umur_ayah').val(hitungUmur($(this).val()));
+        });
+        $('#input_tanggal_lahir_ibu').on('change keyup', function () {
+            $('#input_umur_ibu').val(hitungUmur($(this).val()));
+        });
+        $('#input_tanggal_lahir_pelapor').on('change keyup', function () {
+            $('#input_umur_pelapor').val(hitungUmur($(this).val()));
+        });
+
+    });
+
+    // Validasi Form Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>
