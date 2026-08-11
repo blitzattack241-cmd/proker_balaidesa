@@ -3,12 +3,62 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/../koneksi.php';
 if (!$koneksi) {
     die('Koneksi gagal: ' . mysqli_connect_error());
 }
 
-$checkColumns = [
+$autoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (is_file($autoloadPath)) {
+    require_once $autoloadPath;
+}
+
+spl_autoload_register(function ($class) {
+    $phpSpreadsheetPrefix = 'PhpOffice\\PhpSpreadsheet\\';
+    if (strncmp($class, $phpSpreadsheetPrefix, strlen($phpSpreadsheetPrefix)) === 0) {
+        $relativeClass = substr($class, strlen($phpSpreadsheetPrefix));
+        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
+        $filePath = __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/' . $relativePath;
+        if (is_file($filePath)) {
+            require_once $filePath;
+            return true;
+        }
+    }
+
+    $psrPrefix = 'Psr\\SimpleCache\\';
+    if (strncmp($class, $psrPrefix, strlen($psrPrefix)) === 0) {
+        $relativeClass = substr($class, strlen($psrPrefix));
+        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
+        $filePath = __DIR__ . '/../vendor/psr/simple-cache/src/' . $relativePath;
+        if (is_file($filePath)) {
+            require_once $filePath;
+            return true;
+        }
+    }
+
+    return false;
+});
+
+if (isset($_GET['test'])) {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "test=1 mode\n";
+    echo "autoload exists: " . (is_file($autoloadPath) ? 'yes' : 'no') . "\n";
+    echo "IOFactory class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory') ? 'yes' : 'no') . "\n";
+    echo "Csv class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\Reader\\Csv') ? 'yes' : 'no') . "\n";
+    echo "Date class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\Shared\\Date') ? 'yes' : 'no') . "\n";
+    echo "requested method: " . $_SERVER['REQUEST_METHOD'] . "\n";
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['import'])) {
+    header('Location: ../index.php?page=penduduk');
+    exit;
+}
+
+$columnsToEnsure = [
     'rt' => 'VARCHAR(5) DEFAULT NULL',
     'rw' => 'VARCHAR(5) DEFAULT NULL',
     'no_kk' => 'VARCHAR(20) DEFAULT NULL',
@@ -34,18 +84,11 @@ if ($existingColsQuery) {
     }
 }
 
-foreach ($checkColumns as $colName => $colDef) {
+foreach ($columnsToEnsure as $colName => $colDef) {
     if (!in_array($colName, $existingCols, true)) {
         mysqli_query($koneksi, "ALTER TABLE `tb_penduduk` ADD COLUMN `$colName` $colDef");
     }
 }
-
-$autoloadPath = __DIR__ . '/../vendor/autoload.php';
-if (is_file($autoloadPath)) {
-    require_once $autoloadPath;
-}
-
-$hasPhpSpreadsheet = class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory');
 
 if (isset($_POST['import'])) {
     if (empty($_FILES['file_excel']['tmp_name'])) {
@@ -66,66 +109,14 @@ if (isset($_POST['import'])) {
     $skipped = 0;
     $errors = [];
 
-    $clean = function ($value) use ($koneksi) {
-        if ($value === null || $value === false) {
-            return '';
-        }
-
-        $value = trim((string) $value);
-        $value = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
-        return mysqli_real_escape_string($koneksi, $value);
-    };
-
-    $normalizeStatusPernikahan = function ($value) {
-        $status = strtolower(trim((string) $value));
-        if ($status === '') {
-            return 'Belum Kawin';
-        }
-
-        if (str_contains($status, 'belum')) {
-            return 'Belum Kawin';
-        }
-
-        if (str_contains($status, 'janda') || str_contains($status, 'duda') || str_contains($status, 'cerai')) {
-            return 'Cerai / Janda / Duda';
-        }
-
-        if (str_contains($status, 'kawin') || str_contains($status, 'nikah')) {
-            return 'Kawin';
-        }
-
-        return 'Belum Kawin';
-    };
-
-    $parseDate = function ($value) {
-        if ($value === null || $value === false || trim((string) $value) === '') {
-            return null;
-        }
-
-        if (is_numeric($value)) {
-            if ($GLOBALS['hasPhpSpreadsheet'] ?? false) {
-                try {
-                    return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
-                } catch (Throwable $e) {
-                    return null;
-                }
-            }
-        }
-
-        $timestamp = strtotime(str_replace('/', '-', (string) $value));
-        return $timestamp ? date('Y-m-d', $timestamp) : null;
-    };
-
     $normalizeHeader = function ($value) {
         $value = strtolower(trim((string) $value));
         $value = preg_replace('/[^a-z0-9]+/', '', $value);
         return $value;
     };
 
-    $normalizeCanonicalHeader = function ($headerName) {
-        $headerName = strtolower(trim((string) $headerName));
-        $headerName = preg_replace('/[^a-z0-9]+/', '', $headerName);
-
+    $canonicalHeaderMap = function ($headerName) use ($normalizeHeader) {
+        $headerName = $normalizeHeader($headerName);
         $map = [
             'rt' => 'rt',
             'rw' => 'rw',
@@ -156,29 +147,84 @@ if (isset($_POST['import'])) {
         return $map[$headerName] ?? null;
     };
 
-    $rows = [];
-    $isExcel = in_array($fileExt, ['xlsx', 'xls'], true) && $hasPhpSpreadsheet;
-
-    if ($isExcel) {
-        try {
-            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
-            $worksheet = $spreadsheet->getActiveSheet();
-            $rows = $worksheet->toArray(null, true, true, true);
-        } catch (Throwable $e) {
-            $errors[] = 'Gagal membaca file Excel: ' . $e->getMessage();
+    $clean = function ($value) use ($koneksi) {
+        if ($value === null || $value === false) {
+            return '';
         }
-    } else {
-        $handle = fopen($fileTmpPath, 'r');
-        if ($handle !== false) {
-            $firstLine = fgets($handle);
-            $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
-            rewind($handle);
 
-            while (($data = fgetcsv($handle, 2000, $delimiter)) !== false) {
-                $rows[] = $data;
+        $value = trim((string) $value);
+        $value = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
+        return mysqli_real_escape_string($koneksi, $value);
+    };
+
+    $normalizeStatusPernikahan = function ($value) {
+        $status = strtolower(trim((string) $value));
+        if ($status === '') {
+            return 'Belum Kawin';
+        }
+        if (str_contains($status, 'belum')) {
+            return 'Belum Kawin';
+        }
+        if (str_contains($status, 'janda') || str_contains($status, 'duda') || str_contains($status, 'cerai')) {
+            return 'Cerai / Janda / Duda';
+        }
+        if (str_contains($status, 'kawin') || str_contains($status, 'nikah')) {
+            return 'Kawin';
+        }
+        return 'Belum Kawin';
+    };
+
+    $parseDate = function ($value) {
+        if ($value === null || $value === false || trim((string) $value) === '') {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            try {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
+            } catch (Throwable $e) {
+                return null;
             }
-            fclose($handle);
         }
+
+        $timestamp = strtotime(str_replace('/', '-', (string) $value));
+        return $timestamp ? date('Y-m-d', $timestamp) : null;
+    };
+
+    $parseCsvDelimiter = function ($path) {
+        $handle = fopen($path, 'r');
+        if ($handle === false) {
+            return ',';
+        }
+
+        $line = fgets($handle);
+        fclose($handle);
+
+        if ($line === false) {
+            return ',';
+        }
+
+        $commaCount = substr_count($line, ',');
+        $semicolonCount = substr_count($line, ';');
+        return $semicolonCount > $commaCount ? ';' : ',';
+    };
+
+    try {
+        if ($fileExt === 'csv') {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+            $reader->setInputEncoding('UTF-8');
+            $reader->setDelimiter($parseCsvDelimiter($fileTmpPath));
+            $spreadsheet = $reader->load($fileTmpPath);
+        } else {
+            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpPath);
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($fileTmpPath);
+        }
+
+        $rows = $spreadsheet->getActiveSheet()->toArray();
+    } catch (Throwable $e) {
+        $errors[] = 'Gagal membaca file: ' . $e->getMessage();
+        $rows = [];
     }
 
     if (!empty($errors)) {
@@ -197,13 +243,16 @@ if (isset($_POST['import'])) {
         }
     }
 
+    if ($headerRowIndex === null && !empty($rows)) {
+        $headerRowIndex = 0;
+    }
+
+    $headerRow = $headerRowIndex !== null ? $rows[$headerRowIndex] : [];
     $headerMap = [];
-    if ($headerRowIndex !== null) {
-        foreach ($rows[$headerRowIndex] as $sourceKey => $headerValue) {
-            $canonical = $normalizeCanonicalHeader($headerValue);
-            if ($canonical !== null) {
-                $headerMap[$sourceKey] = $canonical;
-            }
+    foreach ($headerRow as $sourceKey => $headerValue) {
+        $canonical = $canonicalHeaderMap($headerValue);
+        if ($canonical !== null) {
+            $headerMap[$sourceKey] = $canonical;
         }
     }
 
@@ -212,82 +261,36 @@ if (isset($_POST['import'])) {
         for ($i = $headerRowIndex + 1; $i < count($rows); $i++) {
             $dataRows[] = $rows[$i];
         }
-    } else {
-        $dataRows = $rows;
     }
 
-    $normalizeRecord = function ($row) use ($headerMap, $clean, $normalizeStatusPernikahan, $parseDate) {
+    foreach ($dataRows as $rowIndex => $row) {
         $mapped = [];
-        if (!empty($headerMap)) {
-            foreach ($row as $sourceKey => $value) {
-                if (isset($headerMap[$sourceKey])) {
-                    $mapped[$headerMap[$sourceKey]] = $value;
-                }
+        foreach ($row as $sourceKey => $value) {
+            if (isset($headerMap[$sourceKey])) {
+                $mapped[$headerMap[$sourceKey]] = $value;
             }
         }
 
-        $rt = $mapped['rt'] ?? ($row['B'] ?? $row[1] ?? '');
-        $rw = $mapped['rw'] ?? ($row['C'] ?? $row[2] ?? '');
-        $no_kk = $mapped['no_kk'] ?? ($row['D'] ?? $row[3] ?? '');
-        $kepala_kk = $mapped['kepala_kk'] ?? ($row['E'] ?? $row[4] ?? '');
-        $nik = $mapped['nik'] ?? ($row['G'] ?? $row[6] ?? '');
-        $nama = $mapped['nama'] ?? ($row['H'] ?? $row[7] ?? '');
-        $jenis_kelamin = $mapped['jenis_kelamin'] ?? ($row['I'] ?? $row[8] ?? '');
-        $status_keluarga = $mapped['status_keluarga'] ?? ($row['J'] ?? $row[9] ?? '');
-        $tempat_lahir = $mapped['tempat_lahir'] ?? ($row['K'] ?? $row[10] ?? '');
-        $tgl_lahir_raw = $mapped['tgl_lahir'] ?? ($row['L'] ?? $row[11] ?? '');
-        $status_pernikahan_raw = $mapped['status_pernikahan'] ?? ($row['M'] ?? $row[12] ?? '');
-        $agama = $mapped['agama'] ?? ($row['N'] ?? $row[13] ?? '');
-        $kewarganegaraan = $mapped['kewarganegaraan'] ?? ($row['O'] ?? $row[14] ?? '');
-        $suku = $mapped['suku'] ?? ($row['P'] ?? $row[15] ?? '');
-        $pendidikan = $mapped['pendidikan'] ?? ($row['Q'] ?? $row[16] ?? '');
-        $pekerjaan = $mapped['pekerjaan'] ?? ($row['R'] ?? $row[17] ?? '');
-        $alamat = $mapped['alamat'] ?? ($row['A'] ?? $row[0] ?? '');
-        $umur = $mapped['umur'] ?? '';
-
-        $rt_clean = $clean($rt);
-        $rw_clean = $clean($rw);
-        $no_kk_clean = $clean($no_kk);
-        $kepala_kk_clean = $clean($kepala_kk);
-        $nik_clean = $clean($nik);
-        $nama_clean = $clean($nama);
-        $jenis_kelamin_clean = $clean($jenis_kelamin);
-        $status_keluarga_clean = $clean($status_keluarga);
-        $tempat_lahir_clean = $clean($tempat_lahir);
-        $tgl_lahir_value = $parseDate($tgl_lahir_raw);
-        $status_pernikahan_clean = $clean($normalizeStatusPernikahan($status_pernikahan_raw));
-        $agama_clean = $clean($agama);
-        $kewarganegaraan_clean = $clean($kewarganegaraan);
-        $suku_clean = $clean($suku);
-        $pendidikan_clean = $clean($pendidikan);
-        $pekerjaan_clean = $clean($pekerjaan);
-        $alamat_clean = $clean($alamat);
-        $umur_clean = $clean($umur);
-
-        return [
-            'rt' => $rt_clean,
-            'rw' => $rw_clean,
-            'no_kk' => $no_kk_clean,
-            'kepala_kk' => $kepala_kk_clean,
-            'nik' => $nik_clean,
-            'nama' => $nama_clean,
-            'jenis_kelamin' => $jenis_kelamin_clean,
-            'status_keluarga' => $status_keluarga_clean,
-            'tempat_lahir' => $tempat_lahir_clean,
-            'tgl_lahir' => $tgl_lahir_value,
-            'status_pernikahan' => $status_pernikahan_clean,
-            'agama' => $agama_clean,
-            'kewarganegaraan' => $kewarganegaraan_clean,
-            'suku' => $suku_clean,
-            'pendidikan' => $pendidikan_clean,
-            'pekerjaan' => $pekerjaan_clean,
-            'alamat' => $alamat_clean,
-            'umur' => $umur_clean,
+        $record = [
+            'rt' => $clean($mapped['rt'] ?? ''),
+            'rw' => $clean($mapped['rw'] ?? ''),
+            'no_kk' => $clean($mapped['no_kk'] ?? ''),
+            'kepala_kk' => $clean($mapped['kepala_kk'] ?? ''),
+            'nik' => $clean($mapped['nik'] ?? ''),
+            'nama' => $clean($mapped['nama'] ?? ''),
+            'jenis_kelamin' => $clean($mapped['jenis_kelamin'] ?? ''),
+            'status_keluarga' => $clean($mapped['status_keluarga'] ?? ''),
+            'tempat_lahir' => $clean($mapped['tempat_lahir'] ?? ''),
+            'tgl_lahir' => $parseDate($mapped['tgl_lahir'] ?? ''),
+            'status_pernikahan' => $clean($normalizeStatusPernikahan($mapped['status_pernikahan'] ?? '')),
+            'agama' => $clean($mapped['agama'] ?? ''),
+            'kewarganegaraan' => $clean($mapped['kewarganegaraan'] ?? ''),
+            'suku' => $clean($mapped['suku'] ?? ''),
+            'pendidikan' => $clean($mapped['pendidikan'] ?? ''),
+            'pekerjaan' => $clean($mapped['pekerjaan'] ?? ''),
+            'alamat' => $clean($mapped['alamat'] ?? ''),
+            'umur' => $clean($mapped['umur'] ?? ''),
         ];
-    };
-
-    foreach ($dataRows as $rowIndex => $row) {
-        $record = $normalizeRecord($row);
 
         if ($record['nik'] === '' || $record['nama'] === '') {
             $skipped++;
@@ -300,7 +303,6 @@ if (isset($_POST['import'])) {
 
         $tglLahirSql = ($record['tgl_lahir'] === null || $record['tgl_lahir'] === '') ? 'NULL' : "'" . mysqli_real_escape_string($koneksi, $record['tgl_lahir']) . "'";
         $umurSql = $record['umur'] === '' ? 'NULL' : (int) $record['umur'];
-
         $tempatTglLahirValue = $record['tgl_lahir'] !== null && $record['tgl_lahir'] !== ''
             ? $record['tempat_lahir'] . ', ' . $record['tgl_lahir']
             : $record['tempat_lahir'];
@@ -358,23 +360,11 @@ if (isset($_POST['import'])) {
         }
     }
 
-    if (!empty($errors)) {
-        $summary = "Import selesai. Ditambahkan/diupdate: $inserted. Dilewati: $skipped.\nError:\n" . implode("\n", array_slice($errors, 0, 5));
-        echo "<script>alert('" . addslashes($summary) . "'); window.location='../index.php?page=penduduk';</script>";
-    } else {
-        $summary = "Berhasil memproses $inserted data penduduk. Dilewati: $skipped.";
-        echo "<script>alert('" . addslashes($summary) . "'); window.location='../index.php?page=penduduk';</script>";
-    }
+    $summary = $errors
+        ? "Import selesai. Ditambahkan/diupdate: $inserted. Dilewati: $skipped.\nError:\n" . implode("\n", array_slice($errors, 0, 5))
+        : "Berhasil memproses $inserted data penduduk. Dilewati: $skipped.";
 
-    echo '<div style="padding:16px;font-family:Arial,sans-serif;">';
-    echo '<strong>Hasil import:</strong><br>';
-    echo 'Ditambahkan/diupdate: ' . $inserted . '<br>';
-    echo 'Dilewati: ' . $skipped . '<br>';
-    if (!empty($errors)) {
-        echo 'Error: ' . htmlspecialchars(implode('<br>', array_slice($errors, 0, 5)), ENT_QUOTES, 'UTF-8');
-    }
-    echo '</div>';
-
+    echo "<script>alert('" . addslashes($summary) . "'); window.location='../index.php?page=penduduk';</script>";
     exit;
 }
 ?>
