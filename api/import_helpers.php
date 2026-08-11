@@ -34,14 +34,17 @@ if (is_file($simpleXlsxPath)) {
     require_once $simpleXlsxPath;
 }
 
-function normalize_header(string $value): string
+function normalize_header($value): string
 {
-    $value = trim($value);
-    $value = preg_replace('/\x{FEFF}/u', '', $value);
+    // Empty cells and malformed source text must not be passed as null to
+    // mb_strtolower(). preg_replace() with a UTF-8 pattern can return null
+    // for invalid byte sequences, so normalize that result as well.
+    $value = is_scalar($value) ? trim((string) $value) : '';
+    $value = preg_replace('/\x{FEFF}/u', '', $value) ?? '';
     $value = mb_strtolower($value, 'UTF-8');
     // remove non-alnum and replace with space
-    $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value);
-    $value = preg_replace('/\s+/', ' ', $value);
+    $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
+    $value = preg_replace('/\s+/', ' ', $value) ?? '';
     $value = trim($value);
     // remove diacritics
     $trans = @iconv('UTF-8', 'ASCII//TRANSLIT', $value);
