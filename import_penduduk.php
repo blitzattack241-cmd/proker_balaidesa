@@ -1,17 +1,26 @@
 <?php
 // Pastikan kamu sudah menginstal phpspreadsheet via composer: composer require phpoffice/phpspreadsheet
 $autoloadPath = __DIR__ . '/vendor/autoload.php';
-if (!is_file($autoloadPath)) {
-    echo "<script>alert('Composer autoload tidak ditemukan. Jalankan composer install terlebih dahulu.'); window.location='import_penduduk.php';</script>";
+if (is_file($autoloadPath) && is_readable($autoloadPath)) {
+    require_once $autoloadPath;
+} else {
+    $path = realpath($autoloadPath) ?: $autoloadPath;
+    echo "<script>alert('Composer autoload tidak ditemukan atau tidak dapat dibaca: " . addslashes($path) . "'); window.location='import_penduduk.php';</script>";
     exit;
 }
 
-require_once $autoloadPath;
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-if (!class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory')) {
-    echo "<script>alert('PhpSpreadsheet tidak terpasang. Jalankan composer require phpoffice/phpspreadsheet.'); window.location='import_penduduk.php';</script>";
+if (!class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory', true)) {
+    $ioFactoryPath = __DIR__ . '/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/IOFactory.php';
+    if (is_file($ioFactoryPath) && is_readable($ioFactoryPath)) {
+        require_once $ioFactoryPath;
+    }
+}
+
+if (!class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory', true)) {
+    $ioFactoryPath = realpath(__DIR__ . '/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/IOFactory.php') ?: __DIR__ . '/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/IOFactory.php';
+    echo "<script>alert('PhpSpreadsheet IOFactory class tidak ditemukan. Pastikan paket phpoffice/phpspreadsheet terpasang. Path: " . addslashes($ioFactoryPath) . "'); window.location='import_penduduk.php';</script>";
     exit;
 }
 
@@ -44,6 +53,46 @@ if (isset($_POST['import'])) {
     $inserted = 0;
     $rowCount = count($sheetData);
 
+    $normalizeHeader = function ($value) {
+        $value = trim((string) $value);
+        $value = preg_replace('/\x{FEFF}/u', '', $value);
+        $value = strtolower($value);
+        $value = preg_replace('/[^a-z0-9]+/', '_', $value);
+        return trim($value, '_');
+    };
+
+    $expectedColumns = [
+        'nik' => ['nik', 'no_ktp', 'nokk', 'no_kk'],
+        'nama' => ['nama', 'nama_lengkap'],
+        'no_kk' => ['no_kk', 'nokk', 'no_kk'],
+        'rt' => ['rt'],
+        'rw' => ['rw'],
+        'jenis_kelamin' => ['jk', 'jenis_kelamin', 'jeniskelamin', 'gender', 'sex'],
+        'alamat' => ['alamat'],
+        'tempat_lahir' => ['tempat_lahir', 'tempat_lahir', 'ttl'],
+        'tanggal_lahir' => ['tanggal_lahir', 'tgl_lahir', 'tanggal_lahir', 'tgllahir', 'tanggallahir'],
+        'umur' => ['umur'],
+        'agama' => ['agama'],
+        'pekerjaan' => ['pekerjaan'],
+    ];
+
+    $headerRow = $sheetData[1] ?? [];
+    $columnMap = [];
+    foreach ($headerRow as $col => $headerValue) {
+        $normalizedHeader = $normalizeHeader($headerValue);
+        foreach ($expectedColumns as $field => $aliases) {
+            if (in_array($normalizedHeader, $aliases, true)) {
+                $columnMap[$field] = $col;
+                break;
+            }
+        }
+    }
+
+    if (empty($columnMap['nik']) || empty($columnMap['nama'])) {
+        echo "<script>alert('Header Excel tidak valid. Pastikan file memiliki kolom NIK dan Nama.'); window.location='import_penduduk.php';</script>";
+        exit;
+    }
+
     $stmt = mysqli_prepare(
         $koneksi,
         "INSERT INTO tb_penduduk (nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, umur, agama, pekerjaan, alamat, rt, rw)
@@ -68,18 +117,26 @@ if (isset($_POST['import'])) {
     }
 
     for ($i = 2; $i <= $rowCount; $i++) {
-        $alamat = trim($sheetData[$i]['A'] ?? '');
-        $rt = trim($sheetData[$i]['B'] ?? '');
-        $rw = trim($sheetData[$i]['C'] ?? '');
-        $nama = trim($sheetData[$i]['D'] ?? '');
-        $no_kk = trim($sheetData[$i]['E'] ?? '');
-        $nik = trim($sheetData[$i]['F'] ?? '');
-        $jenis_kelamin = trim($sheetData[$i]['G'] ?? '');
-        $tempat_tgl_lahir = trim($sheetData[$i]['H'] ?? '');
-        $umurValue = trim($sheetData[$i]['I'] ?? '');
+        $row = $sheetData[$i] ?? [];
+        $alamat = trim($row[$columnMap['alamat']] ?? '');
+        $rt = trim($row[$columnMap['rt']] ?? '');
+        $rw = trim($row[$columnMap['rw']] ?? '');
+        $nama = trim($row[$columnMap['nama']] ?? '');
+        $no_kk = trim($row[$columnMap['no_kk']] ?? '');
+        $nik = trim($row[$columnMap['nik']] ?? '');
+        $jenis_kelamin = trim($row[$columnMap['jenis_kelamin']] ?? '');
+
+        $tempat = trim($row[$columnMap['tempat_lahir']] ?? '');
+        $tanggal = trim($row[$columnMap['tanggal_lahir']] ?? '');
+        $tempat_tgl_lahir = $tempat;
+        if ($tanggal !== '') {
+            $tempat_tgl_lahir = $tempat !== '' ? $tempat . ', ' . $tanggal : $tanggal;
+        }
+
+        $umurValue = trim($row[$columnMap['umur']] ?? '');
         $umur = $umurValue === '' ? null : (int) $umurValue;
-        $agama = trim($sheetData[$i]['J'] ?? '');
-        $pekerjaan = trim($sheetData[$i]['K'] ?? '');
+        $agama = trim($row[$columnMap['agama']] ?? '');
+        $pekerjaan = trim($row[$columnMap['pekerjaan']] ?? '');
 
         if ($nik === '' || $nama === '') {
             continue;

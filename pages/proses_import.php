@@ -126,8 +126,16 @@ foreach ($columnsToEnsure as $colName => $colDef) {
 }
 
 if (isset($_POST['import'])) {
-    if (empty($_FILES['file_excel']['tmp_name'])) {
-        echo "<script>alert('File Excel tidak valid atau gagal diunggah.'); window.location='../index.php?page=penduduk';</script>";
+    if (empty($_FILES['file_excel']['tmp_name']) || ($_FILES['file_excel']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        $uploadError = $_FILES['file_excel']['error'] ?? 'unknown';
+        $message = 'File Excel tidak valid atau gagal diunggah. Error: ' . $uploadError;
+        if ($debugMode) {
+            $debugOutput([
+                $message,
+                'file_excel keys: ' . json_encode(array_keys($_FILES['file_excel'] ?? []), JSON_UNESCAPED_UNICODE),
+            ]);
+        }
+        echo "<script>alert('" . addslashes($message) . "'); window.location='../index.php?page=penduduk';</script>";
         exit;
     }
 
@@ -154,8 +162,11 @@ if (isset($_POST['import'])) {
     $errors = [];
 
     $normalizeHeader = function ($value) {
-        $value = strtolower(trim((string) $value));
-        $value = preg_replace('/[^a-z0-9]+/', '', $value);
+        $value = (string) $value;
+        $value = trim($value);
+        $value = preg_replace('/\x{FEFF}/u', '', $value);
+        $value = mb_strtolower($value, 'UTF-8');
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', '', $value);
         return $value;
     };
 
@@ -165,30 +176,40 @@ if (isset($_POST['import'])) {
             'rt' => 'rt',
             'rw' => 'rw',
             'nokk' => 'no_kk',
-            'no_kk' => 'no_kk',
             'nokkk' => 'no_kk',
-            'no_ktp' => 'nik',
+            'no_kk' => 'no_kk',
             'noktp' => 'nik',
+            'no_ktp' => 'nik',
             'nik' => 'nik',
             'nikk' => 'nik',
             'nama' => 'nama',
-            'nama_lengkap' => 'nama',
             'namalengkap' => 'nama',
+            'namaanggota' => 'nama',
+            'namaanggotakeluarga' => 'nama',
+            'nama_lengkap' => 'nama',
             'kepalakk' => 'kepala_kk',
             'kepalakeluarga' => 'kepala_kk',
+            'nama_kepala' => 'kepala_kk',
+            'nama_kepala_keluarga' => 'kepala_kk',
             'jeniskelamin' => 'jenis_kelamin',
             'jk' => 'jenis_kelamin',
+            'sex' => 'jenis_kelamin',
+            'gender' => 'jenis_kelamin',
             'statuskeluarga' => 'status_keluarga',
-            'tempatkeluarga' => 'status_keluarga',
+            'status_keluarga' => 'status_keluarga',
+            'hubungan' => 'status_keluarga',
             'tempatlahir' => 'tempat_lahir',
+            'ttl' => 'tempat_lahir',
             'tanggallahir' => 'tgl_lahir',
             'tgllahir' => 'tgl_lahir',
+            'tanggal_lahir' => 'tgl_lahir',
             'statusperkawinan' => 'status_pernikahan',
             'statuspernikahan' => 'status_pernikahan',
             'agama' => 'agama',
             'kewarganegaraan' => 'kewarganegaraan',
             'kewarganegara' => 'kewarganegaraan',
             'suku' => 'suku',
+            'etnis' => 'suku',
             'pendidikan' => 'pendidikan',
             'pekerjaan' => 'pekerjaan',
             'alamat' => 'alamat',
@@ -196,7 +217,66 @@ if (isset($_POST['import'])) {
             'umur' => 'umur',
         ];
 
-        return $map[$headerName] ?? null;
+        if (isset($map[$headerName])) {
+            return $map[$headerName];
+        }
+
+        if (str_contains($headerName, 'nik')) {
+            return 'nik';
+        }
+        if (str_contains($headerName, 'nama')) {
+            return 'nama';
+        }
+        if (str_contains($headerName, 'kk') && str_contains($headerName, 'no')) {
+            return 'no_kk';
+        }
+        if (str_contains($headerName, 'rt')) {
+            return 'rt';
+        }
+        if (str_contains($headerName, 'rw')) {
+            return 'rw';
+        }
+        if (str_contains($headerName, 'jk') || str_contains($headerName, 'jenis') || str_contains($headerName, 'gender') || str_contains($headerName, 'sex')) {
+            return 'jenis_kelamin';
+        }
+        if (str_contains($headerName, 'keluarga') || str_contains($headerName, 'hubungan')) {
+            return 'status_keluarga';
+        }
+        if (str_contains($headerName, 'tempat') && str_contains($headerName, 'lahir')) {
+            return 'tempat_lahir';
+        }
+        if (str_contains($headerName, 'ttl')) {
+            return 'tempat_lahir';
+        }
+        if (str_contains($headerName, 'tanggal') || str_contains($headerName, 'tgllahir') || str_contains($headerName, 'tanggallahir')) {
+            return 'tgl_lahir';
+        }
+        if (str_contains($headerName, 'nikah')) {
+            return 'status_pernikahan';
+        }
+        if (str_contains($headerName, 'agama')) {
+            return 'agama';
+        }
+        if (str_contains($headerName, 'kewarga')) {
+            return 'kewarganegaraan';
+        }
+        if (str_contains($headerName, 'suku') || str_contains($headerName, 'etnis')) {
+            return 'suku';
+        }
+        if (str_contains($headerName, 'pendidikan')) {
+            return 'pendidikan';
+        }
+        if (str_contains($headerName, 'pekerjaan')) {
+            return 'pekerjaan';
+        }
+        if (str_contains($headerName, 'alamat')) {
+            return 'alamat';
+        }
+        if (str_contains($headerName, 'umur')) {
+            return 'umur';
+        }
+
+        return null;
     };
 
     $clean = function ($value) use ($koneksi) {
@@ -317,11 +397,39 @@ if (isset($_POST['import'])) {
         }
     }
 
+    $headerMapValues = array_values($headerMap);
+    if (!in_array('nik', $headerMapValues, true) || !in_array('nama', $headerMapValues, true)) {
+        $message = 'Header Excel tidak valid. Pastikan file memiliki kolom NIK dan Nama.';
+        if ($debugMode) {
+            $debugOutput([
+                'Header validation failed',
+                'headerRowIndex: ' . ($headerRowIndex === null ? 'none' : $headerRowIndex),
+                'headerRow: ' . json_encode($headerRow, JSON_UNESCAPED_UNICODE),
+                'headerMap: ' . json_encode($headerMap, JSON_UNESCAPED_UNICODE),
+            ]);
+        }
+        echo "<script>alert('" . addslashes($message) . "'); window.location='../index.php?page=penduduk';</script>";
+        exit;
+    }
+
     $dataRows = [];
     if ($headerRowIndex !== null) {
         for ($i = $headerRowIndex + 1; $i < count($rows); $i++) {
             $dataRows[] = $rows[$i];
         }
+    }
+
+    if ($debugMode) {
+        $debugOutput([
+            'fileName: ' . $fileName,
+            'fileExt: ' . $fileExt,
+            'rowsRead: ' . count($rows),
+            'headerRowIndex: ' . ($headerRowIndex === null ? 'none' : $headerRowIndex),
+            'headerRow: ' . json_encode($headerRow, JSON_UNESCAPED_UNICODE),
+            'headerMap: ' . json_encode($headerMap, JSON_UNESCAPED_UNICODE),
+            'dataRowsCount: ' . count($dataRows),
+            'firstDataRow: ' . json_encode($dataRows[0] ?? [], JSON_UNESCAPED_UNICODE),
+        ]);
     }
 
     foreach ($dataRows as $rowIndex => $row) {
@@ -330,6 +438,14 @@ if (isset($_POST['import'])) {
             if (isset($headerMap[$sourceKey])) {
                 $mapped[$headerMap[$sourceKey]] = $value;
             }
+        }
+
+        if ($debugMode && $rowIndex < 3) {
+            $debugOutput([
+                'processing row index: ' . $rowIndex,
+                'rawRow: ' . json_encode($row, JSON_UNESCAPED_UNICODE),
+                'mappedRow: ' . json_encode($mapped, JSON_UNESCAPED_UNICODE),
+            ]);
         }
 
         $record = [

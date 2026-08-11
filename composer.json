@@ -1,6 +1,7 @@
 {
     "require": {
         "endroid/qr-code": "4.8.2",
-        "bacon/bacon-qr-code": "^2.0.8"
+        "bacon/bacon-qr-code": "^2.0.8",
+        "phpoffice/phpspreadsheet": "^5.9"
     }
 }
