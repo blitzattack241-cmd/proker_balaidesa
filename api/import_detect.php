@@ -1,7 +1,9 @@
 <?php
+ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+ob_clean();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/import_helpers.php';
 

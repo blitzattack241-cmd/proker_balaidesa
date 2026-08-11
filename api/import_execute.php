@@ -1,7 +1,9 @@
 <?php
+ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+ob_clean();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/import_helpers.php';
 
@@ -47,6 +49,12 @@ $mode = isset($payload['mode']) && $payload['mode'] === 'insert_or_update' ? 'in
 
 $inserted = 0; $updated = 0; $skipped = 0; $failed = 0;
 $failRows = [];
+
+// Check database connection before proceeding
+if (!$koneksi) {
+    echo json_encode(['error' => 'Koneksi database tidak tersedia']);
+    exit;
+}
 
 ensure_import_logs_table();
 
