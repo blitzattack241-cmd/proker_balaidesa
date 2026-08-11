@@ -6,12 +6,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/import_helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['error' => 'Invalid method']);
+    echo json_encode(['error' => 'Metode tidak valid']);
     exit;
 }
 
 if (empty($_FILES['file']['tmp_name']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-    echo json_encode(['error' => 'File not provided or upload error']);
+    echo json_encode(['error' => 'File belum dipilih atau terjadi kesalahan saat unggah']);
     exit;
 }
 
@@ -22,12 +22,12 @@ $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 try {
     $rows = load_rows_from_file($tmp, $ext);
 } catch (Throwable $e) {
-    echo json_encode(['error' => 'Failed to read file: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Gagal membaca file: ' . $e->getMessage()]);
     exit;
 }
 
 if (empty($rows)) {
-    echo json_encode(['error' => 'No rows found in file']);
+    echo json_encode(['error' => 'Tidak ada baris data yang ditemukan di dalam file']);
     exit;
 }
 

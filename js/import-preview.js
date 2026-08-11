@@ -6,18 +6,43 @@ document.addEventListener('DOMContentLoaded', function(){
   const sampleDiv = document.getElementById('sample');
   let lastResponse = null;
 
+  const fieldLabels = {
+    skip: 'Lewati',
+    nama: 'Nama',
+    nik: 'NIK',
+    no_kk: 'No. KK',
+    jenis_kelamin: 'Jenis Kelamin',
+    tgl_lahir: 'Tanggal Lahir',
+    tempat_lahir: 'Tempat Lahir',
+    alamat: 'Alamat',
+    rt: 'RT',
+    rw: 'RW',
+    umur: 'Umur',
+    pendidikan: 'Pendidikan',
+    pekerjaan: 'Pekerjaan',
+    agama: 'Agama'
+  };
+
+  function getFieldLabel(value) {
+    return fieldLabels[value] || value;
+  }
+
+  function showError(message) {
+    alert(message);
+  }
+
   detectBtn.addEventListener('click', function(){
     const f = fileInput.files[0];
-    if (!f) return alert('Choose a file');
+    if (!f) return showError('Silakan pilih file terlebih dahulu.');
     const fd = new FormData();
     fd.append('file', f);
     fetch('/api/import_detect.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{
-      if (resp.error) return alert(resp.error);
+      if (resp.error) return showError(resp.error);
       lastResponse = resp;
       renderMapping(resp);
       renderSample(resp);
       preview.style.display='block';
-    }).catch(e=>{alert('Error: '+e)});
+    }).catch(e=>{showError('Terjadi kesalahan saat membaca file: ' + e)});
   });
 
   // load templates
@@ -32,17 +57,19 @@ document.addEventListener('DOMContentLoaded', function(){
   function renderMapping(resp){
     mappingDiv.innerHTML='';
     const table = document.createElement('table');
+    table.className = 'table table-bordered table-hover align-middle mapping-table';
     const tr = document.createElement('tr');
-    tr.innerHTML = '<th>Source Column</th><th>Suggested</th><th>Map To</th>';
+    tr.innerHTML = '<th>Kolom Asal</th><th>Saran Sistem</th><th>Pemetaan</th>';
     table.appendChild(tr);
     const canonFields = ['skip','nama','nik','no_kk','jenis_kelamin','tgl_lahir','tempat_lahir','alamat','rt','rw','umur','pendidikan','pekerjaan','agama'];
     resp.suggestions.forEach((s, idx)=>{
       const row = document.createElement('tr');
       const src = document.createElement('td'); src.textContent = s.original;
-      const sug = document.createElement('td'); sug.textContent = s.suggested + ' ('+s.score+')';
+      const sug = document.createElement('td'); sug.textContent = s.suggested ? getFieldLabel(s.suggested) + ' ('+s.score+')' : '-';
       const selTd = document.createElement('td');
       const sel = document.createElement('select');
-      canonFields.forEach(f=>{const o=document.createElement('option');o.value=f; o.textContent=f; if(f===s.suggested) o.selected=true; sel.appendChild(o)});
+      sel.className = 'form-select form-select-sm';
+      canonFields.forEach(f=>{const o=document.createElement('option');o.value=f; o.textContent=getFieldLabel(f); if(f===s.suggested) o.selected=true; sel.appendChild(o)});
       selTd.appendChild(sel);
       row.appendChild(src); row.appendChild(sug); row.appendChild(selTd);
       table.appendChild(row);
@@ -63,15 +90,16 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function renderSample(resp){
     sampleDiv.innerHTML='';
-    const h = document.createElement('div'); h.textContent='Sample rows (first 10)'; sampleDiv.appendChild(h);
+    const h = document.createElement('div'); h.className = 'sample-title'; h.textContent='Contoh Baris Data (maksimal 10 baris)'; sampleDiv.appendChild(h);
     const tbl = document.createElement('table');
+    tbl.className = 'table table-sm table-bordered bg-white mb-0';
     const hdr = document.createElement('tr'); resp.headers.forEach(hd=>{const th=document.createElement('th');th.textContent=hd;hdr.appendChild(th)}); tbl.appendChild(hdr);
     resp.sample.forEach(r=>{const tr=document.createElement('tr'); resp.headers.forEach((_,i)=>{const td=document.createElement('td'); td.textContent = r[i] ?? ''; tr.appendChild(td)}); tbl.appendChild(tr)});
     sampleDiv.appendChild(tbl);
   }
 
   document.getElementById('importBtn').addEventListener('click', function(){
-    if (!lastResponse) return alert('No preview loaded');
+    if (!lastResponse) return showError('Pratinjau belum dimuat. Silakan pilih file dan klik tombol cek file terlebih dahulu.');
     const f = fileInput.files[0];
     const fd = new FormData();
     fd.append('file', f);
@@ -84,22 +112,22 @@ document.addEventListener('DOMContentLoaded', function(){
     selects.forEach((sel, idx)=>{ mapping[idx] = sel.value; });
     fd.append('mapping', JSON.stringify(mapping));
     fetch('/api/import_execute.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{
-      if (resp.error) return alert(resp.error);
-      alert('Inserted: '+resp.inserted+' Updated: '+resp.updated+' Failed: '+resp.failed+' Skipped: '+resp.skipped);
-      if (resp.fail_rows && resp.fail_rows.length) console.log('Failed rows:', resp.fail_rows);
+      if (resp.error) return showError(resp.error);
+      alert('Berhasil: '+resp.inserted+' ditambahkan, '+resp.updated+' diperbarui, '+resp.failed+' gagal, '+resp.skipped+' dilewati.');
+      if (resp.fail_rows && resp.fail_rows.length) console.log('Baris gagal:', resp.fail_rows);
       window.location='/index.php?page=penduduk';
-    }).catch(e=>{alert('Import failed: '+e)});
+    }).catch(e=>{showError('Impor gagal: '+e)});
   });
 
   document.getElementById('saveTemplate').addEventListener('click', function(){
     const name = (document.getElementById('templateName').value || '').trim();
-    if (!name) return alert('Provide template name');
+    if (!name) return showError('Silakan isi nama template terlebih dahulu.');
     const selects = mappingDiv.querySelectorAll('select');
     const mapping = {};
     selects.forEach((sel, idx)=>{ mapping[idx] = sel.value; });
     const fd = new FormData();
     fd.append('action','save'); fd.append('name', name); fd.append('content', JSON.stringify(mapping));
-    fetch('/api/import_template.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{ if (resp.ok) { alert('Template saved'); const opt = document.createElement('option'); opt.value=name; opt.textContent=name; document.getElementById('loadTemplate').appendChild(opt);} else alert('Save failed'); }).catch(e=>alert('Save error'));
+    fetch('/api/import_template.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{ if (resp.ok) { alert('Template berhasil disimpan.'); const opt = document.createElement('option'); opt.value=name; opt.textContent=name; document.getElementById('loadTemplate').appendChild(opt);} else showError(resp.error || 'Penyimpanan template gagal.'); }).catch(e=>showError('Gagal menyimpan template: '+e));
   });
 
   document.getElementById('loadTemplate').addEventListener('change', function(){
@@ -107,6 +135,6 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!name) return;
     fetch('/data/import_mappings.json').then(r=>r.json()).then(js=>{
       if (js.templates && js.templates[name]) applyTemplate(js.templates[name]);
-    }).catch(()=>alert('Failed to load template'));
+    }).catch(()=>showError('Template tidak dapat dimuat.'));
   });
 });

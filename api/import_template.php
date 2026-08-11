@@ -24,7 +24,7 @@ if ($method === 'POST') {
 
     if ($action === 'save' && $name !== '' && $content !== '') {
         $tpl = json_decode($content, true);
-        if (!is_array($tpl)) { echo json_encode(['error'=>'Invalid template content']); exit; }
+        if (!is_array($tpl)) { echo json_encode(['error'=>'Isi template tidak valid']); exit; }
         $json['templates'][$name] = $tpl;
         file_put_contents($dataFile, json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
         echo json_encode(['ok'=>true]); exit;
@@ -35,9 +35,9 @@ if ($method === 'POST') {
         echo json_encode(['ok'=>true]); exit;
     }
 
-    echo json_encode(['error' => 'Invalid action']);
+    echo json_encode(['error' => 'Aksi tidak valid']);
     exit;
 }
 
-echo json_encode(['error'=>'Unsupported method']);
+echo json_encode(['error'=>'Metode tidak didukung']);
 exit;

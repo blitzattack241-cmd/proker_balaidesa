@@ -77,7 +77,7 @@ function load_rows_from_file(string $path, string $ext): array
         if (class_exists('Shuchkin\\SimpleXLSX')) {
             $xlsx = \Shuchkin\SimpleXLSX::parseFile($path);
             if (!$xlsx) {
-                $error = \Shuchkin\SimpleXLSX::parseError() ?: 'Unable to parse xlsx file';
+                $error = \Shuchkin\SimpleXLSX::parseError() ?: 'Tidak dapat membaca file XLSX';
                 throw new RuntimeException($error);
             }
             return $xlsx->rows();
@@ -90,7 +90,7 @@ function load_rows_from_file(string $path, string $ext): array
             return $spreadsheet->getActiveSheet()->toArray();
         }
 
-        throw new RuntimeException('XLSX support requires includes/SimpleXLSX.php or PhpSpreadsheet via Composer.');
+        throw new RuntimeException('Dukungan XLSX memerlukan includes/SimpleXLSX.php atau PhpSpreadsheet melalui Composer.');
     }
 
     if ($ext === 'xls') {
@@ -101,12 +101,12 @@ function load_rows_from_file(string $path, string $ext): array
             return $spreadsheet->getActiveSheet()->toArray();
         }
 
-        throw new RuntimeException('XLS support requires PhpSpreadsheet via Composer. Save as CSV or XLSX instead.');
+        throw new RuntimeException('Dukungan XLS memerlukan PhpSpreadsheet melalui Composer. Simpan file sebagai CSV atau XLSX sebagai gantinya.');
     }
 
     // Use PhpSpreadsheet for other types
     if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
-        throw new RuntimeException('PhpSpreadsheet classes not available. Run composer install or provide vendor autoload.');
+        throw new RuntimeException('Kelas PhpSpreadsheet tidak tersedia. Jalankan composer install atau sediakan vendor autoload.');
     }
     $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($path);
     $reader->setReadDataOnly(true);

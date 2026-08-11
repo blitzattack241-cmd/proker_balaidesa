@@ -1,21 +1,21 @@
-Importer design and usage
+Panduan impor data penduduk
 
-Overview
-- Use `/pages/import_upload.php` to upload files and preview mappings.
-- APIs:
-  - `/api/import_detect.php` : detect headers and return suggestions
-  - `/api/import_execute.php` : execute import with provided mapping
-  - `/api/import_template.php` : list/save/delete mapping templates
+Gambaran umum
+- Gunakan `/pages/import_upload.php` untuk mengunggah file dan melihat pratinjau pemetaan kolom.
+- API yang digunakan:
+  - `/api/import_detect.php` : mendeteksi header dan memberi saran pemetaan
+  - `/api/import_execute.php` : menjalankan impor berdasarkan pemetaan yang dipilih
+  - `/api/import_template.php` : menampilkan, menyimpan, dan menghapus template pemetaan
 
-Notes
-- By default import mode is `insert_only` (will not overwrite existing NIK records).
-- To update existing rows choose `Insert or Update existing` mode.
-- Mapping synonyms and saved templates are stored in `data/import_mappings.json`.
+Catatan
+- Mode default adalah `insert_only` sehingga data NIK yang sudah ada tidak akan ditimpa.
+- Jika ingin memperbarui data lama, pilih mode `Tambah atau perbarui data yang sudah ada`.
+- Sinonim pemetaan dan template yang disimpan berada di `data/import_mappings.json`.
 
-Security and safety
-- Access to import UI should be limited to authorized users.
-- Uploaded files are read from temporary path and not persisted long-term by default.
+Keamanan dan kehati-hatian
+- Akses ke halaman impor sebaiknya dibatasi hanya untuk pengguna yang berwenang.
+- File yang diunggah dibaca dari folder sementara dan tidak disimpan permanen secara bawaan.
 
-Troubleshooting
-- If header detection fails, open the file and ensure the header row contains `Nama` and `NIK` variants.
-- For CSV encoding problems, re-save file as UTF-8.
+Pemecahan masalah
+- Jika deteksi header gagal, pastikan baris header pada file memuat variasi kata seperti `Nama` dan `NIK`.
+- Jika file CSV bermasalah karena encoding, simpan ulang file dalam format UTF-8.

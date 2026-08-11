@@ -9,13 +9,13 @@ require_once __DIR__ . '/import_helpers.php';
 global $koneksi;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['error' => 'Invalid method']);
+    echo json_encode(['error' => 'Metode tidak valid']);
     exit;
 }
 
 $payload = $_POST;
 if (empty($_FILES['file']['tmp_name']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-    echo json_encode(['error' => 'File upload missing']);
+    echo json_encode(['error' => 'File belum dipilih atau unggahan gagal']);
     exit;
 }
 
@@ -26,12 +26,12 @@ $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 try {
     $rows = load_rows_from_file($tmp, $ext);
 } catch (Throwable $e) {
-    echo json_encode(['error' => 'Failed to read file: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Gagal membaca file: ' . $e->getMessage()]);
     exit;
 }
 
 if (empty($rows)) {
-    echo json_encode(['error' => 'No rows found']);
+    echo json_encode(['error' => 'Tidak ada baris data yang ditemukan']);
     exit;
 }
 
@@ -64,7 +64,7 @@ for ($i = $headerIndex + 1; $i < count($rows); $i++) {
     $nama = trim($record['nama'] ?? '');
     if ($nik === '' || $nama === '') {
         $skipped++;
-        $failRows[] = ['row' => $i+1, 'reason' => 'Missing nik or nama', 'data' => $raw];
+        $failRows[] = ['row' => $i+1, 'reason' => 'NIK atau Nama belum diisi', 'data' => $raw];
         continue;
     }
 
@@ -102,7 +102,7 @@ for ($i = $headerIndex + 1; $i < count($rows); $i++) {
             $res = mysqli_query($koneksi, $sql);
             if ($res) { $updated++; } else { $failed++; $failRows[] = ['row' => $i+1, 'reason' => mysqli_error($koneksi), 'data' => $raw]; }
         } else {
-            // insert_only mode: do not overwrite existing records
+            // Mode insert_only: data lama tidak ditimpa
             $skipped++;
             continue;
         }
