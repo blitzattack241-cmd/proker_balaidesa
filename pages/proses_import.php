@@ -16,34 +16,21 @@ if (is_file($autoloadPath)) {
     require_once $autoloadPath;
 }
 
-spl_autoload_register(function ($class) {
-    $phpSpreadsheetPrefix = 'PhpOffice\\PhpSpreadsheet\\';
-    if (strncmp($class, $phpSpreadsheetPrefix, strlen($phpSpreadsheetPrefix)) === 0) {
-        $relativeClass = substr($class, strlen($phpSpreadsheetPrefix));
-        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
-        $filePath = __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/' . $relativePath;
-        if (is_file($filePath)) {
-            require_once $filePath;
-            return true;
-        }
-    }
+$manualAutoloadMap = [
+    'PhpOffice\\PhpSpreadsheet\\' => __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/',
+    'Psr\\SimpleCache\\' => __DIR__ . '/../vendor/psr/simple-cache/src/',
+    'Composer\\Pcre\\' => __DIR__ . '/../vendor/composer/pcre/src/',
+];
 
-    $psrPrefix = 'Psr\\SimpleCache\\';
-    if (strncmp($class, $psrPrefix, strlen($psrPrefix)) === 0) {
-        $relativeClass = substr($class, strlen($psrPrefix));
-        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
-        $filePath = __DIR__ . '/../vendor/psr/simple-cache/src/' . $relativePath;
-        if (is_file($filePath)) {
-            require_once $filePath;
-            return true;
+spl_autoload_register(function ($class) use ($manualAutoloadMap) {
+    foreach ($manualAutoloadMap as $prefix => $baseDir) {
+        if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+            continue;
         }
-    }
 
-    $composerPcrePrefix = 'Composer\\Pcre\\';
-    if (strncmp($class, $composerPcrePrefix, strlen($composerPcrePrefix)) === 0) {
-        $relativeClass = substr($class, strlen($composerPcrePrefix));
+        $relativeClass = substr($class, strlen($prefix));
         $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
-        $filePath = __DIR__ . '/../vendor/composer/pcre/src/' . $relativePath;
+        $filePath = $baseDir . $relativePath;
         if (is_file($filePath)) {
             require_once $filePath;
             return true;
@@ -53,10 +40,28 @@ spl_autoload_register(function ($class) {
     return false;
 });
 
+$explicitLoads = [
+    'PhpOffice\\PhpSpreadsheet\\IOFactory' => __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/IOFactory.php',
+    'PhpOffice\\PhpSpreadsheet\\Shared\\Date' => __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Shared/Date.php',
+    'PhpOffice\\PhpSpreadsheet\\Reader\\Csv' => __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Csv.php',
+    'Psr\\SimpleCache\\CacheInterface' => __DIR__ . '/../vendor/psr/simple-cache/src/CacheInterface.php',
+    'Composer\\Pcre\\Preg' => __DIR__ . '/../vendor/composer/pcre/src/Preg.php',
+];
+
+foreach ($explicitLoads as $class => $path) {
+    if ((class_exists($class, false) === false && interface_exists($class, false) === false) && is_file($path)) {
+        require_once $path;
+    }
+}
+
 if (isset($_GET['test'])) {
     header('Content-Type: text/plain; charset=utf-8');
     echo "test=1 mode\n";
+    echo "cwd: " . getcwd() . "\n";
     echo "autoload exists: " . (is_file($autoloadPath) ? 'yes' : 'no') . "\n";
+    foreach ($explicitLoads as $className => $filePath) {
+        echo "exists($className): " . (is_file($filePath) ? 'yes' : 'no') . " => $filePath\n";
+    }
     echo "IOFactory class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory') ? 'yes' : 'no') . "\n";
     echo "Csv class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\Reader\\Csv') ? 'yes' : 'no') . "\n";
     echo "Date class: " . (class_exists('PhpOffice\\PhpSpreadsheet\\Shared\\Date') ? 'yes' : 'no') . "\n";
