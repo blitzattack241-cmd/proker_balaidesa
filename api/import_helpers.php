@@ -61,7 +61,9 @@ function load_rows_from_file(string $path, string $ext): array
         if ($handle === false) {
             return [];
         }
-        while (($data = fgetcsv($handle, 0, $delimiter)) !== false) {
+        // Pass the legacy backslash escape character explicitly. PHP 8.4 warns
+        // when it is omitted, while this retains the parser's existing behavior.
+        while (($data = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
             if (count($data) === 1 && $data[0] === null) {
                 continue;
             }
