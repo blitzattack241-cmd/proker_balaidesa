@@ -1,0 +1,11 @@
+{
+  "synonyms": {
+    "nama": ["nama lengkap", "nama penduduk", "nama anggota", "nama", "NAMA", "Nama Lengkap"],
+    "nik": ["nik", "no ktp", "no_ktp", "noktp", "NIK"],
+    "tgl_lahir": ["tanggal lahir", "tgl lahir", "tanggal_lahir", "birth date", "tgl_lahir"],
+    "jenis_kelamin": ["jenis kelamin", "jk", "gender", "sex"],
+    "no_kk": ["no kk", "no_kk", "nokk", "no. kk"],
+    "alamat": ["alamat", "address"]
+  },
+  "templates": {}
+}

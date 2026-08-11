@@ -457,34 +457,28 @@ $displayedRows = mysqli_num_rows($result);
 
 </div>
 
-<!-- Modal Import Data Excel -->
+<!-- Modal Import Data Excel (redirects to new import UI) -->
 <div class="modal fade" id="modalImport" tabindex="-1" aria-labelledby="modalImportLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <form action="pages/proses_import.php" method="POST" enctype="multipart/form-data">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalImportLabel">
-                        <i class="fas fa-file-excel text-success me-2"></i>Import Data Penduduk
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalImportLabel">
+                    <i class="fas fa-file-excel text-success me-2"></i>Import Data Penduduk
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="text-muted small mb-3">
+                    Sistem import telah diperbarui. Klik tombol di bawah untuk membuka antarmuka import baru yang
+                    mendukung preview, pemetaan kolom, dan validasi.
+                </p>
+                <div class="mb-3">
+                    <a href="pages/import_upload.php" class="btn btn-primary"><i class="fas fa-file-import me-1"></i> Buka Import Baru</a>
                 </div>
-                <div class="modal-body py-4">
-                    <p class="text-muted small mb-3">
-                        Pilih file Spreadsheet (<code>.xlsx</code> / <code>.xls</code>) atau File CSV
-                        (<code>.csv</code>) yang berisi format data kependudukan desa.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small text-dark">Pilih File Import</label>
-                        <input type="file" name="file_excel" class="form-control" accept=".xlsx, .xls, .csv" required>
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="import" class="btn btn-success px-4 fw-semibold">
-                        <i class="fas fa-upload me-1"></i> Upload & Proses
-                    </button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Tutup</button>
+            </div>
         </div>
     </div>
 </div>
