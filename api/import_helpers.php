@@ -1,7 +1,8 @@
 <?php
-if (!defined('IMPORT_HELPERS_SKIP_DB')) {
-    require_once __DIR__ . '/../koneksi.php';
-}
+// Don't auto-require koneksi.php - let the caller decide
+// if (!defined('IMPORT_HELPERS_SKIP_DB')) {
+//     require_once __DIR__ . '/../koneksi.php';
+// }
 
 // Attempt to load Composer autoload for PhpSpreadsheet and other deps
 $autoloadPath = __DIR__ . '/../vendor/autoload.php';

@@ -1,21 +1,24 @@
 <?php
-// Set error handler to suppress output
+header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
-set_error_handler(function() {});
+set_error_handler(function() {}, E_ALL);
 
 ob_start();
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Clean any output that happened during session start
-ob_end_clean();
-ob_start();
 
-header('Content-Type: application/json; charset=utf-8');
-require_once __DIR__ . '/import_helpers.php';
+// Discard any output from session initialization
+ob_clean();
+
+// Now start the actual response buffer
+$output = '';
 
 try {
+    require_once __DIR__ . '/import_helpers.php';
+    
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception('Metode tidak valid');
     }
@@ -28,11 +31,7 @@ try {
     $name = $_FILES['file']['name'];
     $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
-    try {
-        $rows = load_rows_from_file($tmp, $ext);
-    } catch (Throwable $e) {
-        throw new Exception('Gagal membaca file: ' . $e->getMessage());
-    }
+    $rows = load_rows_from_file($tmp, $ext);
 
     if (empty($rows)) {
         throw new Exception('Tidak ada baris data yang ditemukan di dalam file');
@@ -68,11 +67,12 @@ try {
         'sample' => $sample,
     ];
 
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    $output = json_encode($response, JSON_UNESCAPED_UNICODE);
 
-} catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+} catch (Throwable $e) {
+    $output = json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
 }
 
-ob_end_flush();
+ob_end_clean();
+echo $output;
 exit;
