@@ -25,6 +25,7 @@ if (!class_exists('PhpOffice\\PhpSpreadsheet\\IOFactory', true)) {
 }
 
 require_once __DIR__ . '/koneksi.php';
+$debugMode = isset($_GET['debug']) || isset($_POST['debug']);
 
 if (isset($_POST['import'])) {
     $fileName = $_FILES['file_excel']['name'] ?? '';
@@ -76,7 +77,33 @@ if (isset($_POST['import'])) {
         'pekerjaan' => ['pekerjaan'],
     ];
 
-    $headerRow = $sheetData[1] ?? [];
+    $headerRow = [];
+    foreach ($sheetData as $rowIndex => $row) {
+        $hasNik = false;
+        $hasNama = false;
+        foreach ($row as $headerValue) {
+            $normalizedHeader = $normalizeHeader($headerValue);
+            foreach ($expectedColumns as $field => $aliases) {
+                if (in_array($normalizedHeader, $aliases, true)) {
+                    if ($field === 'nik') {
+                        $hasNik = true;
+                    }
+                    if ($field === 'nama') {
+                        $hasNama = true;
+                    }
+                }
+            }
+        }
+        if ($hasNik && $hasNama) {
+            $headerRow = $row;
+            break;
+        }
+    }
+
+    if (empty($headerRow)) {
+        $headerRow = reset($sheetData) ?: [];
+    }
+
     $columnMap = [];
     foreach ($headerRow as $col => $headerValue) {
         $normalizedHeader = $normalizeHeader($headerValue);
@@ -89,6 +116,17 @@ if (isset($_POST['import'])) {
     }
 
     if (empty($columnMap['nik']) || empty($columnMap['nama'])) {
+        if ($debugMode) {
+            header('Content-Type: text/plain; charset=utf-8');
+            echo "DEBUG HEADER MAPPING\n";
+            echo "headerRow: " . json_encode($headerRow, JSON_UNESCAPED_UNICODE) . "\n";
+            echo "columnMap: " . json_encode($columnMap, JSON_UNESCAPED_UNICODE) . "\n";
+            echo "normalized headers: \n";
+            foreach ($headerRow as $col => $headerValue) {
+                echo "$col => " . $normalizeHeader($headerValue) . "\n";
+            }
+            exit;
+        }
         echo "<script>alert('Header Excel tidak valid. Pastikan file memiliki kolom NIK dan Nama.'); window.location='import_penduduk.php';</script>";
         exit;
     }

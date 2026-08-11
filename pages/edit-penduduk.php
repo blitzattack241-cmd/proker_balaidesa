@@ -86,21 +86,21 @@ if (isset($_POST['update'])) {
 ?>
 
 <style>
-    .form-card {
-        background: #ffffff;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        padding: 2rem;
-    }
+.form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 2rem;
+}
 
-    .section-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #0f172a;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.25rem;
-    }
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.25rem;
+}
 </style>
 
 <div class="container-fluid px-4 py-3">
@@ -171,9 +171,11 @@ if (isset($_POST['update'])) {
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Jenis Kelamin <span class="text-danger">*</span></label>
                     <select name="jenis_kelamin" class="form-select" required>
-                        <option value="Laki-laki" <?php echo (strcasecmp($data['jenis_kelamin'] ?? '', 'Laki-laki') == 0 || strtoupper(substr($data['jenis_kelamin'] ?? '', 0, 1)) === 'L') ? 'selected' : ''; ?>>
+                        <option value="Laki-laki"
+                            <?php echo (strcasecmp($data['jenis_kelamin'] ?? '', 'Laki-laki') == 0 || strtoupper(substr($data['jenis_kelamin'] ?? '', 0, 1)) === 'L') ? 'selected' : ''; ?>>
                             Laki-laki</option>
-                        <option value="Perempuan" <?php echo (strcasecmp($data['jenis_kelamin'] ?? '', 'Perempuan') == 0 || strtoupper(substr($data['jenis_kelamin'] ?? '', 0, 1)) === 'P') ? 'selected' : ''; ?>>
+                        <option value="Perempuan"
+                            <?php echo (strcasecmp($data['jenis_kelamin'] ?? '', 'Perempuan') == 0 || strtoupper(substr($data['jenis_kelamin'] ?? '', 0, 1)) === 'P') ? 'selected' : ''; ?>>
                             Perempuan</option>
                     </select>
                 </div>

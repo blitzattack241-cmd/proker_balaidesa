@@ -1,3 +1,3 @@
-nik,nama,rt,rw,no_kk,kepala_kk,jenis_kelamin,status_keluarga,tempat_lahir,tgl_lahir,status_pernikahan,agama,kewarganegaraan,suku,pendidikan,pekerjaan,alamat,umur
-9990000000000001,Test Import Satu,1,1,9990000000000001,Test Import Satu,Laki-laki,Kepala Keluarga,Semarang,1990-01-01,Kawin,Islam,Warga Negara Indonesia,Jawa,SMA,PNS,Jl. Test 1,35
-9990000000000002,Test Import Dua,1,1,9990000000000001,Test Import Satu,Perempuan,Istri,Semarang,1992-05-05,Kawin,Islam,Warga Negara Indonesia,Jawa,SMA,IRT,Jl. Test 2,33
+﻿NIK,Nama,RT,RW,Alamat
+1234567890123456,Budi Santoso,01,02,Jl. Merdeka
+

@@ -1,6 +1,6 @@
 <?php
 // Konfigurasi Database
-$host = 'localhost';
+$host = '101.50.1.77';
 $username = 'simdesid_admin';
 $password = '+!IF?PeAd1V[{7C$'; // Petik tunggal agar karakter $ tidak terbaca variabel
 $database = 'simdesid_db_balaidesa';

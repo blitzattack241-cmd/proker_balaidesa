@@ -28,7 +28,9 @@ $createTableQuery = "CREATE TABLE IF NOT EXISTS `tb_penduduk` (
   `kewarganegaraan` VARCHAR(50) DEFAULT NULL,
   `suku` VARCHAR(50) DEFAULT NULL,
   `pendidikan` VARCHAR(100) DEFAULT NULL,
-  `pekerjaan` VARCHAR(100) DEFAULT NULL
+  `pekerjaan` VARCHAR(100) DEFAULT NULL,
+  `umur` INT(11) DEFAULT NULL,
+  `tempat_tgl_lahir` VARCHAR(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 mysqli_query($koneksi, $createTableQuery);
 

@@ -108,6 +108,8 @@ $columnsToEnsure = [
     'suku' => 'VARCHAR(50) DEFAULT NULL',
     'pendidikan' => 'VARCHAR(100) DEFAULT NULL',
     'pekerjaan' => 'VARCHAR(100) DEFAULT NULL',
+    'umur' => 'INT(11) DEFAULT NULL',
+    'alamat' => 'TEXT DEFAULT NULL',
     'tempat_tgl_lahir' => 'VARCHAR(100) DEFAULT NULL',
 ];
 
@@ -341,19 +343,36 @@ if (isset($_POST['import'])) {
         return $semicolonCount > $commaCount ? ';' : ',';
     };
 
+    $loadCsvRows = function ($path) use ($parseCsvDelimiter) {
+        $rows = [];
+        $delimiter = $parseCsvDelimiter($path);
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            return $rows;
+        }
+
+        while (($data = fgetcsv($handle, 0, $delimiter)) !== false) {
+            if (count($data) === 1 && $data[0] === null) {
+                continue;
+            }
+            if (isset($data[0])) {
+                $data[0] = preg_replace('/^\x{FEFF}/u', '', $data[0]);
+            }
+            $rows[] = $data;
+        }
+        fclose($handle);
+        return $rows;
+    };
+
     try {
         if ($fileExt === 'csv') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-            $reader->setInputEncoding('UTF-8');
-            $reader->setDelimiter($parseCsvDelimiter($fileTmpPath));
-            $spreadsheet = $reader->load($fileTmpPath);
+            $rows = $loadCsvRows($fileTmpPath);
         } else {
             $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpPath);
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($fileTmpPath);
+            $rows = $spreadsheet->getActiveSheet()->toArray();
         }
-
-        $rows = $spreadsheet->getActiveSheet()->toArray();
     } catch (Throwable $e) {
         $errors[] = 'Gagal membaca file: ' . $e->getMessage();
         $rows = [];
@@ -375,12 +394,21 @@ if (isset($_POST['import'])) {
 
     $headerRowIndex = null;
     foreach ($rows as $idx => $row) {
+        $hasNik = false;
+        $hasNama = false;
         foreach ($row as $cellValue) {
             $normalized = $normalizeHeader($cellValue);
-            if (in_array($normalized, ['nik', 'nama', 'nokk', 'rt', 'rw', 'jeniskelamin', 'pekerjaan', 'alamat'], true)) {
-                $headerRowIndex = $idx;
-                break 2;
+            $canonical = $canonicalHeaderMap($normalized);
+            if ($canonical === 'nik') {
+                $hasNik = true;
             }
+            if ($canonical === 'nama') {
+                $hasNama = true;
+            }
+        }
+        if ($hasNik && $hasNama) {
+            $headerRowIndex = $idx;
+            break;
         }
     }
 
