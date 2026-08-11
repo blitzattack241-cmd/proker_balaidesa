@@ -148,7 +148,7 @@ require_once __DIR__ . '/../koneksi.php';
             <div class="col-12 col-md-6">
               <label for="file" class="form-label fw-semibold">Pilih File Impor</label>
               <input type="file" name="file" id="file" class="form-control" accept=".csv,.xlsx,.xls" required>
-              <div class="form-text">Dukungan file: CSV dan XLSX tanpa Composer. File XLS tetap memerlukan PhpSpreadsheet.</div>
+              <div class="form-text"></div>
             </div>
             <div class="col-12 col-md-4">
               <label for="mode" class="form-label fw-semibold">Mode Impor</label>
@@ -203,12 +203,6 @@ require_once __DIR__ . '/../koneksi.php';
       </div>
       <div id="mapping" class="mb-4"></div>
       <div id="sample" class="sample-card"></div>
-    </div>
-
-    <div class="mt-4">
-      <div class="alert alert-info border-0 shadow-sm rounded-3 mb-0">
-        <strong>Catatan:</strong> CSV dan XLSX dapat diproses tanpa Composer. Jika Anda ingin mengunggah file XLS, pastikan PhpSpreadsheet tersedia di server.
-      </div>
     </div>
   </div>
 
