@@ -1,33 +1,26 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-error_reporting(E_ALL);
-ini_set('display_errors', '0');
-set_error_handler(function() {}, E_ALL);
+require_once __DIR__ . '/import_response.php';
 
-ob_start();
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Discard any output from session initialization
-ob_clean();
-
-$output = '';
+import_json_begin();
 
 try {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
     require_once __DIR__ . '/import_helpers.php';
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new InvalidArgumentException('Metode tidak valid');
+    }
+
     require_once __DIR__ . '/../koneksi.php';
 
     global $koneksi;
 
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Metode tidak valid');
-    }
-
     $payload = $_POST;
     if (empty($_FILES['file']['tmp_name']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-        throw new Exception('File belum dipilih atau unggahan gagal');
+        throw new InvalidArgumentException('File belum dipilih atau unggahan gagal');
     }
 
     $tmp = $_FILES['file']['tmp_name'];
@@ -37,7 +30,7 @@ try {
     $rows = load_rows_from_file($tmp, $ext);
 
     if (empty($rows)) {
-        throw new Exception('Tidak ada baris data yang ditemukan');
+        throw new InvalidArgumentException('Tidak ada baris data yang ditemukan');
     }
 
     $headerIndex = isset($payload['header_index']) ? (int)$payload['header_index'] : 0;
@@ -55,7 +48,7 @@ try {
 
     // Check database connection before proceeding
     if (!$koneksi) {
-        throw new Exception('Koneksi database tidak tersedia');
+        throw new RuntimeException('Koneksi database tidak tersedia');
     }
 
     ensure_import_logs_table();
@@ -130,12 +123,16 @@ try {
         $inserted, $updated, $skipped, $failed
     ));
 
-    $output = json_encode(['inserted' => $inserted, 'updated' => $updated, 'skipped' => $skipped, 'failed' => $failed, 'fail_rows' => $failRows], JSON_UNESCAPED_UNICODE);
+    import_json_response([
+        'ok' => true,
+        'inserted' => $inserted,
+        'updated' => $updated,
+        'skipped' => $skipped,
+        'failed' => $failed,
+        'fail_rows' => $failRows,
+    ]);
 
 } catch (Throwable $e) {
-    $output = json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    $status = $e instanceof InvalidArgumentException ? 400 : 500;
+    import_json_response(['ok' => false, 'error' => $e->getMessage()], $status);
 }
-
-ob_end_clean();
-echo $output;
-exit;

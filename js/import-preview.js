@@ -31,12 +31,36 @@ document.addEventListener('DOMContentLoaded', function(){
     alert(message);
   }
 
+  async function parseJsonResponse(response) {
+    const body = await response.text();
+    if (!body.trim()) {
+      throw new Error('Server mengembalikan respons kosong (HTTP ' + response.status + ').');
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch (_) {
+      throw new Error('Server mengembalikan respons JSON tidak valid (HTTP ' + response.status + ').');
+    }
+
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      throw new Error('Server mengembalikan format respons impor yang tidak valid (HTTP ' + response.status + ').');
+    }
+
+    if (!response.ok && !payload.error) {
+      payload.error = 'Permintaan impor gagal (HTTP ' + response.status + ').';
+    }
+
+    return payload;
+  }
+
   detectBtn.addEventListener('click', function(){
     const f = fileInput.files[0];
     if (!f) return showError('Silakan pilih file terlebih dahulu.');
     const fd = new FormData();
     fd.append('file', f);
-    fetch('/api/import_detect.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{
+    fetch('/api/import_detect.php', {method:'POST', body: fd}).then(parseJsonResponse).then(resp=>{
       if (resp.error) return showError(resp.error);
       lastResponse = resp;
       renderMapping(resp);
@@ -46,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   // load templates
-  fetch('/api/import_template.php').then(r=>r.json()).then(js=>{
+  fetch('/api/import_template.php').then(parseJsonResponse).then(js=>{
     const sel = document.getElementById('loadTemplate');
     if (!js.templates) return;
     Object.keys(js.templates).forEach(name=>{
@@ -111,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const mapping = {};
     selects.forEach((sel, idx)=>{ mapping[idx] = sel.value; });
     fd.append('mapping', JSON.stringify(mapping));
-    fetch('/api/import_execute.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{
+    fetch('/api/import_execute.php', {method:'POST', body: fd}).then(parseJsonResponse).then(resp=>{
       if (resp.error) return showError(resp.error);
       alert('Berhasil: '+resp.inserted+' ditambahkan, '+resp.updated+' diperbarui, '+resp.failed+' gagal, '+resp.skipped+' dilewati.');
       if (resp.fail_rows && resp.fail_rows.length) console.log('Baris gagal:', resp.fail_rows);
@@ -127,13 +151,13 @@ document.addEventListener('DOMContentLoaded', function(){
     selects.forEach((sel, idx)=>{ mapping[idx] = sel.value; });
     const fd = new FormData();
     fd.append('action','save'); fd.append('name', name); fd.append('content', JSON.stringify(mapping));
-    fetch('/api/import_template.php', {method:'POST', body: fd}).then(r=>r.json()).then(resp=>{ if (resp.ok) { alert('Template berhasil disimpan.'); const opt = document.createElement('option'); opt.value=name; opt.textContent=name; document.getElementById('loadTemplate').appendChild(opt);} else showError(resp.error || 'Penyimpanan template gagal.'); }).catch(e=>showError('Gagal menyimpan template: '+e));
+    fetch('/api/import_template.php', {method:'POST', body: fd}).then(parseJsonResponse).then(resp=>{ if (resp.ok) { alert('Template berhasil disimpan.'); const opt = document.createElement('option'); opt.value=name; opt.textContent=name; document.getElementById('loadTemplate').appendChild(opt);} else showError(resp.error || 'Penyimpanan template gagal.'); }).catch(e=>showError('Gagal menyimpan template: '+e));
   });
 
   document.getElementById('loadTemplate').addEventListener('change', function(){
     const name = this.value;
     if (!name) return;
-    fetch('/data/import_mappings.json').then(r=>r.json()).then(js=>{
+    fetch('/data/import_mappings.json').then(parseJsonResponse).then(js=>{
       if (js.templates && js.templates[name]) applyTemplate(js.templates[name]);
     }).catch(()=>showError('Template tidak dapat dimuat.'));
   });

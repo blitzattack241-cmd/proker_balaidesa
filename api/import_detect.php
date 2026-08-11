@@ -1,30 +1,21 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-error_reporting(E_ALL);
-ini_set('display_errors', '0');
-set_error_handler(function() {}, E_ALL);
+require_once __DIR__ . '/import_response.php';
 
-ob_start();
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Discard any output from session initialization
-ob_clean();
-
-// Now start the actual response buffer
-$output = '';
+import_json_begin();
 
 try {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
     require_once __DIR__ . '/import_helpers.php';
     
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Metode tidak valid');
+        throw new InvalidArgumentException('Metode tidak valid');
     }
 
     if (empty($_FILES['file']['tmp_name']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-        throw new Exception('File belum dipilih atau terjadi kesalahan saat unggah');
+        throw new InvalidArgumentException('File belum dipilih atau terjadi kesalahan saat unggah');
     }
 
     $tmp = $_FILES['file']['tmp_name'];
@@ -34,7 +25,7 @@ try {
     $rows = load_rows_from_file($tmp, $ext);
 
     if (empty($rows)) {
-        throw new Exception('Tidak ada baris data yang ditemukan di dalam file');
+        throw new InvalidArgumentException('Tidak ada baris data yang ditemukan di dalam file');
     }
 
     // find header row index (first row with both nama and nik)
@@ -67,12 +58,9 @@ try {
         'sample' => $sample,
     ];
 
-    $output = json_encode($response, JSON_UNESCAPED_UNICODE);
+    import_json_response(array_merge(['ok' => true], $response));
 
 } catch (Throwable $e) {
-    $output = json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    $status = $e instanceof InvalidArgumentException ? 400 : 500;
+    import_json_response(['ok' => false, 'error' => $e->getMessage()], $status);
 }
-
-ob_end_clean();
-echo $output;
-exit;
