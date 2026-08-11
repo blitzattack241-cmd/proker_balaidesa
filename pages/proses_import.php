@@ -39,6 +39,17 @@ spl_autoload_register(function ($class) {
         }
     }
 
+    $composerPcrePrefix = 'Composer\\Pcre\\';
+    if (strncmp($class, $composerPcrePrefix, strlen($composerPcrePrefix)) === 0) {
+        $relativeClass = substr($class, strlen($composerPcrePrefix));
+        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
+        $filePath = __DIR__ . '/../vendor/composer/pcre/src/' . $relativePath;
+        if (is_file($filePath)) {
+            require_once $filePath;
+            return true;
+        }
+    }
+
     return false;
 });
 
