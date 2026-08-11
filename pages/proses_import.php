@@ -69,7 +69,26 @@ if (isset($_GET['test'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['import'])) {
+$debugMode = isset($_GET['debug']) || isset($_POST['debug']);
+$debugOutput = function (array $lines) {
+    if (!headers_sent()) {
+        header('Content-Type: text/plain; charset=utf-8');
+    }
+    echo "IMPORT DEBUG MODE\n\n";
+    foreach ($lines as $line) {
+        echo $line . "\n";
+    }
+    exit;
+};
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || (!isset($_POST['import']) && !$debugMode)) {
+    if ($debugMode) {
+        $debugOutput([
+            'Request method: ' . $_SERVER['REQUEST_METHOD'],
+            'Import flag present: ' . (isset($_POST['import']) ? 'yes' : 'no'),
+            'Debug mode: yes',
+        ]);
+    }
     header('Location: ../index.php?page=penduduk');
     exit;
 }
@@ -117,7 +136,16 @@ if (isset($_POST['import'])) {
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
     if (!is_uploaded_file($fileTmpPath) || !is_readable($fileTmpPath)) {
-        echo "<script>alert('File tidak bisa dibaca dari server.'); window.location='../index.php?page=penduduk';</script>";
+        $message = 'File tidak bisa dibaca dari server.';
+        if ($debugMode) {
+            $debugOutput([
+                $message,
+                'tmp_name: ' . $fileTmpPath,
+                'is_uploaded_file: ' . (is_uploaded_file($fileTmpPath) ? 'yes' : 'no'),
+                'is_readable: ' . (is_readable($fileTmpPath) ? 'yes' : 'no'),
+            ]);
+        }
+        echo "<script>alert('" . addslashes($message) . "'); window.location='../index.php?page=penduduk';</script>";
         exit;
     }
 
@@ -137,13 +165,21 @@ if (isset($_POST['import'])) {
             'rt' => 'rt',
             'rw' => 'rw',
             'nokk' => 'no_kk',
+            'no_kk' => 'no_kk',
+            'nokkk' => 'no_kk',
+            'no_ktp' => 'nik',
+            'noktp' => 'nik',
+            'nik' => 'nik',
+            'nikk' => 'nik',
+            'nama' => 'nama',
+            'nama_lengkap' => 'nama',
+            'namalengkap' => 'nama',
             'kepalakk' => 'kepala_kk',
             'kepalakeluarga' => 'kepala_kk',
-            'nik' => 'nik',
-            'nama' => 'nama',
             'jeniskelamin' => 'jenis_kelamin',
             'jk' => 'jenis_kelamin',
             'statuskeluarga' => 'status_keluarga',
+            'tempatkeluarga' => 'status_keluarga',
             'tempatlahir' => 'tempat_lahir',
             'tanggallahir' => 'tgl_lahir',
             'tgllahir' => 'tgl_lahir',
@@ -244,6 +280,15 @@ if (isset($_POST['import'])) {
     }
 
     if (!empty($errors)) {
+        if ($debugMode) {
+            $debugOutput(array_merge([
+                'File: ' . $fileName,
+                'File extension: ' . $fileExt,
+                'Rows read: ' . count($rows),
+                'Header row index: not yet determined',
+                'Header row: not available',
+            ], $errors));
+        }
         echo "<script>alert('" . addslashes(implode("\n", $errors)) . "'); window.location='../index.php?page=penduduk';</script>";
         exit;
     }
