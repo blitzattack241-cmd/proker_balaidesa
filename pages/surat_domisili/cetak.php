@@ -1,6 +1,5 @@
 <?php
 // 1. Koneksi ke Database
-// Sesuaikan dengan path koneksi Anda, misalnya: include '../../koneksi.php';
 require_once __DIR__ . '/../../koneksi.php';
 
 if (!isset($_GET['id'])) {
@@ -24,7 +23,7 @@ if (!$data) {
     exit;
 }
 
-// Modul QR Verifikasi (ACC) - agar setiap surat yang dicetak punya QR sah
+// Modul QR Verifikasi (ACC)
 require_once __DIR__ . '/../../includes/qr_helper.php';
 $qr_token = dapatkanTokenVerifikasi($koneksi, 'surat_domisili', $id_domisili, $data['nomor_surat'] ?? '');
 
@@ -49,7 +48,7 @@ function tgl_indo($tanggal)
     return $pecahkan[2] . ' ' . $bulan[(int) $pecahkan[1]] . ' ' . $pecahkan[0];
 }
 
-// Format Tanggal Lahir (DD – MM – YYYY) sesuai visual dokumen asli
+// Format Tanggal Lahir (DD – MM – YYYY)
 $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
 ?>
 <!DOCTYPE html>
@@ -103,12 +102,11 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             background-color: #0b5ed7;
         }
 
-        /* Wadah Utama Dokumen (Kertas A4 Sesuai Gambar) */
+        /* Wadah Utama Dokumen (Kertas A4) */
         .page-wrapper {
             width: 210mm;
             height: 297mm;
-            padding: 10mm 18mm 10mm 18mm;
-            /* Menyesuaikan margins dokumen asli */
+            padding: 10mm 20mm 15mm 20mm;
             margin: 20px auto;
             box-sizing: border-box;
             position: relative;
@@ -120,52 +118,69 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             font-family: "Times New Roman", Times, serif;
         }
 
-        /* Kop Surat Resmi Sesuai Gambar */
+        /* Kop Surat Resmi Sesuai Gambar Pratinjau */
         .kop-surat {
+            position: relative;
+            border-bottom: 4px double #000;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            margin-top: 0;
+            width: 100%;
+        }
+
+        .kop-header {
             display: flex;
             align-items: center;
-            border-bottom: 4px solid #000;
-            padding-bottom: 3px;
-            margin-bottom: 5px;
+            justify-content: center;
+            position: relative;
+            min-height: 80px;
         }
 
         .kop-logo {
-            width: 75px;
-            /* Ukuran Logo Pemkab */
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 85px;
             height: auto;
-            margin-right: 15px;
         }
 
         .kop-teks {
-            flex-grow: 1;
             text-align: center;
-            margin-right: 75px;
-            /* Penyeimbang posisi logo agar teks tetap di tengah */
+            width: 100%;
+            padding-left: 75px;
+            padding-right: 75px;
         }
 
         .kop-teks h2 {
             font-size: 14pt;
             text-transform: uppercase;
             margin: 0;
-            font-weight: normal;
-        }
-
-        .kop-teks h1 {
-            font-size: 16pt;
-            text-transform: uppercase;
-            margin: 1px 0;
-            font-weight: normal;
-            letter-spacing: 0.5px;
-        }
-
-        .kop-teks h2:first-child {
             font-weight: bold;
+            line-height: 1.15;
+        }
+
+        .kop-teks h3 {
+            font-size: 13pt;
+            text-transform: uppercase;
+            margin: 0;
+            font-weight: bold;
+            line-height: 1.15;
+        }
+
+        .kop-teks h4 {
+            font-size: 15pt;
+            text-transform: uppercase;
+            margin: 0;
+            font-weight: bold;
+            line-height: 1.15;
         }
 
         .kop-teks p {
-            font-size: 10pt;
-            font-style: italic;
-            margin: 2px 0 0 0;
+            font-size: 11pt;
+            margin: 3px 0 0 0;
+            line-height: 1.2;
+            font-weight: normal;
         }
 
         /* No Kode Desa */
@@ -173,18 +188,14 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             font-size: 10.5pt;
             font-weight: bold;
             text-align: left;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             line-height: 1.2;
-        }
-
-        .no-kode-desa span {
-            text-decoration: underline;
         }
 
         /* Judul Dokumen */
         .judul-box {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .judul-box h2 {
@@ -204,15 +215,15 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
 
         /* Paragraf Pembuka */
         .pembuka {
-            margin-top: 10px;
-            margin-bottom: 8px;
+            margin-top: 8px;
+            margin-bottom: 6px;
         }
 
-        /* Struktur Form Identitas Sejajar */
+        /* Tabel Isi Form Identitas */
         .table-isi {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .table-isi td {
@@ -220,32 +231,43 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             vertical-align: top;
         }
 
-        /* Area Tanda Tangan Sesuai Posisi Gambar */
+        /* Area Tanda Tangan */
         .ttd-area {
             width: 100%;
             display: flex;
             justify-content: space-between;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .ttd-kolom {
             width: 45%;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-wrapper {
+            margin-top: -5px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .ttd-space {
-            height: 65px;
-            /* Ruang tanda tangan fisik */
+            height: 70px;
         }
 
         .ttd-nama {
             font-weight: bold;
             text-transform: uppercase;
+            text-decoration: underline;
+            margin-top: 2px;
         }
 
         /* ATURAN PRINT */
         @media print {
-
             html,
             body {
                 background: none;
@@ -282,47 +304,46 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
 
     <div class="page-wrapper">
 
-        <!-- Kop Surat Resmi Berdasarkan Gambar -->
+        <!-- Kop Surat Resmi Berdasarkan Format Gambar -->
         <div class="kop-surat">
-            <!-- Sediakan file gambar logo kabupaten kudus di folder aset Anda -->
-            <img src="../../uplouds/logo.png" alt="Logo" class="kop-logo"
-                onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Coat_of_arms_of_Kudus_Regency.svg'">
-            <div class="kop-teks">
-                <h2>Pemerintah Desa Berugenjang</h2>
-                <h2>Kecamatan Undaan</h2>
-                <h1>Kabupaten Kudus</h1>
-                <p>Jl. Kyai Panjang Babalan - Wonosoco Km. 1 Kode pos 59372</p>
+            <div class="kop-header">
+                <img src="../../uplouds/Logo_Kudus.png" alt="Logo Kudus" class="kop-logo"
+                    onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Coat_of_arms_of_Kudus_Regency.svg'">
+                <div class="kop-teks">
+                    <h4>PEMERINTAH KABUPATEN KUDUS</h4>
+                    <h3>KECAMATAN UNDAAN</h3>
+                    <h3>DESA BERUGENJANG</h3>
+                   <p>
+    Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos <br>
+   59372 Provinsi Jawa Tengah<br>
+    e-mail: desaberugenjangundaan@gmail.com
+</p>
+                </div>
             </div>
         </div>
 
         <!-- Kode Desa Kiri -->
         <div class="no-kode-desa">
-            No Kode <span>Desa :</span><br>
-            31.07.16
+            Kode Desa : 31.07.16/2026
         </div>
 
         <!-- Judul Dokumen Tengah -->
         <div class="judul-box">
-            <h2>Keterangan<br>Domisili</h2>
-            <p>Nomor : <?= htmlspecialchars($data['nomor_surat']); ?></p>
+            <h2>SURAT KETERANGAN / PENGANTAR DOMISILI</h2>
+            <p>NOMOR: <?= htmlspecialchars($data['nomor_surat']); ?></p>
         </div>
 
-        <!-- Pembuka (Pihak Pertama: Kepala Desa) -->
+        <!-- Pembuka -->
         <div class="pembuka">
-            Yang bertanda tangan dibawah ini :
+            Yang bertanda tangan dibawah ini, menerangkan bahwa :
         </div>
 
         <!-- Detail Data Kepala Desa -->
-        <table class="table-isi" style="margin-bottom: 15px;">
+        <table class="table-isi" style="margin-bottom: 10px;">
             <tr>
-                <td width="25%">Nama</td>
+                <td width="25%">Nama Pejabat</td>
                 <td width="3%">:</td>
                 <td><strong><?= htmlspecialchars($data['nama_pejabat']); ?></strong></td>
-            </tr>
-            <tr>
-                <td>Alamat</td>
-                <td>:</td>
-                <td>Berugenjang, RT 02 RW 01 Kec. Undaan Kab. Kudus</td>
             </tr>
             <tr>
                 <td>Jabatan</td>
@@ -332,7 +353,7 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
         </table>
 
         <!-- Kalimat Penyambung -->
-        <div class="pembuka" style="margin-bottom: 10px;">
+        <div class="pembuka" style="margin-bottom: 8px;">
             Menerangkan dengan sesungguhnya bahwa :
         </div>
 
@@ -366,29 +387,7 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
             <tr>
                 <td>Alamat</td>
                 <td>:</td>
-                <td><?= htmlspecialchars($data['alamat_jalan']); ?> RT <?= htmlspecialchars($data['rt']); ?> Rw
-                    <?= htmlspecialchars($data['rw']); ?>
-                </td>
-            </tr>
-            <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;RT/RW</td>
-                <td>:</td>
-                <td><?= htmlspecialchars($data['rt']); ?> / <?= htmlspecialchars($data['rw']); ?></td>
-            </tr>
-            <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;Kel/Desa</td>
-                <td>:</td>
-                <td>Berugenjang</td>
-            </tr>
-            <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;Kecamatan</td>
-                <td>:</td>
-                <td>Undaan</td>
-            </tr>
-            <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;Kabupaten</td>
-                <td>:</td>
-                <td>Kudus</td>
+                <td><?= htmlspecialchars($data['alamat_jalan']); ?> RT <?= htmlspecialchars($data['rt']); ?> / RW <?= htmlspecialchars($data['rw']); ?>, Desa Berugenjang, Kec. Undaan, Kab. Kudus</td>
             </tr>
             <tr>
                 <td>Keperluan</td>
@@ -404,30 +403,37 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
                 <td>Keterangan Lain-Lain</td>
                 <td>:</td>
                 <td style="text-align: justify;">
-                    <?= !empty($data['keterangan_lain']) ? htmlspecialchars($data['keterangan_lain']) : '–'; ?>
+                    <?= !empty($data['keterangan_lain']) ? htmlspecialchars($data['keterangan_lain']) : 'Menerangkan Bahwa Orang tersebut diatas, benar-benar penduduk Desa Berugenjang'; ?>
                 </td>
             </tr>
         </table>
 
         <!-- Penutup -->
-        <div class="pembuka" style="margin-top: 15px; text-align: justify;">
-            Demikian surat keterangan Domisili ini di keluarkan kepada yang bersangkutan untuk dipergunakan sebagaimana
-            mestinya.
+        <div class="pembuka" style="margin-top: 10px; text-align: justify;">
+            Demikian surat keterangan Domisili ini dikeluarkan kepada yang bersangkutan untuk dipergunakan sebagaimana mestinya.
         </div>
 
-        <!-- Bagian Tanda Tangan Kiri dan Kanan Sesuai Gambar -->
+        <!-- Bagian Tanda Tangan & QR Code (Posisi Disesuaikan: Kiri = Kepala Desa, Kanan = Pemegang) -->
         <div class="ttd-area">
+            <!-- Kiri: Kepala Desa (dengan QR Code) -->
             <div class="ttd-kolom">
-                <p style="margin-bottom: 0;"><br><?= htmlspecialchars($data['jabatan']); ?></p>
-                <div class="ttd-space"></div>
-                <?= tampilkanQR('surat_domisili', $id_domisili, $qr_token); ?>
+                <p style="margin-bottom: 2px;">&nbsp;</p>
+                <p style="margin-top: 0; margin-bottom: 5px;"><?= htmlspecialchars($data['jabatan']); ?></p>
+                
+                <div class="qr-wrapper">
+                    <?= tampilkanQR('surat_domisili', $id_domisili, $qr_token); ?>
+                </div>
+
                 <p class="ttd-nama"><?= htmlspecialchars($data['nama_pejabat']); ?></p>
             </div>
 
+            <!-- Kanan: Pemegang Surat / Warga -->
             <div class="ttd-kolom">
-                <p style="margin-bottom: 0;">Kudus, <?= tgl_indo($data['tanggal_surat']); ?></p>
-                <p style="margin-top: 0; margin-bottom: 0;">Tandatangan Pemegang</p>
+                <p style="margin-bottom: 2px;">Kudus, <?= tgl_indo($data['tanggal_surat'] ?? date('Y-m-d')); ?></p>
+                <p style="margin-top: 0; margin-bottom: 5px;">Tandatangan Pemegang</p>
+                
                 <div class="ttd-space"></div>
+                
                 <p class="ttd-nama"><?= htmlspecialchars(strtoupper($data['nama_warga'])); ?></p>
             </div>
         </div>

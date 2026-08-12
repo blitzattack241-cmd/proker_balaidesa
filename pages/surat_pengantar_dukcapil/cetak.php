@@ -84,57 +84,80 @@ function tgl_indo($tanggal)
             background-color: #fff;
             width: 215mm;
             min-height: 330mm;
-            padding: 25mm 20mm 20mm 20mm;
+            padding: 20mm 20mm 20mm 20mm;
             box-sizing: border-box;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Kop Surat */
+        /* Kop Surat Modern & Presisi */
         .kop-surat {
-            text-align: center;
             position: relative;
-            margin-bottom: 15px;
+            width: 100%;
+            margin-bottom: 5px;
         }
 
-        .kop-surat h2 {
-            font-size: 15pt;
-            text-transform: uppercase;
-            margin: 0;
-            font-weight: normal;
-            letter-spacing: 0.5px;
+        .kop-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        .kop-surat h3 {
+        .logo-kudus {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 95px;
+            height: auto;
+        }
+
+        .kop-teks {
+            text-align: center;
+            width: 100%;
+        }
+
+        .kop-teks h2 {
             font-size: 14pt;
             text-transform: uppercase;
-            margin: 2px 0;
-            font-weight: normal;
+            margin: 0;
+            font-weight: bold;
             letter-spacing: 0.5px;
+            line-height: 1.2;
         }
 
-        .kop-surat h4 {
-            font-size: 15pt;
+        .kop-teks h3 {
+            font-size: 13pt;
+            text-transform: uppercase;
+            margin: 2px 0;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .kop-teks h4 {
+            font-size: 14pt;
             text-transform: uppercase;
             margin: 0;
-            font-weight: normal;
-            letter-spacing: 0.5px;
-        }
-
-        .kop-surat h2:first-child {
             font-weight: bold;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
         }
 
-        .kop-surat p {
-            font-size: 12pt;
-            margin: 5px 0 0 0;
+        .kop-teks p {
+            font-size: 11pt;
+            margin: 4px 0 0 0;
             font-weight: normal;
+            line-height: 1.3;
         }
 
-        /* Garis Tebal Kop Surat */
+        /* Garis Ganda Kop Surat Resmi */
         .garis-kop {
             border: none;
-            border-top: 4px solid #000;
-            margin-top: 10px;
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 2px;
+            margin-top: 8px;
             margin-bottom: 20px;
         }
 
@@ -193,12 +216,10 @@ function tgl_indo($tanggal)
             height: 300px;
         }
 
-        /* PERBAIKAN: Mengatur teks tabel agar rata kiri rapi tanpa dipaksa melebar */
         .text-left-clean {
             text-align: left !important;
             line-height: 1.5;
             white-space: pre-wrap;
-            /* Menjaga enter/baris baru tetap berfungsi */
         }
 
         /* Desain area teks yang bisa diedit */
@@ -207,7 +228,6 @@ function tgl_indo($tanggal)
             transition: background 0.2s;
         }
 
-        /* Saat kursor diarahkan atau diklik di layar monitor, muncul indikator bisa diedit */
         [contenteditable="true"]:hover {
             background-color: #f1f3f5;
             cursor: edit;
@@ -221,7 +241,7 @@ function tgl_indo($tanggal)
         /* Bagian Tanda Tangan */
         .tabel-ttd {
             width: 100%;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .tabel-ttd td {
@@ -229,17 +249,34 @@ function tgl_indo($tanggal)
             vertical-align: top;
         }
 
+        /* PERBAIKAN: Mengurangi jarak kosong di atas barcode */
         .space-ttd {
-            height: 75px;
+            height: 5px;
+        }
+
+        /* PERBAIKAN: Mengatur spasi blok QR Code agar lebih padat ke atas */
+        .qr-sign-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .qr-sign-block img {
+            margin: 5px 0;
+            max-width: 90px; /* Menyesuaikan batas lebar QR agar rapi */
+            height: auto;
         }
 
         .nama-kades {
             font-weight: bold;
             text-decoration: underline;
             text-transform: uppercase;
+            margin-top: 5px;
         }
 
-        /* Pengaturan Cetak (Hanya Berpengaruh saat Print Fisik) */
+        /* Pengaturan Cetak Fisik */
         @media print {
             body {
                 background-color: #fff;
@@ -310,28 +347,35 @@ function tgl_indo($tanggal)
 <body>
 
     <!-- Panel Kontrol Cetak & Edukasi Edit -->
-    <!-- Panel Kontrol Cetak & Edukasi Edit -->
     <div class="no-print">
         <div class="nav-control">
-            <span class="badge-info-edit">💡 Tips: Anda bisa langsung mengklik dan mengedit tulisan di kertas untuk
-                merubah isi sebelum dicetak!</span>
+            <span class="badge-info-edit">💡 Tips: Anda bisa langsung mengklik dan mengedit tulisan di kertas untuk merubah isi sebelum dicetak!</span>
             <button class="btn-cetak" onclick="window.print();">🖨️ Cetak Sekarang</button>
             <button class="btn-cetak" style="background-color: #6c757d;" onclick="window.close();">❌ Tutup</button>
         </div>
     </div>
 
     <div class="kertas">
-        <!-- KOP SURAT ASLI -->
+        <!-- KOP SURAT BARU SESUAI BERKAS DOKUMEN -->
         <div class="kop-surat">
-            <h2>Pemerintah Desa Berugenjang</h2>
-            <h3>Kecamatan Undaan</h3>
-            <h4>Kabupaten Kudus</h4>
-            <p>Jln. Kyai Panjang Babalan – Wonosoco , KM. 1 Kudus 59372</p>
+            <div class="kop-header">
+                <img src="/uplouds/Logo_Kudus.png" alt="Logo Kabupaten Kudus" class="logo-kudus">
+                
+                <div class="kop-teks">
+                    <h4>Pemerintah Kabupaten Kudus</h4>
+                    <h3>Kecamatan Undaan</h3>
+                    <h3>Desa Berugenjang</h3>
+                    <p>
+                        Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos<br>
+                        59372 Provinsi Jawa Tengah<br>
+                        e-mail: desaberugenjangundaan@gmail.com
+                    </p>
+                </div>
+            </div>
             <hr class="garis-kop">
         </div>
 
         <!-- Bagian Alamat & Tanggal Kanan-Tengah -->
-        <!-- Bagian Alamat & Tanggal Kanan-Tengah (Presisi Menggunakan Sub-Tabel) -->
         <table class="meta-surat">
             <tr>
                 <td style="width: 45%;"></td>
@@ -339,8 +383,7 @@ function tgl_indo($tanggal)
                     Berugenjang, <?= tgl_indo($data['tanggal_surat']); ?>
 
                     <!-- Sub-tabel untuk merapikan penerimaan surat -->
-                    <table
-                        style="width: 100%; border: none; margin-top: 15px; border-collapse: collapse; line-height: 1.5;">
+                    <table style="width: 100%; border: none; margin-top: 15px; border-collapse: collapse; line-height: 1.5;">
                         <tr style="border: none;">
                             <td style="width: 10%; border: none; padding: 0; vertical-align: top;">Yth.</td>
                             <td style="width: 90%; border: none; padding: 0; vertical-align: top; font-weight: bold;">
@@ -366,8 +409,7 @@ function tgl_indo($tanggal)
         <!-- Judul & Nomor Surat Pengantar -->
         <div class="judul-container">
             <h1 class="judul-surat">Surat Pengantar</h1>
-            <p class="nomor-surat">Nomor : <span
-                    contenteditable="true"><?= htmlspecialchars($data['nomor_surat']); ?></span></p>
+            <p class="nomor-surat">Nomor : <span contenteditable="true"><?= htmlspecialchars($data['nomor_surat']); ?></span></p>
         </div>
 
         <!-- Tabel Rincian Berkas -->
@@ -383,13 +425,9 @@ function tgl_indo($tanggal)
             <tbody>
                 <tr>
                     <td style="text-align: center;">1.</td>
-                    <!-- Menambahkan contenteditable="true" agar isi tabel dapat diketik manual saat halaman terbuka -->
-                    <td class="text-left-clean" contenteditable="true"><?= htmlspecialchars($data['jenis_dikirim']); ?>
-                    </td>
-                    <td style="text-align: center;" contenteditable="true"><?= htmlspecialchars($data['banyaknya']); ?>
-                    </td>
-                    <td class="text-left-clean" contenteditable="true"><?= htmlspecialchars($data['keterangan']); ?>
-                    </td>
+                    <td class="text-left-clean" contenteditable="true"><?= htmlspecialchars($data['jenis_dikirim']); ?></td>
+                    <td style="text-align: center;" contenteditable="true"><?= htmlspecialchars($data['banyaknya']); ?></td>
+                    <td class="text-left-clean" contenteditable="true"><?= htmlspecialchars($data['keterangan']); ?></td>
                 </tr>
             </tbody>
         </table>

@@ -150,51 +150,65 @@ function tgl_indo($tanggal)
         }
 
         /* 3. FORMAT DOKUMEN */
-        .kop-surat {
-            border-bottom: 4px solid #000;
-            padding-bottom: 3px;
-            margin-bottom: 2px;
-            text-align: center;
-            position: relative;
-        }
+     /* Styling Kop Surat */
+.kop-surat {
+    border-bottom: 4px double #000; /* Garis ganda khas kop surat resmi */
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+}
 
-        .kop-logo {
-            position: absolute;
-            left: 15px;
-            top: 5px;
-            width: 60px;
-            height: auto;
-        }
+.kop-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+}
 
-        .kop-teks {
-            text-align: center;
-            margin-left: 75px;
-            margin-right: 75px;
-        }
+.logo-kudus {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 85px;
+    height: auto;
+}
 
-        .kop-teks h4 {
-            margin: 0;
-            font-size: 13pt;
-            text-transform: uppercase;
-            font-weight: normal;
-        }
+.kop-teks {
+    text-align: center;
+    width: 100%;
+    padding-left: 70px;  /* Memberi ruang agar teks tidak tertimpa logo */
+    padding-right: 70px; /* Menjaga teks tetap simetris di tengah */
+}
 
-        .kop-teks h3 {
-            margin: 0;
-            font-size: 15pt;
-            text-transform: uppercase;
-            font-weight: normal;
-        }
+.kop-teks h2 {
+    margin: 0;
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
 
-        .kop-teks h4:first-child {
-            font-weight: bold;
-        }
+.kop-teks h3 {
+    margin: 0;
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
 
-        .kop-teks p {
-            margin: 3px 0 0 0;
-            font-size: 9pt;
-            font-style: italic;
-        }
+.kop-teks h4 {
+    margin: 0;
+    font-size: 15pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.kop-teks p {
+    margin: 2px 0 0 0;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 1.2;
+}
 
         .kode-desa-row {
             width: 100%;
@@ -257,8 +271,7 @@ function tgl_indo($tanggal)
         /* Bagian Tanda Tangan */
         .container-ttd {
             width: 100%;
-            margin-top: 120px;
-            /* Diperbesar signifikan agar seluruh blok TTD terdorong ke bawah */
+            margin-top: 50px; /* Disesuaikan agar seluruh TTD naik ke atas */
             font-size: 10.5pt;
         }
 
@@ -266,7 +279,7 @@ function tgl_indo($tanggal)
             width: 100%;
             display: table;
             table-layout: fixed;
-            margin-bottom: 12px;
+            margin-bottom: 5px;
         }
 
         .col-ttd {
@@ -277,15 +290,18 @@ function tgl_indo($tanggal)
         }
 
         .spasi-ttd {
-            height: 80px;
+            height: 60px; /* Diperkecil agar TTD/QR naik sedikit */
         }
 
-        /* Menggeser TTD Camat agar lebih ke bawah lagi dan proporsional */
+        .qr-wrapper {
+            margin: 3px 0; /* Mengatur jarak barcode agar presisi */
+        }
+
+        /* Menggeser TTD Camat agar lebih ke atas lagi */
         .row-ttd-bawah {
             width: 100%;
             text-align: center;
-            margin-top: 70px;
-            /* Ditambah jaraknya agar renggang dan rapi */
+            margin-top: 25px; /* Dikurangi signifikan agar "Mengetahui: Camat Undaan" terangkat naik */
         }
 
         /* 4. CSS KHUSUS PRINT FISIK (SATU HALAMAN) */
@@ -337,16 +353,22 @@ function tgl_indo($tanggal)
         <!-- HALAMAN TUNGGAL: SURAT KETERANGAN -->
         <div class="page">
             <!-- Kop Surat Resmi -->
-            <div class="kop-surat">
-                <img class="kop-logo" src="../../assets/img/logo_kabupaten.png" alt="Logo Kab"
-                    onerror="this.style.display='none'">
-                <div class="kop-teks">
-                    <h4>Pemerintah Desa Berugenjang</h4>
-                    <h4>Kecamatan Undaan</h4>
-                    <h3>Kabupaten Kudus</h3>
-                    <p>Jl. Kyai Panjang Babalan - Wonosoco Km. 1 Kode pos 59372</p>
-                </div>
-            </div>
+           <!-- Kop Surat Resmi -->
+<div class="kop-surat">
+    <div class="kop-header">
+        <img src="/uplouds/Logo_Kudus.png" alt="" class="logo-kudus" onerror="this.onerror=null; this.style.display='none';">
+        <div class="kop-teks">
+            <h4>PEMERINTAH KABUPATEN KUDUS</h4>
+            <h3>KECAMATAN UNDAAN</h3>
+            <h3>DESA BERUGENJANG</h3>
+            <p>
+                        Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos<br>
+                        59372 Provinsi Jawa Tengah<br>
+                        e-mail: desaberugenjangundaan@gmail.com
+                    </p>
+        </div>
+    </div>
+</div>
 
             <!-- Kode Desa -->
             <div class="kode-desa-row">
@@ -356,7 +378,7 @@ function tgl_indo($tanggal)
             <!-- Judul Surat -->
             <div class="judul-surat">
                 <h5>Surat Keterangan Tidak Mampu</h5>
-                <p>Nomor: 145 / <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></p>
+                <p>Nomor: <?= htmlspecialchars($data['nomor_surat'] ?? ''); ?></p>
             </div>
 
             <p class="paragraf-pengantar">
@@ -463,8 +485,9 @@ function tgl_indo($tanggal)
                     <div class="col-ttd">
                         Kudus, <?= tgl_indo($data['tanggal_surat']); ?><br>
                         <?= htmlspecialchars($data['jabatan'] ?? 'Kepala Desa'); ?> Desa Berugenjang
-                        <div class="spasi-ttd"></div>
-                        <?= tampilkanQR('sktm_kip', $id_sktm, $qr_token); ?>
+                        <div class="qr-wrapper">
+                            <?= tampilkanQR('sktm_kip', $id_sktm, $qr_token); ?>
+                        </div>
                         <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                     </div>
                 </div>
@@ -472,7 +495,7 @@ function tgl_indo($tanggal)
                 <div class="row-ttd-bawah">
                     Mengetahui :<br>
                     Camat Undaan
-                    <div class="spasi-ttd" style="height: 45px;"></div>
+                    <div class="spasi-ttd" style="height: 50px;"></div>
                     ___________________________
                 </div>
             </div>

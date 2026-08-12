@@ -110,7 +110,6 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
             font-family: "Times New Roman", Times, serif;
             color: #000;
             font-size: 11pt;
-            /* Dikecilkan sedikit dari 12pt ke 11pt agar lebih aman */
         }
 
         /* Top Bar Preview */
@@ -155,31 +154,72 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
             background-color: #ffffff;
             width: 210mm;
             height: 297mm;
-            padding: 15mm 25mm 15mm 25mm;
-            /* Mengurangi padding atas & bawah dari 20mm ke 15mm */
+            padding: 10mm 25mm 15mm 25mm !important;
             box-sizing: border-box;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             position: relative;
         }
 
-        /* Kop Surat Persis Foto */
-        .kop-surat {
-            text-align: center;
-            border-bottom: 3px solid #000;
-            padding-bottom: 3px;
-            margin-bottom: 10px;
-        }
+        /* Kop Surat Resmi dengan Logo */
+      /* Styling Kop Surat */
+.kop-surat {
+    border-bottom: 4px double #000; /* Garis ganda khas kop surat resmi */
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+}
 
-        .kop-surat h3 {
-            margin: 0;
-            font-size: 13pt;
-            font-weight: normal;
-            letter-spacing: 0.5px;
-        }
+.kop-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+}
 
-        .kop-surat h3:first-child {
-            font-weight: bold;
-        }
+.logo-kudus {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 85px;
+    height: auto;
+}
+
+.kop-teks {
+    text-align: center;
+    width: 100%;
+    padding-left: 70px;  /* Memberi ruang agar teks tidak tertimpa logo */
+    padding-right: 70px; /* Menjaga teks tetap simetris di tengah */
+}
+
+.kop-teks h2 {
+    margin: 0;
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.kop-teks h3 {
+    margin: 0;
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.kop-teks h4 {
+    margin: 0;
+    font-size: 15pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.kop-teks p {
+    margin: 2px 0 0 0;
+    font-size: 11pt;
+    font-weight: normal;
+    line-height: 1.2;
+}
 
         .no-klasifikasi {
             font-size: 10pt;
@@ -220,7 +260,6 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
 
         .tabel-isi td {
             padding: 2px 0;
-            /* Mempersempit jarak antar baris tabel */
             vertical-align: top;
         }
 
@@ -230,7 +269,7 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
             font-size: 10pt;
         }
 
-        /* Layout Block Tanda Tangan Model Segitiga */
+        /* Layout Block Tanda Tangan */
         .block-ttd {
             width: 100%;
             font-size: 10pt;
@@ -250,8 +289,21 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
         }
 
         .space-ttd {
-            height: 55px;
-            /* Sedikit mengurangi ruang tanda tangan fisik */
+            height: 40px;
+        }
+
+        /* Styling QR Code dinaikkan */
+        .qr-wrapper {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-wrapper img {
+            max-width: 85px;
+            height: auto;
         }
 
         @media print {
@@ -289,12 +341,22 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
     <div class="print-container">
         <div class="page">
 
-            <!-- Kop Surat Sesuai Surat Asli -->
+            <!-- Kop Surat Resmi -->
             <div class="kop-surat">
-                <h3>PEMERINTAH DESA BERUGENJANG</h3>
-                <h3>KECAMATAN UNDAAN</h3>
-                <h3>KABUPATEN KUDUS</h3>
-                <p>Jl.Kyai Panjang Km 1 Babalan-Wonosoco kode Pos 59372</p>
+                <div class="kop-header">
+                    <img src="/uplouds/Logo_Kudus.png" alt="" class="logo-kudus" onerror="this.onerror=null; this.style.display='none';">
+                    <div class="kop-teks">
+                        <h4>PEMERINTAH KABUPATEN KUDUS</h4>
+                        <h3>KECAMATAN UNDAAN</h3>
+                        <h3>DESA BERUGENJANG</h3>
+                       <p>
+    Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos <br>
+   59372 Provinsi Jawa Tengah<br>
+    e-mail: desaberugenjangundaan@gmail.com
+</p>
+
+                    </div>
+                </div>
             </div>
 
             <!-- Nomor Klasifikasi Kiri -->
@@ -312,7 +374,7 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
                 Yang bertanda tangan dibawah ini, menerangkan bahwa :
             </div>
 
-            <!-- Tabel Informasi Poin 1 - 12 Sesuai Fisik Asli -->
+            <!-- Tabel Informasi Poin 1 - 12 -->
             <table class="tabel-isi">
                 <tr>
                     <td style="width: 5%; text-align: center;">1</td>
@@ -404,9 +466,9 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
                 Demikian Untuk menjadi maklum bagi yang berkepentingan.
             </div>
 
-            <!-- Struktur Penandatanganan Sesuai Persis Foto -->
+            <!-- Penandatanganan -->
             <div class="block-ttd">
-                <!-- Baris Pertama: Tanggal Kanan & Kolom Pemohon -->
+                <!-- Baris Pemohon -->
                 <div class="row-ttd">
                     <div class="col-ttd" style="width: 45%;"></div>
                     <div class="col-ttd" style="width: 10%;"></div>
@@ -414,22 +476,22 @@ if ($jabatan_penandatanganan === '' || strtolower($jabatan_penandatanganan) === 
                         Berugenjang, <?= tgl_indo($data['tanggal_surat']); ?><br>
                         Pemohon
                         <div class="space-ttd"></div>
-                        <span
-                            style="text-transform: uppercase; font-weight: bold;"><?= htmlspecialchars($data['nama_pemohon'] ?? $data['nama_penduduk']); ?></span>
+                        <span style="text-transform: uppercase; font-weight: bold;"><?= htmlspecialchars($data['nama_pemohon'] ?? $data['nama_penduduk']); ?></span>
                     </div>
                 </div>
 
-                <!-- Jarak Vertikal Antara Pemohon dan Kepala Desa -->
-                <div style="height: 15px;"></div>
+                <div style="height: 10px;"></div>
 
-                <!-- Baris Kedua: Kepala Desa di Tengah (Mengetahui) -->
+                <!-- Baris Kepala Desa -->
                 <div class="row-ttd">
                     <div class="col-ttd" style="width: 27.5%;"></div>
                     <div class="col-ttd" style="width: 45%; text-align: center;">
                         Mengetahui,<br>
                         Kepala Desa Berugenjang
-                        <div class="space-ttd"></div>
-                        <?= tampilkanQR('surat_keterangan_pengantar', $id_surat, $qr_token); ?>
+                        <div style="height: 10px;"></div>
+                        <div class="qr-wrapper">
+                            <?= tampilkanQR('surat_keterangan_pengantar', $id_surat, $qr_token); ?>
+                        </div>
                         <span style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">
                             <?= htmlspecialchars($data['nama_penandatanganan'] ?? 'KISWO, S.E'); ?>
                         </span>
