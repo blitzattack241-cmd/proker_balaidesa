@@ -231,6 +231,47 @@ $displayedRows = mysqli_num_rows($result);
         border-color: var(--primary-color);
     }
 
+    .resident-search-suggestions {
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        right: 0;
+        z-index: 1040;
+        max-height: 20rem;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.14);
+    }
+
+    .resident-search-suggestion {
+        display: block;
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        color: var(--text-main);
+        text-align: left;
+        background: #fff;
+        border: 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .resident-search-suggestion:last-child {
+        border-bottom: 0;
+    }
+
+    .resident-search-suggestion:hover,
+    .resident-search-suggestion[aria-selected="true"] {
+        background: #eff6ff;
+    }
+
+    .resident-search-suggestion-meta {
+        display: block;
+        margin-top: 0.15rem;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
     .total-badge {
         background: #ecfdf5;
         color: #047857;
@@ -290,18 +331,20 @@ $displayedRows = mysqli_num_rows($result);
     <div class="main-card mb-4">
         <form method="GET" action="index.php" class="row g-3 align-items-center">
             <input type="hidden" name="page" value="penduduk">
-            <div class="col-md-8 col-lg-9">
+            <div class="col-md-8 col-lg-9 position-relative">
                 <div class="input-group search-input-group">
                     <span class="input-group-text border-end-0"><i class="fas fa-search"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0"
+                    <input id="residentSearchInput" type="text" name="search" class="form-control border-start-0 ps-0"
                         placeholder="Cari berdasarkan Nama, NIK, No. KK, Suku, atau Pekerjaan..."
-                        value="<?php echo htmlspecialchars($search); ?>">
+                        value="<?php echo htmlspecialchars($search); ?>" autocomplete="off" role="combobox"
+                        aria-autocomplete="list" aria-expanded="false" aria-controls="residentSearchSuggestions">
                     <button type="submit" class="btn btn-primary px-4 fw-semibold">Cari</button>
                     <?php if (!empty($search)): ?>
                         <a href="index.php?page=penduduk" class="btn btn-outline-secondary px-3" title="Reset"><i
                                 class="fas fa-times"></i></a>
                     <?php endif; ?>
                 </div>
+                <div id="residentSearchSuggestions" class="resident-search-suggestions d-none" role="listbox"></div>
             </div>
             <div class="col-md-4 col-lg-3 text-md-end">
                 <span class="total-badge d-inline-block">
@@ -503,3 +546,4 @@ $displayedRows = mysqli_num_rows($result);
 </div>
 
 <script src="/js/resident-import.js"></script>
+<script src="/js/resident-search.js"></script>

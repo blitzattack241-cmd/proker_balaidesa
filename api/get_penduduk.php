@@ -99,12 +99,21 @@ if (isset($_GET['search']) && $_GET['search'] !== '') {
 }
 
 if ($searchTerm !== '') {
-    $search = mysqli_real_escape_string($koneksi, $searchTerm);
+    $searchPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm);
+    $search = mysqli_real_escape_string($koneksi, '%' . $searchPattern . '%');
+    $identifierSearch = str_replace('_', '', $searchTerm);
+    $identifierPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $identifierSearch);
+    $identifierLike = mysqli_real_escape_string($koneksi, '%' . $identifierPattern . '%');
+    $identifierWhere = $identifierSearch !== ''
+        ? " OR REPLACE(nik, '_', '') LIKE '$identifierLike'
+            OR REPLACE(no_kk, '_', '') LIKE '$identifierLike'"
+        : '';
 
-    // Cari berdasarkan Nama, NIK, atau No. KK
+    // Keep autocomplete results consistent with the Residents-page search.
     $query = "SELECT id, nik, no_kk, nama, jenis_kelamin, tempat_tgl_lahir, tempat_lahir, tgl_lahir, pekerjaan, alamat, rt, rw, status_pernikahan, status_keluarga 
               FROM tb_penduduk 
-              WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' 
+              WHERE nama LIKE '$search' OR nik LIKE '$search' OR no_kk LIKE '$search'
+                    OR pekerjaan LIKE '$search' OR kepala_kk LIKE '$search' OR suku LIKE '$search'$identifierWhere
               ORDER BY nama ASC
               LIMIT 15";
 
@@ -121,9 +130,9 @@ if ($searchTerm !== '') {
 
         $data[] = [
             'id' => (string) $row['id'],
-            'text' => $row['nama'] . " | NIK: " . $row['nik'] . " | KK: " . ($row['no_kk'] ?: '-'),
-            'nik' => $row['nik'],
-            'no_kk' => $row['no_kk'],
+            'text' => $row['nama'] . " | NIK: " . str_replace('_', '', (string) $row['nik']) . " | KK: " . (str_replace('_', '', (string) ($row['no_kk'] ?? '')) ?: '-'),
+            'nik' => str_replace('_', '', (string) $row['nik']),
+            'no_kk' => str_replace('_', '', (string) ($row['no_kk'] ?? '')),
             'nama' => $row['nama'],
             'tempat_tgl_lahir' => $row['tempat_tgl_lahir'],
             'tgl_lahir' => $tgl_lahir,
