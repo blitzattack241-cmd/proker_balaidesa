@@ -50,10 +50,29 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus_semua') {
 }
 
 // Filter Pencarian
-$search = isset($_GET['search']) ? mysqli_real_escape_string($koneksi, trim($_GET['search'])) : '';
-$where = "";
-if (!empty($search)) {
-    $where = "WHERE nama LIKE '%$search%' OR nik LIKE '%$search%' OR no_kk LIKE '%$search%' OR pekerjaan LIKE '%$search%' OR kepala_kk LIKE '%$search%' OR suku LIKE '%$search%'";
+// Keep the submitted value separate from the SQL pattern so it can be safely
+// shown again in the form and pagination links. Escape LIKE wildcards so users
+// search for their actual text, not a SQL pattern.
+$search = trim((string) ($_GET['search'] ?? ''));
+$where = '';
+if ($search !== '') {
+    $searchPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
+    $searchLike = mysqli_real_escape_string($koneksi, '%' . $searchPattern . '%');
+    $identifierSearch = str_replace('_', '', $search);
+    $identifierPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $identifierSearch);
+    $identifierLike = mysqli_real_escape_string($koneksi, '%' . $identifierPattern . '%');
+
+    $identifierWhere = $identifierSearch !== ''
+        ? " OR REPLACE(nik, '_', '') LIKE '$identifierLike'
+            OR REPLACE(no_kk, '_', '') LIKE '$identifierLike'"
+        : '';
+
+    $where = "WHERE nama LIKE '$searchLike'
+        OR nik LIKE '$searchLike'
+        OR no_kk LIKE '$searchLike'
+        OR pekerjaan LIKE '$searchLike'
+        OR kepala_kk LIKE '$searchLike'
+        OR suku LIKE '$searchLike'$identifierWhere";
 }
 
 // --- LOGIKA PAGINATION ---
