@@ -40,7 +40,35 @@ document.addEventListener('DOMContentLoaded', function () {
     options[activeIndex].scrollIntoView({ block: 'nearest' });
   }
 
-  function renderResults(data) {
+  function appendHighlightedText(element, value, term) {
+    const text = String(value || '');
+    const searchTerm = String(term || '');
+    const normalizedText = text.toLocaleLowerCase();
+    const normalizedTerm = searchTerm.toLocaleLowerCase();
+    if (!normalizedTerm) {
+      element.appendChild(document.createTextNode(text));
+      return;
+    }
+
+    let offset = 0;
+    let matchAt = normalizedText.indexOf(normalizedTerm, offset);
+    while (matchAt !== -1) {
+      if (matchAt > offset) {
+        element.appendChild(document.createTextNode(text.slice(offset, matchAt)));
+      }
+      const highlight = document.createElement('mark');
+      highlight.className = 'resident-search-highlight';
+      highlight.textContent = text.slice(matchAt, matchAt + searchTerm.length);
+      element.appendChild(highlight);
+      offset = matchAt + searchTerm.length;
+      matchAt = normalizedText.indexOf(normalizedTerm, offset);
+    }
+    if (offset < text.length) {
+      element.appendChild(document.createTextNode(text.slice(offset)));
+    }
+  }
+
+  function renderResults(data, term) {
     results = Array.isArray(data) ? data : [];
     suggestionsBox.innerHTML = '';
     activeIndex = -1;
@@ -59,10 +87,13 @@ document.addEventListener('DOMContentLoaded', function () {
         option.setAttribute('aria-selected', 'false');
 
         const name = document.createElement('strong');
-        name.textContent = resident.nama || '-';
+        appendHighlightedText(name, resident.nama || '-', term);
         const meta = document.createElement('span');
         meta.className = 'resident-search-suggestion-meta';
-        meta.textContent = 'NIK: ' + (resident.nik || '-') + ' · KK: ' + (resident.no_kk || '-');
+        meta.appendChild(document.createTextNode('NIK: '));
+        appendHighlightedText(meta, resident.nik || '-', term);
+        meta.appendChild(document.createTextNode(' · KK: '));
+        appendHighlightedText(meta, resident.no_kk || '-', term);
         option.append(name, meta);
         option.addEventListener('click', function () { selectResult(index); });
         suggestionsBox.appendChild(option);
@@ -84,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!response.ok) throw new Error('Suggestion request failed');
       const payload = await response.json();
       if (input.value.trim() !== term) return;
-      renderResults(payload.results);
+      renderResults(payload.results, term);
     } catch (error) {
       if (error.name !== 'AbortError') hideSuggestions();
     }

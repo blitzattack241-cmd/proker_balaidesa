@@ -272,6 +272,13 @@ $displayedRows = mysqli_num_rows($result);
         font-size: 0.8rem;
     }
 
+    .resident-search-highlight {
+        padding: 0;
+        color: inherit;
+        background: #fef08a;
+        border-radius: 0.15rem;
+    }
+
     .total-badge {
         background: #ecfdf5;
         color: #047857;
