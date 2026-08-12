@@ -39,6 +39,7 @@ try {
     // user mapping: array index -> canonical field or 'skip'
     $mapping = json_decode($payload['mapping'] ?? '[]', true);
     if (!is_array($mapping)) { $mapping = []; }
+    $allowedMappingFields = importable_mapping_fields();
 
     // mode: 'insert_only' (default) or 'insert_or_update'
     $mode = isset($payload['mode']) && $payload['mode'] === 'insert_or_update' ? 'insert_or_update' : 'insert_only';
@@ -57,9 +58,22 @@ try {
         $raw = $rows[$i];
         $record = [];
         foreach ($raw as $idx => $cell) {
-            if (!isset($mapping[$idx]) || $mapping[$idx] === 'skip') continue;
-            $canon = $mapping[$idx];
-            $record[$canon] = is_string($cell) ? trim($cell) : $cell;
+            $canon = $mapping[$idx] ?? 'skip';
+            if (!is_string($canon) || $canon === 'skip' || !in_array($canon, $allowedMappingFields, true)) {
+                continue;
+            }
+
+            $value = is_string($cell) ? trim($cell) : $cell;
+            if ($canon === 'rt_rw') {
+                $record = array_merge($record, parse_rt_rw_value($value));
+                continue;
+            }
+            if ($canon === 'ttl') {
+                $record = array_merge($record, parse_ttl_value($value));
+                continue;
+            }
+
+            $record[$canon] = $value;
         }
 
         // basic required checks

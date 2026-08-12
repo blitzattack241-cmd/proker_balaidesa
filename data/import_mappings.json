@@ -1,11 +1,19 @@
 {
   "synonyms": {
-    "nama": ["nama lengkap", "nama penduduk", "nama anggota", "nama", "NAMA", "Nama Lengkap"],
-    "nik": ["nik", "no ktp", "no_ktp", "noktp", "NIK"],
-    "tgl_lahir": ["tanggal lahir", "tgl lahir", "tanggal_lahir", "birth date", "tgl_lahir"],
-    "jenis_kelamin": ["jenis kelamin", "jk", "gender", "sex"],
+    "rt_rw": ["rt/rw", "rt rw", "rt-rw"],
     "no_kk": ["no kk", "no_kk", "nokk", "no. kk"],
-    "alamat": ["alamat", "address"]
+    "kepala_kk": ["kepala kk", "nama kepala keluarga"],
+    "nama": ["anggota keluarga", "nama lengkap", "nama penduduk", "nama anggota", "nama", "NAMA", "Nama Lengkap"],
+    "nik": ["nik", "no ktp", "no_ktp", "noktp", "NIK"],
+    "jenis_kelamin": ["jenis kelamin", "jk", "gender", "sex"],
+    "status_keluarga": ["status keluarga"],
+    "ttl": ["ttl", "tempat tanggal lahir", "tempat/tanggal lahir"],
+    "status_pernikahan": ["status pernikahan"],
+    "agama": ["agama"],
+    "kewarganegaraan": ["kewarganegaraan"],
+    "suku": ["etnis/suku", "etnis suku", "etnis", "suku"],
+    "pendidikan": ["pendidikan"],
+    "pekerjaan": ["pekerjaan"]
   },
   "templates": {}
 }

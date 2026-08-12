@@ -139,28 +139,29 @@ function parse_csv_delimiter(string $path): string
 function canonical_map(): array
 {
     $map = [
+        // Source columns that are not stored by the application.
+        'no' => 'skip',
         'rt' => 'rt',
         'rw' => 'rw',
+        'rt rw' => 'rt_rw',
         'no kk' => 'no_kk',
         'no_ktp' => 'nik',
         'nik' => 'nik',
         'nama' => 'nama',
+        'anggota keluarga' => 'nama',
         'kepala kk' => 'kepala_kk',
         'jenis kelamin' => 'jenis_kelamin',
         'jk' => 'jenis_kelamin',
         'status keluarga' => 'status_keluarga',
-        'tempat lahir' => 'tempat_lahir',
-        'ttl' => 'tempat_lahir',
-        'tanggal lahir' => 'tgl_lahir',
-        'tgl lahir' => 'tgl_lahir',
+        'ttl' => 'ttl',
         'status pernikahan' => 'status_pernikahan',
         'agama' => 'agama',
         'kewarganegaraan' => 'kewarganegaraan',
         'suku' => 'suku',
+        'etnis' => 'suku',
+        'etnis suku' => 'suku',
         'pendidikan' => 'pendidikan',
         'pekerjaan' => 'pekerjaan',
-        'alamat' => 'alamat',
-        'umur' => 'umur',
     ];
     // load user synonyms if present
     $synFile = __DIR__ . '/../data/import_mappings.json';
@@ -168,6 +169,9 @@ function canonical_map(): array
         $json = json_decode(file_get_contents($synFile), true);
         if (is_array($json) && isset($json['synonyms']) && is_array($json['synonyms'])) {
             foreach ($json['synonyms'] as $canon => $arr) {
+                if (!in_array($canon, importable_mapping_fields(), true)) {
+                    continue;
+                }
                 foreach ($arr as $alias) {
                     $k = normalize_header($alias);
                     $map[$k] = $canon;
@@ -176,6 +180,32 @@ function canonical_map(): array
         }
     }
     return $map;
+}
+
+/**
+ * The resident import intentionally accepts only these source fields. Every
+ * other source column remains mapped to "skip" and is never persisted.
+ */
+function importable_mapping_fields(): array
+{
+    return [
+        'rt',
+        'rw',
+        'rt_rw',
+        'no_kk',
+        'kepala_kk',
+        'nik',
+        'nama',
+        'jenis_kelamin',
+        'status_keluarga',
+        'ttl',
+        'status_pernikahan',
+        'agama',
+        'kewarganegaraan',
+        'suku',
+        'pendidikan',
+        'pekerjaan',
+    ];
 }
 
 function suggest_mappings(array $headers): array
@@ -191,32 +221,6 @@ function suggest_mappings(array $headers): array
         if (isset($canon[$norm])) {
             $best = $canon[$norm];
             $bestScore = 100;
-        } else {
-            // token overlap
-            $tokens = $norm === '' ? [] : explode(' ', $norm);
-            foreach ($canon as $k => $v) {
-                $kTokens = $k === '' ? [] : explode(' ', $k);
-                $common = count(array_intersect($tokens, $kTokens));
-                if ($common > 0) {
-                    $score = 50 + ($common * 10);
-                    if ($score > $bestScore) {
-                        $bestScore = $score;
-                        $best = $v;
-                    }
-                }
-            }
-            // levenshtein fallback
-            if ($best === null) {
-                foreach ($canon as $k => $v) {
-                    $dist = levenshtein($norm, $k);
-                    $len = max(strlen($norm), strlen($k));
-                    $sim = $len > 0 ? (1 - ($dist / $len)) * 100 : 0;
-                    if ($sim > $bestScore && $sim > 50) {
-                        $bestScore = (int) $sim;
-                        $best = $v;
-                    }
-                }
-            }
         }
 
         $suggestions[$idx] = [
@@ -227,6 +231,41 @@ function suggest_mappings(array $headers): array
         ];
     }
     return $suggestions;
+}
+
+function parse_rt_rw_value($value): array
+{
+    $value = trim((string) $value);
+    if (!preg_match('/^(?:rt\.?\s*)?(\d+)\s*\/\s*(?:rw\.?\s*)?(\d+)$/i', $value, $matches)) {
+        return [];
+    }
+
+    return ['rt' => $matches[1], 'rw' => $matches[2]];
+}
+
+function parse_ttl_value($value): array
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return [];
+    }
+
+    $parts = preg_split('/\s*,\s*/', $value, 2);
+    if (count($parts) !== 2) {
+        return ['tempat_lahir' => $value];
+    }
+
+    $tempat = trim($parts[0]);
+    $tanggal = parse_date_value(trim($parts[1]));
+    $result = [];
+    if ($tempat !== '') {
+        $result['tempat_lahir'] = $tempat;
+    }
+    if ($tanggal !== null) {
+        $result['tgl_lahir'] = $tanggal;
+    }
+
+    return $result;
 }
 
 function parse_date_value($value)

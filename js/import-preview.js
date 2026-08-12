@@ -11,13 +11,16 @@ document.addEventListener('DOMContentLoaded', function(){
     nama: 'Nama',
     nik: 'NIK',
     no_kk: 'No. KK',
+    kepala_kk: 'Kepala KK',
     jenis_kelamin: 'Jenis Kelamin',
-    tgl_lahir: 'Tanggal Lahir',
-    tempat_lahir: 'Tempat Lahir',
-    alamat: 'Alamat',
+    status_keluarga: 'Status Keluarga',
+    ttl: 'TTL',
+    status_pernikahan: 'Status Pernikahan',
+    kewarganegaraan: 'Kewarganegaraan',
+    suku: 'Etnis/Suku',
     rt: 'RT',
     rw: 'RW',
-    umur: 'Umur',
+    rt_rw: 'RT/RW',
     pendidikan: 'Pendidikan',
     pekerjaan: 'Pekerjaan',
     agama: 'Agama'
@@ -85,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const tr = document.createElement('tr');
     tr.innerHTML = '<th>Kolom Asal</th><th>Saran Sistem</th><th>Pemetaan</th>';
     table.appendChild(tr);
-    const canonFields = ['skip','nama','nik','no_kk','jenis_kelamin','tgl_lahir','tempat_lahir','alamat','rt','rw','umur','pendidikan','pekerjaan','agama'];
+    const canonFields = ['skip','rt_rw','rt','rw','no_kk','kepala_kk','nik','nama','jenis_kelamin','status_keluarga','ttl','status_pernikahan','agama','kewarganegaraan','suku','pendidikan','pekerjaan'];
     resp.suggestions.forEach((s, idx)=>{
       const row = document.createElement('tr');
       const src = document.createElement('td'); src.textContent = s.original;
