@@ -256,9 +256,7 @@ $displayedRows = mysqli_num_rows($result);
                 <i class="fas fa-trash-alt me-1"></i> Hapus Semua Data
             </a>
 
-            <!-- Tombol Modal Import Excel -->
-            <button class="btn btn-success rounded-3 fw-semibold btn-sm px-3 py-2" data-bs-toggle="modal"
-                data-bs-target="#modalImport">
+            <button id="residentImportButton" class="btn btn-success rounded-3 fw-semibold btn-sm px-3 py-2" type="button">
                 <i class="fas fa-file-excel me-1"></i> Import Excel / CSV
             </button>
 
@@ -457,28 +455,25 @@ $displayedRows = mysqli_num_rows($result);
 
 </div>
 
-<!-- Modal Import Data Excel (redirects to new import UI) -->
-<div class="modal fade" id="modalImport" tabindex="-1" aria-labelledby="modalImportLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalImportLabel">
-                    <i class="fas fa-file-excel text-success me-2"></i>Import Data Penduduk
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<input id="residentImportFile" type="file" accept=".csv,.xlsx,.xls" class="d-none">
+
+<div id="residentImportProgress" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center p-3" style="z-index: 1080; background: rgba(15, 23, 42, .55);">
+    <div class="bg-white rounded-4 shadow-lg p-4" style="width: min(100%, 440px);" role="status" aria-live="polite">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="spinner-border text-success" aria-hidden="true"></div>
+            <div>
+                <h5 class="fw-bold mb-1">Memproses impor penduduk</h5>
+                <p id="residentImportStatus" class="text-muted small mb-0">Menunggu file dipilih.</p>
             </div>
-            <div class="modal-body py-4">
-                <p class="text-muted small mb-3">
-                    Sistem import telah diperbarui. Klik tombol di bawah untuk membuka antarmuka import baru yang
-                    mendukung preview, pemetaan kolom, dan validasi.
-                </p>
-                <div class="mb-3">
-                    <a href="pages/import_upload.php" class="btn btn-primary"><i class="fas fa-file-import me-1"></i> Buka Import Baru</a>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Tutup</button>
-            </div>
+        </div>
+        <div class="progress" style="height: .55rem;">
+            <div id="residentImportProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success w-100"></div>
+        </div>
+        <div id="residentImportResult" class="small mt-3 d-none"></div>
+        <div class="text-end mt-3">
+            <button id="residentImportDone" type="button" class="btn btn-success d-none">Muat Ulang Data</button>
         </div>
     </div>
 </div>
+
+<script src="/js/resident-import.js"></script>

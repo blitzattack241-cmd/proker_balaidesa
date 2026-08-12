@@ -33,18 +33,17 @@ try {
         throw new InvalidArgumentException('Tidak ada baris data yang ditemukan');
     }
 
-    $headerIndex = isset($payload['header_index']) ? (int)$payload['header_index'] : 0;
-    $header = $rows[$headerIndex];
-
-    // user mapping: array index -> canonical field or 'skip'
-    $mapping = json_decode($payload['mapping'] ?? '[]', true);
-    if (!is_array($mapping)) { $mapping = []; }
-    $allowedMappingFields = importable_mapping_fields();
+    // The server owns the mapping. Do not trust a browser-supplied column map:
+    // it would allow a stale preview or manually altered request to shift data.
+    $layout = detect_import_layout($rows);
+    $headerIndex = $layout['header_index'];
+    $mapping = $layout['mapping'];
 
     // mode: 'insert_only' (default) or 'insert_or_update'
     $mode = isset($payload['mode']) && $payload['mode'] === 'insert_or_update' ? 'insert_or_update' : 'insert_only';
 
     $inserted = 0; $updated = 0; $skipped = 0; $failed = 0;
+    $skippedExisting = 0; $skippedInvalid = 0; $skippedHeaderRows = 0;
     $failRows = [];
 
     // Check database connection before proceeding
@@ -56,32 +55,20 @@ try {
 
     for ($i = $headerIndex + 1; $i < count($rows); $i++) {
         $raw = $rows[$i];
-        $record = [];
-        foreach ($raw as $idx => $cell) {
-            $canon = $mapping[$idx] ?? 'skip';
-            if (!is_string($canon) || $canon === 'skip' || !in_array($canon, $allowedMappingFields, true)) {
-                continue;
-            }
-
-            $value = is_string($cell) ? trim($cell) : $cell;
-            if ($canon === 'rt_rw') {
-                $record = array_merge($record, parse_rt_rw_value($value));
-                continue;
-            }
-            if ($canon === 'ttl') {
-                $record = array_merge($record, parse_ttl_value($value));
-                continue;
-            }
-
-            $record[$canon] = $value;
+        if (!is_array($raw) || is_header_like_row($raw)) {
+            $skippedHeaderRows++;
+            continue;
         }
 
+        $record = build_import_record($raw, $mapping);
+
         // basic required checks
-        $nik = trim($record['nik'] ?? '');
+        $nik = normalize_nik_value($record['nik'] ?? '');
         $nama = trim($record['nama'] ?? '');
-        if ($nik === '' || $nama === '') {
+        if (strlen($nik) !== 16 || $nama === '') {
             $skipped++;
-            $failRows[] = ['row' => $i+1, 'reason' => 'NIK atau Nama belum diisi', 'data' => $raw];
+            $skippedInvalid++;
+            $failRows[] = ['row' => $i+1, 'reason' => 'NIK harus 16 digit dan Nama harus diisi', 'data' => $raw];
             continue;
         }
 
@@ -121,6 +108,7 @@ try {
             } else {
                 // Mode insert_only: data lama tidak ditimpa
                 $skipped++;
+                $skippedExisting++;
                 continue;
             }
         } else {
@@ -142,6 +130,9 @@ try {
         'inserted' => $inserted,
         'updated' => $updated,
         'skipped' => $skipped,
+        'skipped_existing' => $skippedExisting,
+        'skipped_invalid' => $skippedInvalid,
+        'skipped_header_rows' => $skippedHeaderRows,
         'failed' => $failed,
         'fail_rows' => $failRows,
     ]);

@@ -233,6 +233,122 @@ function suggest_mappings(array $headers): array
     return $suggestions;
 }
 
+function import_mapping_for_headers(array $headers): array
+{
+    $mapping = [];
+    $canon = canonical_map();
+
+    foreach ($headers as $idx => $header) {
+        $mapping[$idx] = $canon[normalize_header($header)] ?? 'skip';
+    }
+
+    return $mapping;
+}
+
+function build_import_record(array $row, array $mapping): array
+{
+    $record = [];
+    $allowedFields = importable_mapping_fields();
+
+    foreach ($row as $idx => $cell) {
+        $field = $mapping[$idx] ?? 'skip';
+        if (!is_string($field) || $field === 'skip' || !in_array($field, $allowedFields, true)) {
+            continue;
+        }
+
+        $value = is_string($cell) ? trim($cell) : $cell;
+        if ($field === 'rt_rw') {
+            $record = array_merge($record, parse_rt_rw_value($value));
+        } elseif ($field === 'ttl') {
+            $record = array_merge($record, parse_ttl_value($value));
+        } else {
+            $record[$field] = $value;
+        }
+    }
+
+    return $record;
+}
+
+function normalize_nik_value($value): string
+{
+    return preg_replace('/\D+/', '', trim((string) $value)) ?? '';
+}
+
+function is_header_like_row(array $row): bool
+{
+    $canon = canonical_map();
+    $matches = 0;
+
+    foreach ($row as $cell) {
+        $field = $canon[normalize_header($cell)] ?? null;
+        if ($field !== null && $field !== 'skip') {
+            $matches++;
+        }
+    }
+
+    return $matches >= 3;
+}
+
+/**
+ * Finds the one supported resident-data header row. A source layout must have
+ * the NIK and Anggota Keluarga/Nama columns plus at least four recognised
+ * fields; otherwise it is rejected before any data can be written.
+ */
+function detect_import_layout(array $rows): array
+{
+    $best = null;
+
+    foreach ($rows as $index => $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+
+        $mapping = import_mapping_for_headers($row);
+        $fields = array_values(array_unique(array_filter($mapping, static function ($field): bool {
+            return $field !== 'skip';
+        })));
+
+        if (!in_array('nik', $fields, true) || !in_array('nama', $fields, true) || count($fields) < 4) {
+            continue;
+        }
+
+        $candidate = [
+            'header_index' => $index,
+            'headers' => array_values($row),
+            'mapping' => $mapping,
+            'fields' => $fields,
+        ];
+
+        if ($best === null || count($candidate['fields']) > count($best['fields'])) {
+            $best = $candidate;
+        }
+    }
+
+    if ($best === null) {
+        throw new InvalidArgumentException('Format header tidak dikenali. File harus memuat kolom NIK dan ANGGOTA KELUARGA/Nama.');
+    }
+
+    $hasDataRow = false;
+    for ($i = $best['header_index'] + 1; $i < count($rows); $i++) {
+        $row = $rows[$i];
+        if (!is_array($row) || is_header_like_row($row)) {
+            continue;
+        }
+
+        $record = build_import_record($row, $best['mapping']);
+        if (strlen(normalize_nik_value($record['nik'] ?? '')) === 16 && trim((string) ($record['nama'] ?? '')) !== '') {
+            $hasDataRow = true;
+            break;
+        }
+    }
+
+    if (!$hasDataRow) {
+        throw new InvalidArgumentException('Tidak ditemukan baris data valid setelah header. Periksa susunan header Excel dan nilai NIK.');
+    }
+
+    return $best;
+}
+
 function parse_rt_rw_value($value): array
 {
     $value = trim((string) $value);

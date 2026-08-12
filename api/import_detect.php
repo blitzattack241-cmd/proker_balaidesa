@@ -28,21 +28,9 @@ try {
         throw new InvalidArgumentException('Tidak ada baris data yang ditemukan di dalam file');
     }
 
-    // find header row index (first row with both nama and nik)
-    $headerIndex = null;
-    foreach ($rows as $idx => $row) {
-        $hasNama = false; $hasNik = false;
-        foreach ($row as $cell) {
-            $norm = normalize_header((string)$cell);
-            $map = canonical_map();
-            if (isset($map[$norm]) && $map[$norm] === 'nama') $hasNama = true;
-            if (isset($map[$norm]) && $map[$norm] === 'nik') $hasNik = true;
-        }
-        if ($hasNama && $hasNik) { $headerIndex = $idx; break; }
-    }
-    if ($headerIndex === null) { $headerIndex = 0; }
-
-    $headerRow = $rows[$headerIndex];
+    $layout = detect_import_layout($rows);
+    $headerIndex = $layout['header_index'];
+    $headerRow = $layout['headers'];
     $sample = [];
     for ($i = $headerIndex + 1; $i <= min($headerIndex + 9, count($rows)-1); $i++) {
         $sample[] = $rows[$i];
@@ -55,6 +43,8 @@ try {
         'header_index' => $headerIndex,
         'headers' => array_values($headerRow),
         'suggestions' => $suggest,
+        'mapping' => $layout['mapping'],
+        'mapped_fields' => $layout['fields'],
         'sample' => $sample,
     ];
 
