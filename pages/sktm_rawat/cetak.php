@@ -158,7 +158,7 @@ function tgl_indo($tanggal)
         /* 3. FORMAT DOKUMEN */
         .kop-surat {
             border-bottom: 4px solid #000;
-            padding-bottom: 3px;
+            padding-bottom: 5px;
             margin-bottom: 2px;
             text-align: center;
             position: relative;
@@ -166,40 +166,38 @@ function tgl_indo($tanggal)
 
         .kop-logo {
             position: absolute;
-            left: 15px;
+            left: 10px;
             top: 5px;
-            width: 60px;
+            width: 85px;
             height: auto;
         }
 
         .kop-teks {
             text-align: center;
-            margin-left: 75px;
-            margin-right: 75px;
+            margin-left: 70px;
+            margin-right: 20px;
         }
 
         .kop-teks h4 {
             margin: 0;
-            font-size: 13pt;
+            font-size: 12pt;
             text-transform: uppercase;
-            font-weight: normal;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
         .kop-teks h3 {
             margin: 0;
-            font-size: 15pt;
+            font-size: 14pt;
             text-transform: uppercase;
-            font-weight: normal;
-        }
-
-        .kop-teks h4:first-child {
             font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
         .kop-teks p {
-            margin: 3px 0 0 0;
-            font-size: 9pt;
-            font-style: italic;
+            margin: 2px 0 0 0;
+            font-size: 11pt;
+            line-height: 1.2;
         }
 
         .kode-desa-row {
@@ -312,7 +310,16 @@ function tgl_indo($tanggal)
         }
 
         .spasi-ttd {
-            height: 45px;
+            height: 35px; /* Disesuaikan agar penandatangan kanan & kiri tetap sejajar */
+        }
+
+        /* Wrapper QR untuk Menaikkan Barcode Lebih ke Atas */
+        .qr-wrapper {
+            margin-top: 25px; /* Nilai negatif menarik barcode ke atas */
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .row-ttd-bawah {
@@ -417,16 +424,20 @@ function tgl_indo($tanggal)
         <!-- HALAMAN 1: SURAT KETERANGAN -->
         <div class="page">
             <!-- Kop Surat Resmi -->
-            <div class="kop-surat">
-                <img class="kop-logo" src="../../assets/img/logo_kabupaten.png" alt="Logo Kab"
-                    onerror="this.style.display='none'">
-                <div class="kop-teks">
-                    <h4>Pemerintah Desa Berugenjang</h4>
-                    <h4>Kecamatan Undaan</h4>
-                    <h3>Kabupaten Kudus</h3>
-                    <p>Jl. Kyai Panjang Babalan - Wonosoco Km. 1 Kode pos 59372</p>
-                </div>
-            </div>
+          <!-- PERBAIKAN: Ubah class="logo-kudus" menjadi class="kop-logo" -->
+<div class="kop-surat">
+    <img src="/uplouds/Logo_Kudus.png" alt="Logo Kudus" class="kop-logo" onerror="this.onerror=null; this.style.display='none';">
+    <div class="kop-teks">
+        <h3>PEMERINTAH DESA BERUGENJANG</h3>
+        <h4>KECAMATAN UNDAAN</h4>
+        <h4>KABUPATEN KUDUS</h4>
+        <p>
+            Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos<br>
+            59372 Provinsi Jawa Tengah<br>
+            e-mail: desaberugenjangundaan@gmail.com
+        </p>
+    </div>
+</div>
 
             <!-- Kode Desa -->
             <div class="kode-desa-row">
@@ -582,8 +593,9 @@ function tgl_indo($tanggal)
                     <div class="col-ttd">
                         Kudus, <?= tgl_indo($data['tanggal_surat']); ?><br>
                         <?= htmlspecialchars($data['jabatan']); ?> Desa Berugenjang
-                        <div class="spasi-ttd"></div>
-                        <?= tampilkanQR('sktm_rawat', $id_sktm, $qr_token); ?>
+                        <div class="qr-wrapper">
+                            <?= tampilkanQR('sktm_rawat', $id_sktm, $qr_token); ?>
+                        </div>
                         <strong><u><?= htmlspecialchars($data['nama_pejabat']); ?></u></strong>
                     </div>
                 </div>

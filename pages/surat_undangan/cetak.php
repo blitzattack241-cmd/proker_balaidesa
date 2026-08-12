@@ -79,7 +79,7 @@ if ($query_tujuan) {
 $query_pejabat = mysqli_query($koneksi, "SELECT * FROM `tb_pejabat` WHERE `jabatan` LIKE '%Kepala Desa%' LIMIT 1");
 $pejabat = mysqli_fetch_assoc($query_pejabat);
 
-// Pengaturan Tanda Tangan (Gunakan data DB pejabat, jika kosong otomatis pakai default Pak Kiswo)
+// Pengaturan Tanda Tangan
 $nama_penandatangan = !empty($pejabat['nama_pejabat']) ? $pejabat['nama_pejabat'] : 'KISWO, S.E';
 $jabatan_penandatangan = !empty($pejabat['jabatan']) ? $pejabat['jabatan'] : 'Kepala Desa';
 $nip_penandatangan = !empty($pejabat['nip']) ? $pejabat['nip'] : '-';
@@ -130,63 +130,74 @@ function tgl_indo($tanggal)
         background-color: #fff;
         width: 215mm;
         min-height: 330mm;
-        padding: 25mm 20mm 20mm 25mm;
+        padding: 20mm 20mm 20mm 20mm;
         box-sizing: border-box;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* Kop Surat */
+    /* Kop Surat RESMI */
     .kop-surat {
-        text-align: center;
         position: relative;
-        margin-bottom: 10px;
+        text-align: center;
+        margin-bottom: 2px;
     }
 
-    .kop-surat h2 {
-        font-size: 16pt;
+    .kop-logo {
+        position: absolute;
+        left: 10px;
+        top: 5px;
+        width: 90px;
+        height: auto;
+    }
+
+    .kop-teks {
+        text-align: center;
+        margin-left: 75px;
+        margin-right: 10px;
+    }
+
+    .kop-teks h2 {
+        font-size: 14pt;
         text-transform: uppercase;
         margin: 0;
         font-weight: bold;
-        letter-spacing: 0.5px;
     }
 
-    .kop-surat h3 {
-        font-size: 14pt;
+    .kop-teks h3 {
+        font-size: 13pt;
         text-transform: uppercase;
         margin: 2px 0;
-        font-weight: normal;
-        letter-spacing: 0.5px;
+        font-weight: bold;
     }
 
-    .kop-surat h4 {
-        font-size: 15pt;
+    .kop-teks h4 {
+        font-size: 14pt;
         text-transform: uppercase;
         margin: 0;
-        font-weight: normal;
-        letter-spacing: 0.5px;
+        font-weight: bold;
     }
 
-    .kop-surat p {
+    .kop-teks p {
         font-size: 11pt;
-        font-style: italic;
-        margin: 5px 0 0 0;
-        font-weight: normal;
+        font-style: normal;
+        margin: 3px 0 0 0;
+        line-height: 1.3;
     }
 
     .garis-kop {
         border: none;
         border-top: 3px solid #000;
         border-bottom: 1px solid #000;
-        height: 3px;
+        height: 2px;
         margin-top: 8px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     /* Tata Letak Info Baris Atas */
     .tabel-meta {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
 
     .tabel-meta td {
@@ -200,7 +211,7 @@ function tgl_indo($tanggal)
         text-align: justify;
         text-indent: 40px;
         line-height: 1.6;
-        margin-top: 20px;
+        margin-top: 15px;
         margin-bottom: 15px;
     }
 
@@ -222,7 +233,7 @@ function tgl_indo($tanggal)
     /* Bagian Tanda Tangan */
     .tabel-ttd {
         width: 100%;
-        margin-top: 40px;
+        margin-top: 30px;
     }
 
     .tabel-ttd td {
@@ -231,7 +242,7 @@ function tgl_indo($tanggal)
     }
 
     .space-ttd {
-        height: 75px;
+        height: 60px;
     }
 
     .nama-kades {
@@ -328,22 +339,28 @@ function tgl_indo($tanggal)
     <!-- Panel Tombol Aksi -->
     <div class="no-print">
         <div class="nav-control">
-            <span class="badge-info-edit">💡 Tips: Tulisan di kertas dapat diedit secara langsung jika ada penyesuaian
-                teks mendadak!</span>
+            <span class="badge-info-edit">💡 Tips: Tulisan di kertas dapat diedit secara langsung jika ada penyesuaian teks mendadak!</span>
             <button class="btn-cetak" onclick="window.print();">🖨️ Cetak Surat</button>
             <button class="btn-cetak" style="background-color: #6c757d;" onclick="window.close();">❌ Tutup</button>
         </div>
     </div>
 
     <div class="kertas">
-        <!-- KOP SURAT SESUAI GAMBAR -->
+        <!-- KOP SURAT PEMERINTAH DESA -->
         <div class="kop-surat">
-            <h2>Pemerintah Desa Berugenjang</h2>
-            <h3>Kecamatan Undaan</h3>
-            <h4>Kabupaten Kudus</h4>
-            <p>Jl. Kyai Panjang Km 1 Babalan-Wonosoco Kode Pos 59372</p>
-            <div class="garis-kop"></div>
+            <img class="kop-logo" src="/uplouds/Logo_Kudus.png" alt="Logo Kabupaten Kudus" onerror="this.style.display='none'">
+            <div class="kop-teks">
+               <h4>PEMERINTAH KABUPATEN KUDUS</h4>
+            <h3>KECAMATAN UNDAAN</h3>
+            <h3>DESA BERUGENJANG</h3>
+            <p>
+                        Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos<br>
+                        59372 Provinsi Jawa Tengah<br>
+                        e-mail: desaberugenjangundaan@gmail.com
+                    </p>
+            </div>
         </div>
+        <div class="garis-kop"></div>
 
         <!-- TABEL STRUKTUR ATAS (KIRI: KETERANGAN SURAT, KANAN: TUJUAN) -->
         <table class="tabel-meta">
@@ -435,8 +452,7 @@ function tgl_indo($tanggal)
             <tr>
                 <td>Acara</td>
                 <td>:</td>
-                <td contenteditable="true"><?= htmlspecialchars($data['acara'] ?? ''); ?>
-                </td>
+                <td contenteditable="true"><?= htmlspecialchars($data['acara'] ?? ''); ?></td>
             </tr>
             <tr>
                 <td>Keterangan</td>
