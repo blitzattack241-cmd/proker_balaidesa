@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         summary.skipped_existing + ' NIK sudah ada',
         summary.skipped_invalid + ' baris tidak valid',
         summary.skipped_header_rows + ' baris header dilewati',
+        (summary.skipped_non_data_rows || 0) + ' baris judul/kosong dilewati',
         summary.failed + ' gagal',
       ];
       showResult('Impor selesai: ' + details.join(', ') + '.', false);

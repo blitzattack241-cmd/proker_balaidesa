@@ -40,6 +40,7 @@ try {
 
     $response = [
         'filename' => $name,
+        'profile' => $layout['profile'] ?? 'generic',
         'header_index' => $headerIndex,
         'headers' => array_values($headerRow),
         'suggestions' => $suggest,

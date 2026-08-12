@@ -43,7 +43,7 @@ try {
     $mode = isset($payload['mode']) && $payload['mode'] === 'insert_or_update' ? 'insert_or_update' : 'insert_only';
 
     $inserted = 0; $updated = 0; $skipped = 0; $failed = 0;
-    $skippedExisting = 0; $skippedInvalid = 0; $skippedHeaderRows = 0;
+    $skippedExisting = 0; $skippedInvalid = 0; $skippedHeaderRows = 0; $skippedNonDataRows = 0;
     $failRows = [];
 
     // Check database connection before proceeding
@@ -55,8 +55,16 @@ try {
 
     for ($i = $headerIndex + 1; $i < count($rows); $i++) {
         $raw = $rows[$i];
-        if (!is_array($raw) || is_header_like_row($raw)) {
+        if (!is_array($raw)) {
+            $skippedNonDataRows++;
+            continue;
+        }
+        if (is_import_header_row($raw, $layout)) {
             $skippedHeaderRows++;
+            continue;
+        }
+        if (is_import_non_data_row($raw, $layout)) {
+            $skippedNonDataRows++;
             continue;
         }
 
@@ -65,10 +73,19 @@ try {
         // basic required checks
         $nik = normalize_nik_value($record['nik'] ?? '');
         $nama = trim($record['nama'] ?? '');
-        if (strlen($nik) !== 16 || $nama === '') {
+        if ($nik === '') {
+            $reason = 'NIK belum diisi';
+        } elseif (strlen($nik) !== 16) {
+            $reason = 'NIK harus 16 digit';
+        } elseif ($nama === '') {
+            $reason = 'Nama belum diisi';
+        } else {
+            $reason = null;
+        }
+        if ($reason !== null) {
             $skipped++;
             $skippedInvalid++;
-            $failRows[] = ['row' => $i+1, 'reason' => 'NIK harus 16 digit dan Nama harus diisi', 'data' => $raw];
+            $failRows[] = ['row' => $i+1, 'reason' => $reason, 'data' => $raw];
             continue;
         }
 
@@ -133,6 +150,7 @@ try {
         'skipped_existing' => $skippedExisting,
         'skipped_invalid' => $skippedInvalid,
         'skipped_header_rows' => $skippedHeaderRows,
+        'skipped_non_data_rows' => $skippedNonDataRows,
         'failed' => $failed,
         'fail_rows' => $failRows,
     ]);

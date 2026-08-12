@@ -12,6 +12,10 @@ if (is_file($autoloadPath) && PHP_VERSION_ID >= 80200) {
     // Minimal manual autoload fallback for PhpSpreadsheet classes if vendor autoload is not present
     $manualAutoloadMap = [
         'PhpOffice\\PhpSpreadsheet\\' => __DIR__ . '/../vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/',
+        // Required by the PhpSpreadsheet readers when Composer's autoloader
+        // cannot run on the deployed PHP version.
+        'Composer\\Pcre\\' => __DIR__ . '/../vendor/composer/pcre/src/',
+        'Psr\\SimpleCache\\' => __DIR__ . '/../vendor/psr/simple-cache/src/',
     ];
     spl_autoload_register(function ($class) use ($manualAutoloadMap) {
         foreach ($manualAutoloadMap as $prefix => $baseDir) {
@@ -100,6 +104,13 @@ function load_rows_from_file(string $path, string $ext): array
     }
 
     if ($ext === 'xls') {
+        // The installed PhpSpreadsheet release requires PHP 8.2+. On an older
+        // runtime, loading its Xls reader causes an uncatchable parse error;
+        // return a normal import error instead.
+        if (PHP_VERSION_ID < 80200) {
+            throw new RuntimeException('Dukungan file XLS pada server memerlukan PHP 8.2 atau lebih baru.');
+        }
+
         if (class_exists('\\PhpOffice\\PhpSpreadsheet\\IOFactory')) {
             $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($path);
             $reader->setReadDataOnly(true);
@@ -146,6 +157,7 @@ function canonical_map(): array
         'rt rw' => 'rt_rw',
         'no kk' => 'no_kk',
         'no_ktp' => 'nik',
+        'no nik' => 'nik',
         'nik' => 'nik',
         'nama' => 'nama',
         'anggota keluarga' => 'nama',
@@ -153,7 +165,12 @@ function canonical_map(): array
         'jenis kelamin' => 'jenis_kelamin',
         'jk' => 'jenis_kelamin',
         'status keluarga' => 'status_keluarga',
+        'setatus dalam keluarga' => 'status_keluarga',
+        'status dalam keluarga' => 'status_keluarga',
         'ttl' => 'ttl',
+        'tempat lahir' => 'tempat_lahir',
+        'tanggal lahir' => 'tgl_lahir',
+        'tgl lahir' => 'tgl_lahir',
         'status pernikahan' => 'status_pernikahan',
         'agama' => 'agama',
         'kewarganegaraan' => 'kewarganegaraan',
@@ -199,6 +216,8 @@ function importable_mapping_fields(): array
         'jenis_kelamin',
         'status_keluarga',
         'ttl',
+        'tempat_lahir',
+        'tgl_lahir',
         'status_pernikahan',
         'agama',
         'kewarganegaraan',
@@ -206,6 +225,95 @@ function importable_mapping_fields(): array
         'pendidikan',
         'pekerjaan',
     ];
+}
+
+/**
+ * Exact header structure used by the recurring "Data Penduduk Desa
+ * Berugenjang" legacy .xls report. Position is intentionally part of the
+ * match so other spreadsheets still use the generic importer below.
+ */
+function berugenjang_population_report_mapping(): array
+{
+    return [
+        0 => 'skip',
+        1 => 'rt',
+        2 => 'rw',
+        3 => 'no_kk',
+        4 => 'kepala_kk',
+        5 => 'skip',
+        6 => 'nik',
+        7 => 'nama',
+        8 => 'jenis_kelamin',
+        9 => 'status_keluarga',
+        10 => 'tempat_lahir',
+        11 => 'tgl_lahir',
+        12 => 'status_pernikahan',
+        13 => 'agama',
+        14 => 'kewarganegaraan',
+        15 => 'suku',
+        16 => 'pendidikan',
+        17 => 'pekerjaan',
+    ];
+}
+
+function is_berugenjang_population_report_header(array $row): bool
+{
+    $expected = [
+        'no', 'rt', 'rw', 'no kk', 'kepala kk', 'no', 'no nik',
+        'anggota keluarga', 'jenis kelamin', 'setatus dalam keluarga',
+        'tempat lahir', 'tanggal lahir', 'status pernikahan', 'agama',
+        'kewarganegaraan', 'etnis suku', 'pendidikan', 'pekerjaan',
+    ];
+
+    foreach ($expected as $index => $header) {
+        if (normalize_header($row[$index] ?? '') !== $header) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function is_berugenjang_section_title_row(array $row): bool
+{
+    $values = array_values(array_filter($row, static function ($value): bool {
+        return trim((string) $value) !== '';
+    }));
+
+    return count($values) === 1
+        && preg_match('/^rt\s*\d+\s+rw\s*\d+$/i', trim((string) $values[0])) === 1;
+}
+
+function is_empty_import_row(array $row): bool
+{
+    foreach ($row as $value) {
+        if (trim((string) $value) !== '') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function detect_berugenjang_population_report_layout(array $rows): ?array
+{
+    foreach ($rows as $index => $row) {
+        if (!is_array($row) || !is_berugenjang_population_report_header($row)) {
+            continue;
+        }
+
+        return [
+            'profile' => 'berugenjang_population_report',
+            'header_index' => $index,
+            'headers' => array_values($row),
+            'mapping' => berugenjang_population_report_mapping(),
+            'fields' => array_values(array_unique(array_filter(berugenjang_population_report_mapping(), static function ($field): bool {
+                return $field !== 'skip';
+            }))),
+        ];
+    }
+
+    return null;
 }
 
 function suggest_mappings(array $headers): array
@@ -289,6 +397,24 @@ function is_header_like_row(array $row): bool
     return $matches >= 3;
 }
 
+function is_import_header_row(array $row, array $layout): bool
+{
+    if (($layout['profile'] ?? null) === 'berugenjang_population_report') {
+        return is_berugenjang_population_report_header($row);
+    }
+
+    return is_header_like_row($row);
+}
+
+function is_import_non_data_row(array $row, array $layout): bool
+{
+    if (($layout['profile'] ?? null) !== 'berugenjang_population_report') {
+        return false;
+    }
+
+    return is_empty_import_row($row) || is_berugenjang_section_title_row($row);
+}
+
 /**
  * Finds the one supported resident-data header row. A source layout must have
  * the NIK and Anggota Keluarga/Nama columns plus at least four recognised
@@ -296,6 +422,11 @@ function is_header_like_row(array $row): bool
  */
 function detect_import_layout(array $rows): array
 {
+    $berugenjangLayout = detect_berugenjang_population_report_layout($rows);
+    if ($berugenjangLayout !== null) {
+        return $berugenjangLayout;
+    }
+
     $best = null;
 
     foreach ($rows as $index => $row) {
@@ -313,6 +444,7 @@ function detect_import_layout(array $rows): array
         }
 
         $candidate = [
+            'profile' => 'generic',
             'header_index' => $index,
             'headers' => array_values($row),
             'mapping' => $mapping,
@@ -331,7 +463,7 @@ function detect_import_layout(array $rows): array
     $hasDataRow = false;
     for ($i = $best['header_index'] + 1; $i < count($rows); $i++) {
         $row = $rows[$i];
-        if (!is_array($row) || is_header_like_row($row)) {
+        if (!is_array($row) || is_import_header_row($row, $best) || is_import_non_data_row($row, $best)) {
             continue;
         }
 
@@ -391,8 +523,15 @@ function parse_date_value($value)
     }
     if (is_numeric($value)) {
         try {
-            if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Shared\\Date')) return null;
-            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
+            if (class_exists('\\PhpOffice\\PhpSpreadsheet\\Shared\\Date')) {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
+            }
+
+            // Excel's 1900 date system includes a non-existent leap day. Using
+            // 1899-12-30 preserves the same serial-date result without relying
+            // on PhpSpreadsheet being available at runtime.
+            $days = (int) floor((float) $value);
+            return (new DateTimeImmutable('1899-12-30'))->modify(($days >= 0 ? '+' : '') . $days . ' days')->format('Y-m-d');
         } catch (Throwable $e) {
             return null;
         }
