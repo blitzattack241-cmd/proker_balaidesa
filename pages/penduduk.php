@@ -335,7 +335,7 @@ $displayedRows = mysqli_num_rows($result);
                                         class="text-dark small fw-semibold"><?php echo htmlspecialchars($row['kepala_kk'] ?: '-'); ?></span>
                                 </td>
                                 <td><span
-                                        class="fw-bold font-mono text-dark"><?php echo htmlspecialchars($row['nik']); ?></span>
+                                        class="fw-bold font-mono text-dark"><?php echo htmlspecialchars(str_replace('_', '', (string) ($row['nik'] ?? ''))); ?></span>
                                 </td>
                                 <td><strong class="text-dark"><?php echo htmlspecialchars($row['nama']); ?></strong></td>
                                 <td class="text-center">
@@ -423,10 +423,14 @@ $displayedRows = mysqli_num_rows($result);
             <?php if ($totalPages > 1): ?>
                 <nav aria-label="Page navigation">
                     <ul class="pagination pagination-sm m-0">
-                        <!-- Tombol Previous -->
                         <li class="page-item <?php echo ($page_num <= 1) ? 'disabled' : ''; ?>">
-                            <a class="page-link"
-                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=<?php echo $page_num - 1; ?>">Previous</a>
+                            <a class="page-link" aria-label="Halaman pertama" title="Halaman pertama"
+                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=1">&lt;&lt;</a>
+                        </li>
+
+                        <li class="page-item <?php echo ($page_num <= 1) ? 'disabled' : ''; ?>">
+                            <a class="page-link" aria-label="Halaman sebelumnya" title="Halaman sebelumnya"
+                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=<?php echo $page_num - 1; ?>">&lt;</a>
                         </li>
 
                         <!-- Digital Page Items -->
@@ -442,10 +446,13 @@ $displayedRows = mysqli_num_rows($result);
                             </li>
                         <?php endfor; ?>
 
-                        <!-- Tombol Next -->
                         <li class="page-item <?php echo ($page_num >= $totalPages) ? 'disabled' : ''; ?>">
-                            <a class="page-link"
-                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=<?php echo $page_num + 1; ?>">Next</a>
+                            <a class="page-link" aria-label="Halaman berikutnya" title="Halaman berikutnya"
+                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=<?php echo $page_num + 1; ?>">&gt;</a>
+                        </li>
+                        <li class="page-item <?php echo ($page_num >= $totalPages) ? 'disabled' : ''; ?>">
+                            <a class="page-link" aria-label="Halaman terakhir" title="Halaman terakhir"
+                                href="index.php?page=penduduk<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&p=<?php echo $totalPages; ?>">&gt;&gt;</a>
                         </li>
                     </ul>
                 </nav>
