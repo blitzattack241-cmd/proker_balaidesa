@@ -101,12 +101,12 @@ if (isset($_GET['search']) && $_GET['search'] !== '') {
 if ($searchTerm !== '') {
     $searchPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm);
     $search = mysqli_real_escape_string($koneksi, '%' . $searchPattern . '%');
-    $identifierSearch = str_replace('_', '', $searchTerm);
+    $identifierSearch = str_replace(['_', '*'], '', $searchTerm);
     $identifierPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $identifierSearch);
     $identifierLike = mysqli_real_escape_string($koneksi, '%' . $identifierPattern . '%');
     $identifierWhere = $identifierSearch !== ''
-        ? " OR REPLACE(nik, '_', '') LIKE '$identifierLike'
-            OR REPLACE(no_kk, '_', '') LIKE '$identifierLike'"
+        ? " OR REPLACE(REPLACE(nik, '_', ''), '*', '') LIKE '$identifierLike'
+            OR REPLACE(REPLACE(no_kk, '_', ''), '*', '') LIKE '$identifierLike'"
         : '';
 
     // Keep autocomplete results consistent with the Residents-page search.
@@ -130,9 +130,9 @@ if ($searchTerm !== '') {
 
         $data[] = [
             'id' => (string) $row['id'],
-            'text' => $row['nama'] . " | NIK: " . str_replace('_', '', (string) $row['nik']) . " | KK: " . (str_replace('_', '', (string) ($row['no_kk'] ?? '')) ?: '-'),
-            'nik' => str_replace('_', '', (string) $row['nik']),
-            'no_kk' => str_replace('_', '', (string) ($row['no_kk'] ?? '')),
+            'text' => $row['nama'] . " | NIK: " . ltrim((string) $row['nik'], '_*') . " | KK: " . (ltrim((string) ($row['no_kk'] ?? ''), '_*') ?: '-'),
+            'nik' => ltrim((string) $row['nik'], '_*'),
+            'no_kk' => ltrim((string) ($row['no_kk'] ?? ''), '_*'),
             'nama' => $row['nama'],
             'tempat_tgl_lahir' => $row['tempat_tgl_lahir'],
             'tgl_lahir' => $tgl_lahir,

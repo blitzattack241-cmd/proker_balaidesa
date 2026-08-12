@@ -58,13 +58,13 @@ $where = '';
 if ($search !== '') {
     $searchPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
     $searchLike = mysqli_real_escape_string($koneksi, '%' . $searchPattern . '%');
-    $identifierSearch = str_replace('_', '', $search);
+    $identifierSearch = str_replace(['_', '*'], '', $search);
     $identifierPattern = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $identifierSearch);
     $identifierLike = mysqli_real_escape_string($koneksi, '%' . $identifierPattern . '%');
 
     $identifierWhere = $identifierSearch !== ''
-        ? " OR REPLACE(nik, '_', '') LIKE '$identifierLike'
-            OR REPLACE(no_kk, '_', '') LIKE '$identifierLike'"
+        ? " OR REPLACE(REPLACE(nik, '_', ''), '*', '') LIKE '$identifierLike'
+            OR REPLACE(REPLACE(no_kk, '_', ''), '*', '') LIKE '$identifierLike'"
         : '';
 
     $where = "WHERE nama LIKE '$searchLike'
@@ -391,13 +391,13 @@ $displayedRows = mysqli_num_rows($result);
                                     </span>
                                 </td>
                                 <td><span
-                                        class="font-mono text-secondary"><?php echo htmlspecialchars($row['no_kk'] ?: '-'); ?></span>
+                                        class="font-mono text-secondary"><?php echo htmlspecialchars(ltrim((string) ($row['no_kk'] ?? ''), '_*') ?: '-'); ?></span>
                                 </td>
                                 <td><span
                                         class="text-dark small fw-semibold"><?php echo htmlspecialchars($row['kepala_kk'] ?: '-'); ?></span>
                                 </td>
                                 <td><span
-                                        class="fw-bold font-mono text-dark"><?php echo htmlspecialchars(str_replace('_', '', (string) ($row['nik'] ?? ''))); ?></span>
+                                        class="fw-bold font-mono text-dark"><?php echo htmlspecialchars(ltrim((string) ($row['nik'] ?? ''), '_*')); ?></span>
                                 </td>
                                 <td><strong class="text-dark"><?php echo htmlspecialchars($row['nama']); ?></strong></td>
                                 <td class="text-center">
