@@ -20,26 +20,27 @@ video {
   overscroll-behavior-x: contain;
 }
 
-@media (max-width: 991.98px) {
-  /* The fixed sidebar is translated off-canvas at this breakpoint. Its desktop
-     content offset must be removed or every included page is clipped horizontally. */
+@media (max-width: 767.98px) {
+  :root {
+    --mobile-topnav-height: 6.5rem;
+  }
+
+  /* Header: the search field moves to its own usable row. The fixed page shell
+     uses the same height, so included page content begins below the header. */
+  .sb-topnav.navbar {
+    height: var(--mobile-topnav-height);
+    min-height: var(--mobile-topnav-height);
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 0.25rem 0 0.5rem;
+  }
+
   .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
-    top: auto;
-    padding-left: 0;
+    top: var(--mobile-topnav-height);
   }
 
   .sb-nav-fixed #layoutSidenav #layoutSidenav_nav .sb-sidenav {
-    padding-top: 0;
-  }
-}
-
-@media (max-width: 767.98px) {
-  /* Header: the search field moves to its own, usable row rather than squeezing controls. */
-  .sb-topnav.navbar {
-    height: auto;
-    min-height: 56px;
-    flex-wrap: wrap;
-    padding: 0.25rem 0 0.5rem;
+    padding-top: var(--mobile-topnav-height);
   }
 
   .sb-topnav .navbar-brand {
