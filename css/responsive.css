@@ -72,6 +72,7 @@ video {
   .search-navbar-group {
     min-width: 0 !important;
     max-width: none;
+    gap: 0.5rem;
   }
 
   .search-navbar-group .form-control,
@@ -81,6 +82,16 @@ video {
 
   .search-navbar-group .form-control {
     min-width: 0;
+    border-radius: 12px !important;
+  }
+
+  .search-navbar-group .btn {
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    margin-left: 0;
+    padding: 0;
+    border-radius: 12px !important;
   }
 
   .theme-dropdown {
