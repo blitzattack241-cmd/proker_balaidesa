@@ -1,0 +1,281 @@
+/*
+ * Shared responsive presentation refinements.
+ * This file intentionally changes layout only; it does not alter application behaviour.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+.table-responsive,
+.datatable-wrapper .datatable-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 991.98px) {
+  /* Keep the application canvas full-width while the navigation is off-canvas. */
+  .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+    top: auto;
+    padding-left: 0;
+  }
+
+  .sb-nav-fixed #layoutSidenav #layoutSidenav_nav .sb-sidenav {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Header: the search field moves to its own, usable row rather than squeezing controls. */
+  .sb-topnav.navbar {
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .sb-topnav .navbar-brand {
+    width: auto;
+    max-width: calc(100vw - 12.5rem);
+    margin-right: 0.15rem;
+    padding-left: 0.75rem !important;
+    padding-right: 0.25rem;
+    overflow: hidden;
+    font-size: clamp(0.85rem, 4vw, 1rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sb-topnav #sidebarToggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 0.25rem 0 0 !important;
+    padding: 0;
+  }
+
+  #navbarSearchForm {
+    order: 3;
+    flex: 0 0 100%;
+    width: calc(100% - 1.5rem);
+    margin: 0.35rem 0.75rem 0 !important;
+  }
+
+  .search-navbar-group {
+    min-width: 0 !important;
+    max-width: none;
+  }
+
+  .search-navbar-group .form-control,
+  .search-navbar-group .btn {
+    min-height: 2.5rem;
+  }
+
+  .search-navbar-group .form-control {
+    min-width: 0;
+  }
+
+  .theme-dropdown {
+    margin-left: auto;
+    margin-right: 0.35rem !important;
+  }
+
+  .theme-dropdown .dropdown-toggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px !important;
+  }
+
+  .profile-dropdown-btn {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    justify-content: center;
+    padding: 0.2rem !important;
+  }
+
+  .profile-img-nav {
+    width: 2.1rem;
+    height: 2.1rem;
+    margin-right: 0;
+  }
+
+  .sb-topnav > .dropdown.me-3 {
+    margin-right: 0.65rem !important;
+  }
+
+  /* Avoid doubled side gutters from the shell and included page templates. */
+  #layoutSidenav_content > main > .container-fluid {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  #layoutSidenav_content > main > .container-fluid > .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .dash-hero {
+    border-radius: 18px;
+    padding: 1.5rem;
+  }
+
+  .dash-hero h2 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    line-height: 1.15;
+  }
+
+  .dash-hero .dash-date-badge {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .stat-card-modern {
+    padding: 1.1rem;
+    gap: 0.85rem;
+  }
+
+  .stat-card-modern .stat-icon-box {
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+  }
+
+  .menu-tile {
+    padding: 0.9rem 1rem;
+  }
+
+  .main-card:not(.p-0),
+  .chart-card {
+    padding: 1rem !important;
+  }
+
+  .card-body.p-4,
+  .card-body.p-md-5 {
+    padding: 1rem !important;
+  }
+
+  .card-header-modern,
+  .green-banner {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding: 1rem !important;
+  }
+
+  .card-header-title {
+    flex: 1 1 100%;
+    line-height: 1.4;
+  }
+
+  .btn-tambah-modern {
+    width: 100%;
+    text-align: center;
+  }
+
+  .green-banner .banner-title {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
+    line-height: 1.18;
+  }
+
+  .green-banner > div:last-child {
+    display: grid;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .green-banner > div:last-child .btn {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  /* Repeated list-page headers can safely wrap their actions below the title. */
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-2,
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-3,
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-4 {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-2 > .btn,
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-3 > .btn,
+  #layoutSidenav_content .d-flex.justify-content-between.align-items-center.mb-4 > .btn {
+    margin-top: 0.15rem;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .pagination .page-link {
+    min-width: 2.25rem;
+    text-align: center;
+  }
+
+  .datatable-top,
+  .datatable-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .datatable-top > nav,
+  .datatable-top > div,
+  .datatable-bottom > nav,
+  .datatable-bottom > div {
+    float: none !important;
+  }
+
+  .datatable-top > nav:last-child,
+  .datatable-top > div:last-child,
+  .datatable-bottom > nav:last-child,
+  .datatable-bottom > div:last-child {
+    margin-left: 0;
+  }
+
+  .datatable-search,
+  .datatable-input {
+    width: 100%;
+  }
+
+  .datatable-pagination ul {
+    flex-wrap: wrap;
+  }
+
+  .select2-container {
+    max-width: 100% !important;
+  }
+
+  .chart-container {
+    height: 240px !important;
+  }
+}
+
+@media (max-width: 399.98px) {
+  .sb-topnav .navbar-brand {
+    max-width: calc(100vw - 11.75rem);
+  }
+
+  .dash-hero,
+  .main-card:not(.p-0),
+  .chart-card {
+    padding: 0.9rem !important;
+  }
+
+  .stat-card-modern {
+    padding: 1rem;
+  }
+
+  .stat-card-modern .stat-label {
+    font-size: 0.75rem;
+  }
+}

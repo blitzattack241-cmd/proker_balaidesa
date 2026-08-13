@@ -10,6 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Impor Data Penduduk</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body class="bg-light">
   <main class="container py-5" style="max-width: 640px;">

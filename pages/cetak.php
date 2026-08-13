@@ -279,6 +279,8 @@ $namaBulanTerpilih = $namaBulanList[sprintf('%02d', $filterBulan)] ?? '';
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/print-preview-responsive.css">
     <title>Cetak Agenda Surat Keluar - <?php echo $namaBulanTerpilih . ' ' . $filterTahun; ?></title>
     <style>
         /* CSS MURNI DOKUMEN CETAK LANDSCAPE */

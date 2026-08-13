@@ -64,6 +64,8 @@ $tgl_lahir_format = date('d – m – Y', strtotime($data['tanggal_lahir']));
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../css/print-preview-responsive.css">
     <title>Preview Surat Garapan - <?= htmlspecialchars($data['nama_penggarap']); ?></title>
     <style>
         /* Desain Background Preview di Browser */

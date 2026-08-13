@@ -139,6 +139,27 @@ if ($jenis !== '' && $id_surat > 0 && $token !== '') {
             font-size: 0.8rem;
             color: #94a3b8;
         }
+
+        @media (max-width: 420px) {
+            body {
+                align-items: flex-start;
+                padding: 1rem;
+            }
+
+            .verif-card {
+                width: 100%;
+                padding: 1.5rem 1rem;
+                border-radius: 14px;
+            }
+
+            .verif-card h2 {
+                font-size: 1.35rem;
+            }
+
+            table td:first-child {
+                width: 42%;
+            }
+        }
     </style>
 </head>
 

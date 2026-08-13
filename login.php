@@ -52,6 +52,7 @@ if (isset($_POST['submit_login'])) {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - SIMDES - Sistem Informasi Management Desa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -261,6 +262,46 @@ if (isset($_POST['submit_login'])) {
         .input-icon:focus-within .icon-left,
         .input-icon:focus-within .icon-right {
             color: var(--primary);
+        }
+
+        @media (max-width: 575.98px) {
+            body {
+                align-items: flex-start;
+                padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+                background-attachment: scroll;
+            }
+
+            .login-shell {
+                min-height: calc(100vh - 2rem);
+            }
+
+            .login-card {
+                max-width: none;
+                padding: 1.5rem 1.25rem;
+                border-radius: 16px;
+            }
+
+            .brand-badge {
+                width: 48px;
+                height: 48px;
+                margin-bottom: 0.75rem;
+                border-radius: 14px;
+                font-size: 21px;
+            }
+
+            .login-card h3 {
+                font-size: 1.35rem;
+            }
+
+            .login-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .input-custom,
+            .btn-login {
+                height: 46px;
+            }
         }
     </style>
 </head>

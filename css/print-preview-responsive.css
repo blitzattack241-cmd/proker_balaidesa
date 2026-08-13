@@ -1,0 +1,57 @@
+/* Screen-only refinements for A4 document previews. Print rules in each view remain untouched. */
+@media screen and (max-width: 767.98px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-width: 0 !important;
+  }
+
+  .preview-header,
+  .no-print,
+  .no-print-header,
+  .no-print-bar,
+  .btn-bar,
+  .nav-control {
+    position: static !important;
+    display: flex !important;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.75rem !important;
+    text-align: center;
+  }
+
+  .preview-title,
+  .no-print-header .title,
+  .badge-info-edit {
+    flex: 1 1 100%;
+  }
+
+  .btn-print,
+  .btn-cetak,
+  .btn-bar button {
+    min-height: 2.75rem !important;
+  }
+
+  .print-container {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    padding: 1rem !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Document dimensions remain stable for accurate printing; the preview scrolls horizontally. */
+  .page,
+  .kertas,
+  .page-wrapper,
+  .form-container,
+  .data-table {
+    max-width: none !important;
+  }
+}

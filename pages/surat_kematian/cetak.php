@@ -73,6 +73,8 @@ function renderDateBoxes($dateString)
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../css/print-preview-responsive.css">
     <title>Cetak F-2.29 Resmi - <?= htmlspecialchars($data['nomor_surat']); ?></title>
     <style>
         /* Desain Struktur Cetak Kertas Standar Dukcapil (F4 / Folio) */

@@ -792,6 +792,7 @@ $isSuratTidakMampuOpen = in_array($page, $suratTidakMampuPages, true);
             border-color: rgba(255, 255, 255, 0.06);
         }
     </style>
+    <link href="css/responsive.css" rel="stylesheet" />
 </head>
 
 <body class="sb-nav-fixed">
