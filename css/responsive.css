@@ -24,7 +24,6 @@ video {
   /* Keep the application canvas full-width while the navigation is off-canvas. */
   .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
     top: auto;
-    padding-left: 0;
   }
 
   .sb-nav-fixed #layoutSidenav #layoutSidenav_nav .sb-sidenav {
