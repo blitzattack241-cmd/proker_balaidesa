@@ -164,14 +164,15 @@ function tgl_indo($tanggal)
             position: absolute;
             left: 15px;
             top: 5px;
-            width: 60px;
+            width: 80px;
             height: auto;
         }
 
         .kop-teks {
-            text-align: center;
-            margin-left: 75px;
-            margin-right: 75px;
+         margin: 4px 0 0 0;
+    font-size: 9.5pt;
+    line-height: 1.3;
+    font-style: normal; /* Memastikan teks berdiri tegak */
         }
 
         .kop-teks h4 {
@@ -189,9 +190,10 @@ function tgl_indo($tanggal)
         }
 
         .kop-teks p {
-            margin: 3px 0 0 0;
-            font-size: 9pt;
-            font-style: italic;
+           margin: 3px 0 0 0;
+    font-size: 11pt;
+    font-style: normal; /* Dibuat normal agar teks berdiri tegak */
+    line-height: 1.3;
         }
 
         .kode-desa-row {
@@ -380,13 +382,17 @@ function tgl_indo($tanggal)
         <div class="page">
             <!-- Kop Surat Resmi -->
             <div class="kop-surat">
-                <img class="kop-logo" src="../../assets/img/logo_kabupaten.png" alt="Logo Kab"
+                <img class="kop-logo" src="/uplouds/Logo_Kudus.png"  alt="Logo Kab"
                     onerror="this.style.display='none'">
                 <div class="kop-teks">
-                    <h4>Pemerintah Desa Berugenjang</h4>
+                    <h3>Pemerintah Desa Berugenjang</h3>
                     <h4>Kecamatan Undaan</h4>
-                    <h3>Kabupaten Kudus</h3>
-                    <p>Jl. Kyai Panjang Babalan - Wonosoco Km. 1 Kode pos 59372</p>
+                    <h4>Kabupaten Kudus</h4>
+                      <p>
+                        Jalan Kyai Panjang Babalan - Wonosoco Km 01, Kudus, Kode Pos<br>
+                        59372 Provinsi Jawa Tengah<br>
+                        e-mail: desaberugenjangundaan@gmail.com
+                    </p>
                 </div>
             </div>
 

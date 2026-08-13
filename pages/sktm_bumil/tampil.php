@@ -176,31 +176,41 @@ $query = mysqli_query($koneksi, "
                                 <tr>
                                     <td class="text-center fw-bold text-secondary"><?= $no++; ?></td>
                                     <td class="fw-semibold text-dark"><?= htmlspecialchars($data['nomor_surat']); ?></td>
-                                    <td>
-                                        <span if (session_status()===PHP_SESSION_NONE) { session_start(); } require_once __DIR__
-                                            . '/../../koneksi.php' ; <?= htmlspecialchars($data['no_ktp']); ?></small>
-                                            <small class="d-block text-secondary"><strong>KK:</strong>
-                                                <?= htmlspecialchars($data['no_kk']); ?></small>
+                                    
+                                    <!-- Nama Ibu Hamil -->
+                                    <td class="fw-bold text-dark">
+                                        <?= htmlspecialchars($data['nama_warga']); ?>
                                     </td>
+                                    
+                                    <!-- NIK / No. KK -->
+                                    <td>
+                                        <span class="d-block text-dark fw-semibold">
+                                            NIK: <?= htmlspecialchars($data['no_ktp']); ?>
+                                        </span>
+                                        <small class="d-block text-secondary">
+                                            <strong>KK:</strong> <?= htmlspecialchars($data['no_kk']); ?>
+                                        </small>
+                                    </td>
+                                    
+                                    <!-- Lampiran Foto -->
                                     <td class="text-center">
                                         <div class="foto-badge-container">
-                                            <span
-                                                class="badge badge-foto <?= !empty($data['foto_depan']) ? 'bg-success' : 'bg-danger'; ?>">Depan</span>
-                                            <span
-                                                class="badge badge-foto <?= !empty($data['foto_ruang_tamu']) ? 'bg-success' : 'bg-danger'; ?>">Tamu</span>
-                                            <span
-                                                class="badge badge-foto <?= !empty($data['foto_kamar']) ? 'bg-success' : 'bg-danger'; ?>">Kamar</span>
-                                            <span
-                                                class="badge badge-foto <?= !empty($data['foto_dapur']) ? 'bg-success' : 'bg-danger'; ?>">Dapur</span>
-                                            <span
-                                                class="badge badge-foto <?= !empty($data['foto_toilet']) ? 'bg-success' : 'bg-danger'; ?>">WC</span>
+                                            <span class="badge badge-foto <?= !empty($data['foto_depan']) ? 'bg-success' : 'bg-danger'; ?>">Depan</span>
+                                            <span class="badge badge-foto <?= !empty($data['foto_ruang_tamu']) ? 'bg-success' : 'bg-danger'; ?>">Tamu</span>
+                                            <span class="badge badge-foto <?= !empty($data['foto_kamar']) ? 'bg-success' : 'bg-danger'; ?>">Kamar</span>
+                                            <span class="badge badge-foto <?= !empty($data['foto_dapur']) ? 'bg-success' : 'bg-danger'; ?>">Dapur</span>
+                                            <span class="badge badge-foto <?= !empty($data['foto_toilet']) ? 'bg-success' : 'bg-danger'; ?>">WC</span>
                                         </div>
                                     </td>
+                                    
+                                    <!-- Tgl Surat -->
                                     <td class="text-center">
                                         <span class="badge bg-light text-dark border p-2">
                                             <?= date('d-m-Y', strtotime($data['tanggal_surat'])); ?>
                                         </span>
                                     </td>
+                                    
+                                    <!-- Aksi -->
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center align-items-center gap-2">
                                             <!-- Cetak -->
@@ -233,8 +243,7 @@ $query = mysqli_query($koneksi, "
                         } else {
                             ?>
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">Belum ada data arsip Surat Keterangan
-                                    Tidak Mampu Bumil.</td>
+                                <td colspan="7" class="text-center text-muted py-4">Belum ada data arsip Surat Keterangan Tidak Mampu Bumil.</td>
                             </tr>
                         <?php } ?>
                     </tbody>
