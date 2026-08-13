@@ -21,9 +21,11 @@ video {
 }
 
 @media (max-width: 991.98px) {
-  /* Keep the application canvas full-width while the navigation is off-canvas. */
+  /* The fixed sidebar is translated off-canvas at this breakpoint. Its desktop
+     content offset must be removed or every included page is clipped horizontally. */
   .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
     top: auto;
+    padding-left: 0;
   }
 
   .sb-nav-fixed #layoutSidenav #layoutSidenav_nav .sb-sidenav {
